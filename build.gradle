@@ -1,0 +1,75 @@
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+//file:noinspection GrUnresolvedAccess
+plugins {
+    id 'java-gradle-plugin'
+    id 'com.gradle.plugin-publish' version '1.2.1'
+}
+
+apply from: "${rootDir}/gradle/java-versions.gradle"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation libs.okhttp3
+
+    testImplementation platform(libs.junit.bom)
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation libs.hamcrest
+    testImplementation libs.mockito.core
+    testImplementation libs.mockito.junit.jupiter
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+gradlePlugin {
+    plugins {
+        javaPlugin {
+            id = 'java-kit'
+            implementationClass = 'io.github.jonloucks.gradle.kit.JavaPlugin'
+        }
+        javaLibraryPlugin {
+            id = 'java-library-kit'
+            implementationClass = 'io.github.jonloucks.gradle.kit.JavaLibraryPlugin'
+        }
+        mavenPublishPlugin {
+            id = 'maven-publish-kit'
+            implementationClass = 'io.github.jonloucks.gradle.kit.MavenPublishPlugin'
+        }
+        signingPlugin {
+            id = 'signing-kit'
+            implementationClass = 'io.github.jonloucks.gradle.kit.SigningPlugin'
+        }
+    }
+}
