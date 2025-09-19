@@ -1,0 +1,211 @@
+package io.github.jonloucks.gradle.kit;
+
+import okhttp3.*;
+import org.gradle.api.GradleException;
+import org.gradle.api.Plugin;
+import org.gradle.api.Project;
+import org.gradle.api.publish.PublishingExtension;
+import org.gradle.api.tasks.bundling.Tar;
+import org.gradle.api.tasks.bundling.Zip;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
+import static io.github.jonloucks.gradle.kit.Internal.base64Encode;
+import static io.github.jonloucks.gradle.kit.Internal.getConfig;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Optional.ofNullable;
+
+/**
+ * Extension of the Gradle 'maven-publish' plugin
+ */
+public final class MavenPublishPlugin implements Plugin<@NotNull Project> {
+    
+    /**
+     * Invoked via reflection by Gradle
+     */
+    public void apply(Project project) {
+        new Applier(project).apply();
+    }
+    
+    @SuppressWarnings("CodeBlock2Expr")
+    private static final class Applier {
+        private Applier(Project project) {
+            this.project = project;
+        }
+        
+        private void apply() {
+            applyMavenPublishPlugin();
+            
+            if (isRootProject()) {
+                registerCreatePublisherBundle();
+                registerUploadPublisherBundle();
+            }
+            
+            createStagingRepository();
+            configureChecksums();
+        }
+        
+        private void configureChecksums() {
+            project.getTasks().withType(Zip.class).configureEach(zip -> {
+                zip.doLast(task -> {
+                    final File file = zip.getArchiveFile().get().getAsFile();
+                    createMD5Checksum(file);
+                    createSHA1Checksum(file);
+                });
+            });
+        }
+        
+        private void createSHA1Checksum(File file) {
+            generateChecksum(file, new File(file.getAbsolutePath() + ".sha1"), "SHA1");
+        }
+        
+        private void createMD5Checksum(File file) {
+            generateChecksum(file, new File(file.getAbsolutePath() + ".md5"), "MD5");
+        }
+        
+        public static void generateChecksum(File inputFile, File outputFile, String algorithm) {
+            try {
+                writeDigestBytes(outputFile, createDigestBytes(inputFile, algorithm));
+            } catch (Exception thrown) {
+                throw new GradleException(thrown.getMessage(), thrown);
+            }
+        }
+        
+        private static void writeDigestBytes(File outputFile, byte[] digestBytes) throws Exception {
+            final StringBuilder stringBuilder = new StringBuilder();
+            for (byte b : digestBytes) {
+                stringBuilder.append(String.format("%02x", b));
+            }
+            try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+                outputStream.write(stringBuilder.toString().getBytes(UTF_8));
+            }
+        }
+        
+        private static byte[] createDigestBytes(File inputFile, String algorithm) throws Exception {
+            final MessageDigest digest = MessageDigest.getInstance(algorithm);
+            
+            try (FileInputStream inputStream = new FileInputStream(inputFile)) {
+                final byte[] buffer = new byte[1024];
+                int bytesCount;
+                while ((bytesCount = inputStream.read(buffer)) != -1) {
+                    digest.update(buffer, 0, bytesCount);
+                }
+                return digest.digest();
+            }
+        }
+        
+        private void createStagingRepository() {
+            System.out.println("Creating staging repository...");
+            project.getExtensions().configure(PublishingExtension.class, extension -> {
+                extension.repositories(r -> {
+                    r.maven(maven -> {
+                        maven.setName("LocalMavenWithChecksums");
+                        maven.setUrl(project.getLayout().getBuildDirectory().dir("staging-deploy"));
+                    });
+                });
+            });
+        }
+        
+        private void applyMavenPublishPlugin() {
+            System.out.println("Applying maven-publish plugin...");
+            project.getPlugins().apply("maven-publish");
+        }
+        
+        private boolean isRootProject() {
+            return project.getRootProject().equals(project);
+        }
+        
+        private void registerCreatePublisherBundle() {
+            System.out.println("Registering " + CREATE_BUNDLE_TASK_NAME + " ...");
+            project.getTasks().register(CREATE_BUNDLE_TASK_NAME, Tar.class).configure(tar -> {
+                tar.getArchiveBaseName().set(project.getGroup().toString());
+                tar.getArchiveVersion().set(project.getVersion().toString());
+                tar.getDestinationDirectory().set(project.getLayout().getBuildDirectory().dir("distributions"));
+                project.allprojects(p -> tar.from(p.getLayout().getBuildDirectory().dir("staging-deploy")));
+            });
+        }
+        
+        private static String createTimestamp() {
+            return ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss XXX"));
+        }
+        
+        private String getWorkflowName() {
+            return getConfig(project, "PROJECT_WORKFLOW", "developer-release");
+        }
+        
+        private String getPublishUsername() {
+            return getConfig(project, "OSSRH_USERNAME");
+        }
+        
+        private String getPublishPassword() {
+            return getConfig(project, "OSSRH_PASSWORD");
+        }
+        
+        private void registerUploadPublisherBundle() {
+            System.out.println("Registering " + UPLOAD_BUNDLE_TASK_NAME + " ...");
+            
+            project.getTasks().register(UPLOAD_BUNDLE_TASK_NAME).configure(task -> {
+                task.doLast(action -> {
+                    final String apiUrl = "https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED";
+                    final String username = getPublishUsername();
+                    final String password = getPublishPassword();
+                    
+                    if (!ofNullable(username).isPresent() || !ofNullable(password).isPresent()) {
+                        throw new GradleException("Publisher environment variables must be set.");
+                    }
+                    
+                    final String bundleName = getBundleName();
+                    final File bundleFile = getBundleFile();
+                    final String encodedAuthString = base64Encode(username + ":" + password);
+                    
+                    if (!bundleFile.exists()) {
+                        throw new GradleException("Bundle file not found at: " + bundleFile.getAbsolutePath());
+                    }
+                    
+                    final OkHttpClient client = new OkHttpClient();
+                    
+                    final RequestBody requestBody = new MultipartBody.Builder()
+                        .setType(MultipartBody.FORM)
+                        .addFormDataPart("bundle", bundleName,
+                            RequestBody.create(bundleFile, MediaType.parse("application/x-tar")))
+                        .build();
+                    
+                    final Request request = new Request.Builder()
+                        .url(apiUrl)
+                        .post(requestBody)
+                        .header("Authorization", "Bearer " + encodedAuthString)
+                        .header("accept", "text/plain; charset=UTF-8")
+                        .build();
+                    
+                    try (Response response = client.newCall(request).execute()) {
+                        if (!response.isSuccessful()) {
+                            throw new GradleException("Unexpected code " + response);
+                        }
+                    } catch (IOException thrown) {
+                        throw new GradleException(thrown.getMessage(), thrown);
+                    }
+                });
+            });
+        }
+        
+        private File getBundleFile() {
+            return project.file("build/distributions/" + project.getGroup() + "-" + project.getVersion() + ".tar");
+        }
+        
+        private String getBundleName() {
+            return project.getGroup() + "-" + project.getVersion() + " by " + getWorkflowName() + " @ " + createTimestamp();
+        }
+
+        private static final String CREATE_BUNDLE_TASK_NAME = "createPublisherBundle";
+        private static final String UPLOAD_BUNDLE_TASK_NAME = "uploadPublisherBundle";
+        
+        private final Project project;
+    }
+}
