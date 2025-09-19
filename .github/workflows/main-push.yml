@@ -29,4 +29,4 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build publishToMavenLocal
       env:
-        CONTRACTS_WORKFLOW: 'main-push'
+        PROJECT_WORKFLOW: 'main-push'

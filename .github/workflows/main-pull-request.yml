@@ -29,5 +29,5 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build publishToMavenLocal
       env:
-        CONTRACTS_WORKFLOW: 'main-pull-request'
+        PROJECT_WORKFLOW: 'main-pull-request'
 
