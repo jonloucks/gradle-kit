@@ -4,6 +4,8 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.jetbrains.annotations.NotNull;
 
+import static io.github.jonloucks.gradle.kit.Internal.log;
+
 /**
  * Extension of the Gradle 'java-library' plugin
  */
@@ -30,7 +32,7 @@ public final class JavaLibraryPlugin implements Plugin<@NotNull Project> {
         }
         
         private void applyJavaLibraryPlugin() {
-            System.out.println("Applying java-library plugin...");
+            log("Applying java-library plugin...");
             project.getPlugins().apply("java-library");
         }
         

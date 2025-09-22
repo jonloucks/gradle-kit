@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static io.github.jonloucks.gradle.kit.Internal.getConfig;
+import static io.github.jonloucks.gradle.kit.Internal.log;
 import static java.util.Optional.ofNullable;
 
 @SuppressWarnings("CodeBlock2Expr")
@@ -29,7 +31,7 @@ final class JavaVersioningApplier {
     }
     
     private void configureJavaVersions() {
-        System.out.println("Applying Java versions ...");
+        log("Applying Java versions ...");
         configureJavaPlugin();
         configureAllJavaCompiles();
     }
@@ -43,7 +45,7 @@ final class JavaVersioningApplier {
     }
     
     private void configureJavaCompile(JavaCompile compile) {
-        compile.getOptions().getRelease().set(TARGET_VERSION.asInt());
+        compile.getOptions().getRelease().set(getTargetVersion().asInt());
         final List<String> compilerArgs = new ArrayList<>(compile.getOptions().getCompilerArgs());
         compilerArgs.add("-Xlint:all");
         compile.getOptions().setCompilerArgs(compilerArgs);
@@ -51,11 +53,38 @@ final class JavaVersioningApplier {
     
     private void configureJavaPlugin() {
         final JavaPluginExtension javaPlugin = project.getExtensions().getByType(JavaPluginExtension.class);
-        javaPlugin.setSourceCompatibility(SOURCE_VERSION);
-        javaPlugin.setTargetCompatibility(TARGET_VERSION);
-        javaPlugin.getToolchain().getLanguageVersion().set(JDK_VERSION);
+        javaPlugin.setSourceCompatibility(getSourceVersion());
+        javaPlugin.setTargetCompatibility(getTargetVersion());
+        javaPlugin.getToolchain().getLanguageVersion().set(getCompilerVersion());
         javaPlugin.withJavadocJar();
         javaPlugin.withSourcesJar();
+    }
+    
+    private JavaLanguageVersion getCompilerVersion() {
+        final String text = getConfig(project, "kit.java.compiler.version", null);
+        if (null == text || text.isEmpty()) {
+            return JavaLanguageVersion.of(17);
+        }
+        return JavaLanguageVersion.of(Integer.parseInt(text));
+    }
+    
+    private JavaLanguageVersion getTargetVersion() {
+        final String text = getConfig(project, "kit.java.target.version", null);
+        if (null == text || text.isEmpty()) {
+            return getSourceVersion();
+        }
+        
+        return JavaLanguageVersion.of(Integer.parseInt(text));
+    }
+    
+    private JavaLanguageVersion getSourceVersion() {
+        final String text = getConfig(project, "kit.java.source.version", null);
+        
+        if (null == text || text.isEmpty()) {
+            return JavaLanguageVersion.of(9);
+        }
+        
+        return JavaLanguageVersion.of(Integer.parseInt(text));
     }
     
     private String[] splitTagsProperty(String propertyName) {
@@ -69,7 +98,7 @@ final class JavaVersioningApplier {
     }
     
     private void configureTestTaggingRules() {
-        System.out.println("Applying Test Tagging Rules ...");
+        log("Applying Test Tagging Rules ...");
         
         configureDefaultTestTask();
         
@@ -79,10 +108,10 @@ final class JavaVersioningApplier {
     
     private void registerTaggedTestTask(String includeTag, String... excludeTags) {
         final String taskName = includeTag + "Test";
-        System.out.println("Creating " + taskName + "...");
+        log("Creating " + taskName + "...");
         
         final TaskProvider<@NotNull Test> taggedTaskProvider = project.getTasks().register(taskName, TEST_TYPE, task -> {
-            System.out.println("Configuring " + taskName + ".");
+            log("Configuring " + taskName + ".");
             task.setDescription("Runs tests with tag: " + includeTag);
             task.setGroup("verification");
             
@@ -100,7 +129,7 @@ final class JavaVersioningApplier {
             task.setTestClassesDirs(mainTestSourceSet.getOutput().getClassesDirs());
             task.setClasspath(mainTestSourceSet.getRuntimeClasspath());
             task.shouldRunAfter("test");
-            System.out.println("Configured " + taskName + ".");
+//            System.out.println("Configured " + taskName + ".");
         });
         
         project.getTasks().named("check").configure(task -> task.dependsOn(taggedTaskProvider));
@@ -123,9 +152,6 @@ final class JavaVersioningApplier {
         });
     }
     
-    private static final JavaLanguageVersion SOURCE_VERSION = JavaLanguageVersion.of(9);
-    private static final JavaLanguageVersion TARGET_VERSION = JavaLanguageVersion.of(9);
-    private static final JavaLanguageVersion JDK_VERSION = JavaLanguageVersion.of(17);
     private static final Class<Test> TEST_TYPE = Test.class;
     private final Project project;
 }

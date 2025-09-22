@@ -42,7 +42,7 @@ public final class SigningPlugin implements Plugin<@NotNull Project> {
             final String secretKey = getGpgSecretKey();
             final String secretPassword = getGpgSecretKeyPassword();
             if (ofNullable(secretKey).isPresent() && ofNullable(secretPassword).isPresent()) {
-                System.out.println("Configuring signing keys...");
+                log("Configuring signing keys...");
                 project.getExtensions().configure(SigningExtension.class, signing -> {
                     signing.useInMemoryPgpKeys(secretKey, secretPassword);
                 });
@@ -50,7 +50,7 @@ public final class SigningPlugin implements Plugin<@NotNull Project> {
         }
         
         private void applySigningPlugin() {
-            System.out.println("Applying signing plugin...");
+           log("Applying signing plugin...");
             project.getPlugins().apply("signing");
         }
         

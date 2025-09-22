@@ -17,8 +17,7 @@ import java.security.MessageDigest;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-import static io.github.jonloucks.gradle.kit.Internal.base64Encode;
-import static io.github.jonloucks.gradle.kit.Internal.getConfig;
+import static io.github.jonloucks.gradle.kit.Internal.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Optional.ofNullable;
 
@@ -102,7 +101,7 @@ public final class MavenPublishPlugin implements Plugin<@NotNull Project> {
         }
         
         private void createStagingRepository() {
-            System.out.println("Creating staging repository...");
+            log("Creating staging repository...");
             project.getExtensions().configure(PublishingExtension.class, extension -> {
                 extension.repositories(r -> {
                     r.maven(maven -> {
@@ -114,7 +113,7 @@ public final class MavenPublishPlugin implements Plugin<@NotNull Project> {
         }
         
         private void applyMavenPublishPlugin() {
-            System.out.println("Applying maven-publish plugin...");
+            log("Applying maven-publish plugin...");
             project.getPlugins().apply("maven-publish");
         }
         
@@ -123,7 +122,7 @@ public final class MavenPublishPlugin implements Plugin<@NotNull Project> {
         }
         
         private void registerCreatePublisherBundle() {
-            System.out.println("Registering " + CREATE_BUNDLE_TASK_NAME + " ...");
+            log("Registering " + CREATE_BUNDLE_TASK_NAME + " ...");
             project.getTasks().register(CREATE_BUNDLE_TASK_NAME, Tar.class).configure(tar -> {
                 tar.getArchiveBaseName().set(project.getGroup().toString());
                 tar.getArchiveVersion().set(project.getVersion().toString());
@@ -149,7 +148,7 @@ public final class MavenPublishPlugin implements Plugin<@NotNull Project> {
         }
         
         private void registerUploadPublisherBundle() {
-            System.out.println("Registering " + UPLOAD_BUNDLE_TASK_NAME + " ...");
+            log("Registering " + UPLOAD_BUNDLE_TASK_NAME + " ...");
             
             project.getTasks().register(UPLOAD_BUNDLE_TASK_NAME).configure(task -> {
                 task.doLast(action -> {
