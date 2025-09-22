@@ -2,6 +2,8 @@ package io.github.jonloucks.gradle.kit.test;
 
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -19,6 +21,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Tag("functionalTest")
 public class JavaPluginFunctionalTest {
+    @BeforeEach
+    public void beforeEachTest() {
+        System.setProperty("gradle.kit.log.enabled", "true");
+    }
+    
+    @AfterEach
+    public void afterEachTest() {
+        System.setProperty("gradle.kit.log.enabled", "false");
+    }
     
     @Test
     public void run_WithDefaults() throws Throwable {

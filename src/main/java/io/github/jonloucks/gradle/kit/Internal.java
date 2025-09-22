@@ -5,12 +5,29 @@ import org.gradle.api.provider.Provider;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Base64;
+import java.util.function.Supplier;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Optional.ofNullable;
 
 final class Internal {
     private Internal() {
+    }
+    
+    static boolean isLogEnabled() {
+        return Boolean.getBoolean("gradle.kit.log.enabled");
+    }
+    
+    static void log(Supplier<String> messageSupplier) {
+        if (isLogEnabled()) {
+            System.out.println(messageSupplier.get());
+        }
+    }
+    
+    static void log(String text) {
+        if (isLogEnabled()) {
+            System.out.println(text);
+        }
     }
     
     static String getConfig(Project project, String name) {
