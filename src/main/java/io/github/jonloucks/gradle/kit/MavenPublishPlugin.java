@@ -42,7 +42,7 @@ public final class MavenPublishPlugin implements Plugin<@NotNull Project> {
         private void apply() {
             applyMavenPublishPlugin();
             
-            if (isRootProject()) {
+            if (isRootProject(project)) {
                 registerCreatePublisherBundle();
                 registerUploadPublisherBundle();
             }
@@ -115,10 +115,6 @@ public final class MavenPublishPlugin implements Plugin<@NotNull Project> {
         private void applyMavenPublishPlugin() {
             log("Applying maven-publish plugin...");
             project.getPlugins().apply("maven-publish");
-        }
-        
-        private boolean isRootProject() {
-            return project.getRootProject().equals(project);
         }
         
         private void registerCreatePublisherBundle() {

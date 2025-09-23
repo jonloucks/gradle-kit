@@ -40,6 +40,7 @@ repositories {
 
 dependencies {
     implementation libs.okhttp3
+    implementation libs.jacoco
 
     testImplementation platform(libs.junit.bom)
     testImplementation 'org.junit.jupiter:junit-jupiter'

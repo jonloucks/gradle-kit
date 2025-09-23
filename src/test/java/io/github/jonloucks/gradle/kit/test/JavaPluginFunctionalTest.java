@@ -54,6 +54,7 @@ public class JavaPluginFunctionalTest {
         assertNotNull(output);
         // Verify the result
         assertThat(output, containsString("Applying java plugin..."));
+        assertThat(output, containsString("Applying jacoco plugin..."));
         assertThat(output, not(containsString("Applying maven-publish plugin...")));
         assertThat(output, not(containsString("Applying signing plugin...")));
     }

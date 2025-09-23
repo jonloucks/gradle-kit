@@ -22,7 +22,7 @@ import static java.util.Optional.ofNullable;
 final class JavaVersioningApplier {
     
     JavaVersioningApplier(Project project) {
-        this.project = project;
+        this.targetProject = project;
     }
     
     void apply() {
@@ -41,7 +41,7 @@ final class JavaVersioningApplier {
     }
     
     private void forAllJavaCompiles(Consumer<JavaCompile> consumer) {
-        project.getTasks().withType(JavaCompile.class).configureEach(consumer::accept);
+        targetProject.getTasks().withType(JavaCompile.class).configureEach(consumer::accept);
     }
     
     private void configureJavaCompile(JavaCompile compile) {
@@ -52,7 +52,7 @@ final class JavaVersioningApplier {
     }
     
     private void configureJavaPlugin() {
-        final JavaPluginExtension javaPlugin = project.getExtensions().getByType(JavaPluginExtension.class);
+        final JavaPluginExtension javaPlugin = targetProject.getExtensions().getByType(JavaPluginExtension.class);
         javaPlugin.setSourceCompatibility(getSourceVersion());
         javaPlugin.setTargetCompatibility(getTargetVersion());
         javaPlugin.getToolchain().getLanguageVersion().set(getCompilerVersion());
@@ -61,7 +61,7 @@ final class JavaVersioningApplier {
     }
     
     private JavaLanguageVersion getCompilerVersion() {
-        final String text = getConfig(project, "kit.java.compiler.version", null);
+        final String text = getConfig(targetProject, "kit.java.compiler.version", null);
         if (null == text || text.isEmpty()) {
             return JavaLanguageVersion.of(17);
         }
@@ -69,7 +69,7 @@ final class JavaVersioningApplier {
     }
     
     private JavaLanguageVersion getTargetVersion() {
-        final String text = getConfig(project, "kit.java.target.version", null);
+        final String text = getConfig(targetProject, "kit.java.target.version", null);
         if (null == text || text.isEmpty()) {
             return getSourceVersion();
         }
@@ -78,7 +78,7 @@ final class JavaVersioningApplier {
     }
     
     private JavaLanguageVersion getSourceVersion() {
-        final String text = getConfig(project, "kit.java.source.version", null);
+        final String text = getConfig(targetProject, "kit.java.source.version", null);
         
         if (null == text || text.isEmpty()) {
             return JavaLanguageVersion.of(9);
@@ -88,8 +88,8 @@ final class JavaVersioningApplier {
     }
     
     private String[] splitTagsProperty(String propertyName) {
-        if (project.hasProperty(propertyName)) {
-            final Object value = project.findProperty(propertyName);
+        if (targetProject.hasProperty(propertyName)) {
+            final Object value = targetProject.findProperty(propertyName);
             if (ofNullable(value).isPresent()) {
                 return value.toString().split(",");
             }
@@ -110,7 +110,7 @@ final class JavaVersioningApplier {
         final String taskName = includeTag + "Test";
         log("Creating " + taskName + "...");
         
-        final TaskProvider<@NotNull Test> taggedTaskProvider = project.getTasks().register(taskName, TEST_TYPE, task -> {
+        final TaskProvider<@NotNull Test> taggedTaskProvider = targetProject.getTasks().register(taskName, TEST_TYPE, task -> {
             log("Configuring " + taskName + ".");
             task.setDescription("Runs tests with tag: " + includeTag);
             task.setGroup("verification");
@@ -120,7 +120,7 @@ final class JavaVersioningApplier {
                 options.excludeTags(getPropertyTags("excludeTags", excludeTags));
             });
             
-            final SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
+            final SourceSetContainer sourceSets = targetProject.getExtensions().getByType(SourceSetContainer.class);
             final SourceSet mainTestSourceSet = sourceSets.stream()
                 .filter(ss -> ss.getName().equals("test"))
                 .findFirst()
@@ -129,21 +129,21 @@ final class JavaVersioningApplier {
             task.setTestClassesDirs(mainTestSourceSet.getOutput().getClassesDirs());
             task.setClasspath(mainTestSourceSet.getRuntimeClasspath());
             task.shouldRunAfter("test");
-//            System.out.println("Configured " + taskName + ".");
+            log("Configured " + taskName + ".");
         });
         
-        project.getTasks().named("check").configure(task -> task.dependsOn(taggedTaskProvider));
+        targetProject.getTasks().named("check").configure(task -> task.dependsOn(taggedTaskProvider));
     }
     
     private String[] getPropertyTags(String propertyName, String... defaults) {
-        if (project.hasProperty(propertyName)) {
+        if (targetProject.hasProperty(propertyName)) {
             return splitTagsProperty(propertyName);
         }
         return defaults;
     }
     
     private void configureDefaultTestTask() {
-        project.getTasks().named("test", TEST_TYPE).configure(task -> {
+        targetProject.getTasks().named("test", TEST_TYPE).configure(task -> {
             task.useJUnitPlatform(configure -> {
                 configure.includeTags(getPropertyTags("includeTags"));
                 configure.excludeTags(getPropertyTags("excludeTags",
@@ -153,6 +153,6 @@ final class JavaVersioningApplier {
     }
     
     private static final Class<Test> TEST_TYPE = Test.class;
-    private final Project project;
+    private final Project targetProject;
 }
 
