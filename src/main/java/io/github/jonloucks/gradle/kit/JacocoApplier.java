@@ -13,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import static io.github.jonloucks.gradle.kit.Internal.isRootProject;
 import static io.github.jonloucks.gradle.kit.Internal.log;
 
-@SuppressWarnings("CodeBlock2Expr")
 final class JacocoApplier {
 
     JacocoApplier(Project project) {
@@ -25,51 +24,23 @@ final class JacocoApplier {
         targetProject.getPlugins().apply("jacoco");
         
         configureJacocoPlugin();
-        disableExistingJacocoReports();
-        
-        if (isRootProject(targetProject)) {
-            registerJacocoTestReportAll();
-        }
+        configureExistingReports();
     }
     
-    private void disableExistingJacocoReports() {
-        targetProject.getTasks().named("jacocoTestReport", JacocoReport.class)
-            .configure(disableJacocoReport());
+    private void configureExistingReports() {
+        targetProject.getTasks().named(JACOCO_TEST_REPORT, JacocoReport.class)
+            .configure(configureExistingReport());
     }
     
-    private void registerJacocoTestReportAll() {
-        final Project rootProject = targetProject.getRootProject();
-        log("Registering " + REPORT_ALL_TASK_NAME + " ...");
-        rootProject.getTasks().register(REPORT_ALL_TASK_NAME, JacocoReport.class)
-            .configure(reportTask -> {
-                reportTask.setGroup("Verification");
-                reportTask.shouldRunAfter("test", "integrationTest", "functionalTest");
-                reportTask.dependsOn("test", "integrationTest", "functionalTest");
-                reportTask.reports(reports -> {
-                    reports.getHtml().getRequired().set(true); // might make this an option, not needed for workflow
-                    reports.getXml().getRequired().set(true);
-                    reports.getCsv().getRequired().set(false);
-                });
-                rootProject.allprojects(getAllJacocoFiles(reportTask));
-            });
-        rootProject.getTasks().withType(TEST_TYPE).configureEach(testTask -> {
-            testTask.finalizedBy(REPORT_ALL_TASK_NAME);
-        });
-        targetProject.getTasks().named("check").configure(checkTask -> {
-            checkTask.dependsOn(REPORT_ALL_TASK_NAME);
-        });
-    }
-    
-    private @NotNull Action<@NotNull Project> getAllJacocoFiles(JacocoReport reportTask) {
+    private @NotNull Action<@NotNull Project> getAllJacocoFiles(JacocoReport rootReport) {
         return project -> {
             final SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);
             final SourceSet sourceSet = sourceSets.getByName("main");
             final DirectoryProperty buildDir = project.getLayout().getBuildDirectory();
-      
-            reportTask.getInputs().getSourceFiles().plus(sourceSet.getJava());
-            reportTask.getAdditionalSourceDirs().from(sourceSet.getJava().getSrcDirs());
-            reportTask.getAdditionalClassDirs().from(sourceSet.getOutput().getClassesDirs());
-            reportTask.getExecutionData().from(project.fileTree(buildDir.dir("jacoco")).include("**.exec"));
+            rootReport.getInputs().getSourceFiles().plus(sourceSet.getJava());
+            rootReport.getAdditionalSourceDirs().from(sourceSet.getJava().getSrcDirs());
+            rootReport.getAdditionalClassDirs().from(sourceSet.getOutput().getClassesDirs());
+            rootReport.getExecutionData().from(project.fileTree(buildDir.dir("jacoco")).include("**.exec"));
         };
     }
     
@@ -81,19 +52,24 @@ final class JacocoApplier {
         });
     }
     
-    private static @NotNull Action<@NotNull JacocoReport> disableJacocoReport() {
+    private @NotNull Action<@NotNull JacocoReport> configureExistingReport() {
+        final boolean isRootProject = isRootProject(targetProject);
+        
         return reportTask -> {
-            reportTask.setEnabled(false);
+            reportTask.shouldRunAfter("test", "integrationTest", "functionalTest");
+            reportTask.dependsOn("test", "integrationTest", "functionalTest");
             reportTask.reports(reports -> {
-                reports.getHtml().getRequired().set(false);
-                reports.getXml().getRequired().set(false);
+                reports.getHtml().getRequired().set(isRootProject);
+                reports.getXml().getRequired().set(true);
                 reports.getCsv().getRequired().set(false);
             });
+            if (isRootProject) {
+                targetProject.allprojects(getAllJacocoFiles(reportTask));
+            }
         };
     }
     
-    private static final String REPORT_ALL_TASK_NAME = "jacocoTestReportAll";
-    private static final Class<org.gradle.api.tasks.testing.Test> TEST_TYPE = org.gradle.api.tasks.testing.Test.class;
+    private static final String JACOCO_TEST_REPORT = "jacocoTestReport";
     
     private final Project targetProject;
 }
