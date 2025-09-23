@@ -51,7 +51,7 @@ final class JacocoApplier {
             reportTask.reports(reports -> {
                 reports.getHtml().getRequired().set(isRootProject);
                 reports.getXml().getRequired().set(true);
-                reports.getCsv().getRequired().set(false);
+                reports.getCsv().getRequired().set(isRootProject);
             });
             if (isRootProject) {
                 targetProject.allprojects(getAllJacocoFiles(reportTask));
