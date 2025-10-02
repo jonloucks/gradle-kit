@@ -53,6 +53,7 @@ final class JavaVersioningApplier {
     
     private void configureJavaPlugin() {
         final JavaPluginExtension javaPlugin = targetProject.getExtensions().getByType(JavaPluginExtension.class);
+        javaPlugin.getModularity().getInferModulePath().set(true);
         javaPlugin.setSourceCompatibility(getSourceVersion());
         javaPlugin.setTargetCompatibility(getTargetVersion());
         javaPlugin.getToolchain().getLanguageVersion().set(getCompilerVersion());

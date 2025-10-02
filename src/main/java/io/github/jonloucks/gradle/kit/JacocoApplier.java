@@ -60,7 +60,6 @@ final class JacocoApplier {
     }
     
     private @NotNull Action<@NotNull Project> getAllJacocoFiles(JacocoReport rootReport) {
-        final Project rootProject = targetProject;
         return project -> {
             final TaskCollection<@NotNull Test> testingTasks = getTestingTasks(project);
             rootReport.shouldRunAfter(testingTasks);
