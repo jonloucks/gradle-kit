@@ -30,6 +30,7 @@ public final class JavaLibraryPlugin implements Plugin<@NotNull Project> {
             applyJavaLibraryPlugin();
             new JavaVersioningApplier(project).apply();
             new JacocoApplier(project).apply();
+            new JavadocApplier(project).apply();
         }
         
         private void applyJavaLibraryPlugin() {
