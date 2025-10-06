@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JavaVersioningApplier.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">main-project</a> &gt; <a href="index.source.html" class="el_package">io.github.jonloucks.gradle.kit</a> &gt; <span class="el_source">JavaVersioningApplier.java</span></div><h1>JavaVersioningApplier.java</h1><pre class="source lang-java linenums">package io.github.jonloucks.gradle.kit;
+
+import org.gradle.api.Project;
+import org.gradle.api.plugins.JavaPluginExtension;
+import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.SourceSetContainer;
+import org.gradle.api.tasks.TaskProvider;
+import org.gradle.api.tasks.compile.JavaCompile;
+import org.gradle.api.tasks.testing.Test;
+import org.gradle.jvm.toolchain.JavaLanguageVersion;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
+import static io.github.jonloucks.gradle.kit.Internal.getConfig;
+import static io.github.jonloucks.gradle.kit.Internal.log;
+import static java.util.Optional.ofNullable;
+
+@SuppressWarnings(&quot;CodeBlock2Expr&quot;)
+final class JavaVersioningApplier {
+    
+<span class="fc" id="L24">    JavaVersioningApplier(Project project) {</span>
+<span class="fc" id="L25">        this.targetProject = project;</span>
+<span class="fc" id="L26">    }</span>
+    
+    void apply() {
+<span class="fc" id="L29">        configureJavaVersions();</span>
+<span class="fc" id="L30">        configureTestTaggingRules();</span>
+<span class="fc" id="L31">    }</span>
+    
+    private void configureJavaVersions() {
+<span class="fc" id="L34">        log(&quot;Applying Java versions ...&quot;);</span>
+<span class="fc" id="L35">        configureJavaPlugin();</span>
+<span class="fc" id="L36">        configureAllJavaCompiles();</span>
+<span class="fc" id="L37">    }</span>
+    
+    private void configureAllJavaCompiles() {
+<span class="fc" id="L40">        forAllJavaCompiles(this::configureJavaCompile);</span>
+<span class="fc" id="L41">    }</span>
+    
+    private void forAllJavaCompiles(Consumer&lt;JavaCompile&gt; consumer) {
+<span class="fc" id="L44">        targetProject.getTasks().withType(JavaCompile.class).configureEach(consumer::accept);</span>
+<span class="fc" id="L45">    }</span>
+    
+    private void configureJavaCompile(JavaCompile compile) {
+<span class="fc" id="L48">        compile.getOptions().getRelease().set(getTargetVersion().asInt());</span>
+<span class="fc" id="L49">        final List&lt;String&gt; compilerArgs = new ArrayList&lt;&gt;(compile.getOptions().getCompilerArgs());</span>
+<span class="fc" id="L50">        compilerArgs.add(&quot;-Xlint:all&quot;);</span>
+<span class="fc" id="L51">        compile.getOptions().setCompilerArgs(compilerArgs);</span>
+<span class="fc" id="L52">    }</span>
+    
+    private void configureJavaPlugin() {
+<span class="fc" id="L55">        final JavaPluginExtension javaPlugin = targetProject.getExtensions().getByType(JavaPluginExtension.class);</span>
+<span class="fc" id="L56">        javaPlugin.getModularity().getInferModulePath().set(true);</span>
+<span class="fc" id="L57">        javaPlugin.setSourceCompatibility(getSourceVersion());</span>
+<span class="fc" id="L58">        javaPlugin.setTargetCompatibility(getTargetVersion());</span>
+<span class="fc" id="L59">        javaPlugin.getToolchain().getLanguageVersion().set(getCompilerVersion());</span>
+<span class="fc" id="L60">        javaPlugin.withJavadocJar();</span>
+<span class="fc" id="L61">        javaPlugin.withSourcesJar();</span>
+<span class="fc" id="L62">    }</span>
+    
+    private JavaLanguageVersion getCompilerVersion() {
+<span class="fc" id="L65">        final String text = getConfig(targetProject, &quot;kit.java.compiler.version&quot;, null);</span>
+<span class="pc bpc" id="L66" title="3 of 4 branches missed.">        if (null == text || text.isEmpty()) {</span>
+<span class="fc" id="L67">            return JavaLanguageVersion.of(17);</span>
+        }
+<span class="nc" id="L69">        return JavaLanguageVersion.of(Integer.parseInt(text));</span>
+    }
+    
+    private JavaLanguageVersion getTargetVersion() {
+<span class="fc" id="L73">        final String text = getConfig(targetProject, &quot;kit.java.target.version&quot;, null);</span>
+<span class="pc bpc" id="L74" title="3 of 4 branches missed.">        if (null == text || text.isEmpty()) {</span>
+<span class="fc" id="L75">            return getSourceVersion();</span>
+        }
+        
+<span class="nc" id="L78">        return JavaLanguageVersion.of(Integer.parseInt(text));</span>
+    }
+    
+    private JavaLanguageVersion getSourceVersion() {
+<span class="fc" id="L82">        final String text = getConfig(targetProject, &quot;kit.java.source.version&quot;, null);</span>
+        
+<span class="pc bpc" id="L84" title="3 of 4 branches missed.">        if (null == text || text.isEmpty()) {</span>
+<span class="fc" id="L85">            return JavaLanguageVersion.of(9);</span>
+        }
+        
+<span class="nc" id="L88">        return JavaLanguageVersion.of(Integer.parseInt(text));</span>
+    }
+    
+    private String[] splitTagsProperty(String propertyName) {
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        if (targetProject.hasProperty(propertyName)) {</span>
+<span class="nc" id="L93">            final Object value = targetProject.findProperty(propertyName);</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">            if (ofNullable(value).isPresent()) {</span>
+<span class="nc" id="L95">                return value.toString().split(&quot;,&quot;);</span>
+            }
+        }
+<span class="nc" id="L98">        return new String[0];</span>
+    }
+    
+    private void configureTestTaggingRules() {
+<span class="fc" id="L102">        log(&quot;Applying Test Tagging Rules ...&quot;);</span>
+        
+<span class="fc" id="L104">        configureDefaultTestTask();</span>
+        
+<span class="fc" id="L106">        registerTaggedTestTask(&quot;integration&quot;, &quot;unstable&quot;, &quot;slow&quot;, &quot;functional&quot;);</span>
+<span class="fc" id="L107">        registerTaggedTestTask(&quot;functional&quot;, &quot;unstable&quot;, &quot;slow&quot;, &quot;integration&quot;);</span>
+<span class="fc" id="L108">    }</span>
+    
+    private void registerTaggedTestTask(String includeTag, String... excludeTags) {
+<span class="fc" id="L111">        final String taskName = includeTag + &quot;Test&quot;;</span>
+<span class="fc" id="L112">        log(&quot;Creating &quot; + taskName + &quot;...&quot;);</span>
+        
+<span class="fc" id="L114">        final TaskProvider&lt;@NotNull Test&gt; taggedTaskProvider = targetProject.getTasks().register(taskName, TEST_TYPE, task -&gt; {</span>
+<span class="fc" id="L115">            log(&quot;Configuring &quot; + taskName + &quot;.&quot;);</span>
+<span class="fc" id="L116">            task.setDescription(&quot;Runs tests with tag: &quot; + includeTag);</span>
+<span class="fc" id="L117">            task.setGroup(&quot;verification&quot;);</span>
+            
+<span class="fc" id="L119">            task.useJUnitPlatform(options -&gt; {</span>
+<span class="fc" id="L120">                options.includeTags(includeTag);</span>
+<span class="fc" id="L121">                options.excludeTags(getPropertyTags(&quot;excludeTags&quot;, excludeTags));</span>
+<span class="fc" id="L122">            });</span>
+            
+<span class="fc" id="L124">            final SourceSetContainer sourceSets = targetProject.getExtensions().getByType(SourceSetContainer.class);</span>
+<span class="fc" id="L125">            final SourceSet mainTestSourceSet = sourceSets.stream()</span>
+<span class="fc" id="L126">                .filter(ss -&gt; ss.getName().equals(&quot;test&quot;))</span>
+<span class="fc" id="L127">                .findFirst()</span>
+<span class="pc" id="L128">                .orElseThrow(() -&gt; new IllegalStateException(&quot;No test source set found&quot;));</span>
+            
+<span class="fc" id="L130">            task.setTestClassesDirs(mainTestSourceSet.getOutput().getClassesDirs());</span>
+<span class="fc" id="L131">            task.setClasspath(mainTestSourceSet.getRuntimeClasspath());</span>
+<span class="fc" id="L132">            task.shouldRunAfter(&quot;test&quot;);</span>
+<span class="fc" id="L133">            log(&quot;Configured &quot; + taskName + &quot;.&quot;);</span>
+<span class="fc" id="L134">        });</span>
+        
+<span class="fc" id="L136">        targetProject.getTasks().named(&quot;check&quot;).configure(task -&gt; task.dependsOn(taggedTaskProvider));</span>
+<span class="fc" id="L137">    }</span>
+    
+    private String[] getPropertyTags(String propertyName, String... defaults) {
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">        if (targetProject.hasProperty(propertyName)) {</span>
+<span class="nc" id="L141">            return splitTagsProperty(propertyName);</span>
+        }
+<span class="fc" id="L143">        return defaults;</span>
+    }
+    
+    private void configureDefaultTestTask() {
+<span class="fc" id="L147">        targetProject.getTasks().named(&quot;test&quot;, TEST_TYPE).configure(task -&gt; {</span>
+<span class="fc" id="L148">            task.useJUnitPlatform(configure -&gt; {</span>
+<span class="fc" id="L149">                configure.includeTags(getPropertyTags(&quot;includeTags&quot;));</span>
+<span class="fc" id="L150">                configure.excludeTags(getPropertyTags(&quot;excludeTags&quot;,</span>
+                    &quot;unstable&quot;, &quot;slow&quot;, &quot;integration&quot;, &quot;functional&quot;));
+<span class="fc" id="L152">            });</span>
+<span class="fc" id="L153">        });</span>
+<span class="fc" id="L154">    }</span>
+    
+<span class="fc" id="L156">    private static final Class&lt;Test&gt; TEST_TYPE = Test.class;</span>
+    private final Project targetProject;
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

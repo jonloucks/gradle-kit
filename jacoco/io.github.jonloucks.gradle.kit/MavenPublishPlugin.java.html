@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MavenPublishPlugin.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">main-project</a> &gt; <a href="index.source.html" class="el_package">io.github.jonloucks.gradle.kit</a> &gt; <span class="el_source">MavenPublishPlugin.java</span></div><h1>MavenPublishPlugin.java</h1><pre class="source lang-java linenums">package io.github.jonloucks.gradle.kit;
+
+import okhttp3.*;
+import org.gradle.api.GradleException;
+import org.gradle.api.Plugin;
+import org.gradle.api.Project;
+import org.gradle.api.publish.PublishingExtension;
+import org.gradle.api.tasks.bundling.Tar;
+import org.gradle.api.tasks.bundling.Zip;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
+import static io.github.jonloucks.gradle.kit.Internal.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Optional.ofNullable;
+
+/**
+ * Extension of the Gradle 'maven-publish' plugin
+ */
+<span class="fc" id="L27">public final class MavenPublishPlugin implements Plugin&lt;@NotNull Project&gt; {</span>
+    
+    /**
+     * Invoked via reflection by Gradle
+     */
+    public void apply(Project project) {
+<span class="fc" id="L33">        new Applier(project).apply();</span>
+<span class="fc" id="L34">    }</span>
+    
+    @SuppressWarnings(&quot;CodeBlock2Expr&quot;)
+    private static final class Applier {
+<span class="fc" id="L38">        private Applier(Project project) {</span>
+<span class="fc" id="L39">            this.project = project;</span>
+<span class="fc" id="L40">        }</span>
+        
+        private void apply() {
+<span class="fc" id="L43">            applyMavenPublishPlugin();</span>
+            
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">            if (isRootProject(project)) {</span>
+<span class="fc" id="L46">                registerCreatePublisherBundle();</span>
+<span class="fc" id="L47">                registerUploadPublisherBundle();</span>
+            }
+            
+<span class="fc" id="L50">            createStagingRepository();</span>
+<span class="fc" id="L51">            configureChecksums();</span>
+<span class="fc" id="L52">        }</span>
+        
+        private void configureChecksums() {
+<span class="fc" id="L55">            project.getTasks().withType(Zip.class).configureEach(zip -&gt; {</span>
+<span class="nc" id="L56">                zip.doLast(task -&gt; {</span>
+<span class="nc" id="L57">                    final File file = zip.getArchiveFile().get().getAsFile();</span>
+<span class="nc" id="L58">                    createMD5Checksum(file);</span>
+<span class="nc" id="L59">                    createSHA1Checksum(file);</span>
+<span class="nc" id="L60">                });</span>
+<span class="nc" id="L61">            });</span>
+<span class="fc" id="L62">        }</span>
+        
+        private void createSHA1Checksum(File file) {
+<span class="nc" id="L65">            generateChecksum(file, new File(file.getAbsolutePath() + &quot;.sha1&quot;), &quot;SHA1&quot;);</span>
+<span class="nc" id="L66">        }</span>
+        
+        private void createMD5Checksum(File file) {
+<span class="nc" id="L69">            generateChecksum(file, new File(file.getAbsolutePath() + &quot;.md5&quot;), &quot;MD5&quot;);</span>
+<span class="nc" id="L70">        }</span>
+        
+        public static void generateChecksum(File inputFile, File outputFile, String algorithm) {
+            try {
+<span class="nc" id="L74">                writeDigestBytes(outputFile, createDigestBytes(inputFile, algorithm));</span>
+<span class="nc" id="L75">            } catch (Exception thrown) {</span>
+<span class="nc" id="L76">                throw new GradleException(thrown.getMessage(), thrown);</span>
+<span class="nc" id="L77">            }</span>
+<span class="nc" id="L78">        }</span>
+        
+        private static void writeDigestBytes(File outputFile, byte[] digestBytes) throws Exception {
+<span class="nc" id="L81">            final StringBuilder stringBuilder = new StringBuilder();</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">            for (byte b : digestBytes) {</span>
+<span class="nc" id="L83">                stringBuilder.append(String.format(&quot;%02x&quot;, b));</span>
+            }
+<span class="nc" id="L85">            try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {</span>
+<span class="nc" id="L86">                outputStream.write(stringBuilder.toString().getBytes(UTF_8));</span>
+            }
+<span class="nc" id="L88">        }</span>
+        
+        private static byte[] createDigestBytes(File inputFile, String algorithm) throws Exception {
+<span class="nc" id="L91">            final MessageDigest digest = MessageDigest.getInstance(algorithm);</span>
+            
+<span class="nc" id="L93">            try (FileInputStream inputStream = new FileInputStream(inputFile)) {</span>
+<span class="nc" id="L94">                final byte[] buffer = new byte[1024];</span>
+                int bytesCount;
+<span class="nc bnc" id="L96" title="All 2 branches missed.">                while ((bytesCount = inputStream.read(buffer)) != -1) {</span>
+<span class="nc" id="L97">                    digest.update(buffer, 0, bytesCount);</span>
+                }
+<span class="nc" id="L99">                return digest.digest();</span>
+            }
+        }
+        
+        private void createStagingRepository() {
+<span class="fc" id="L104">            log(&quot;Creating staging repository...&quot;);</span>
+<span class="fc" id="L105">            project.getExtensions().configure(PublishingExtension.class, extension -&gt; {</span>
+<span class="fc" id="L106">                extension.repositories(r -&gt; {</span>
+<span class="fc" id="L107">                    r.maven(maven -&gt; {</span>
+<span class="fc" id="L108">                        maven.setName(&quot;LocalMavenWithChecksums&quot;);</span>
+<span class="fc" id="L109">                        maven.setUrl(project.getLayout().getBuildDirectory().dir(&quot;staging-deploy&quot;));</span>
+<span class="fc" id="L110">                    });</span>
+<span class="fc" id="L111">                });</span>
+<span class="fc" id="L112">            });</span>
+<span class="fc" id="L113">        }</span>
+        
+        private void applyMavenPublishPlugin() {
+<span class="fc" id="L116">            log(&quot;Applying maven-publish plugin...&quot;);</span>
+<span class="fc" id="L117">            project.getPlugins().apply(&quot;maven-publish&quot;);</span>
+<span class="fc" id="L118">        }</span>
+        
+        private void registerCreatePublisherBundle() {
+<span class="fc" id="L121">            log(&quot;Registering &quot; + CREATE_BUNDLE_TASK_NAME + &quot; ...&quot;);</span>
+<span class="fc" id="L122">            project.getTasks().register(CREATE_BUNDLE_TASK_NAME, Tar.class).configure(tar -&gt; {</span>
+<span class="nc" id="L123">                tar.getArchiveBaseName().set(project.getGroup().toString());</span>
+<span class="nc" id="L124">                tar.getArchiveVersion().set(project.getVersion().toString());</span>
+<span class="nc" id="L125">                tar.getDestinationDirectory().set(project.getLayout().getBuildDirectory().dir(&quot;distributions&quot;));</span>
+<span class="nc" id="L126">                project.allprojects(p -&gt; tar.from(p.getLayout().getBuildDirectory().dir(&quot;staging-deploy&quot;)));</span>
+<span class="nc" id="L127">            });</span>
+<span class="fc" id="L128">        }</span>
+        
+        private static String createTimestamp() {
+<span class="nc" id="L131">            return ZonedDateTime.now().format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm:ss XXX&quot;));</span>
+        }
+        
+        private String getWorkflowName() {
+<span class="nc" id="L135">            return getConfig(project, &quot;PROJECT_WORKFLOW&quot;, &quot;developer-release&quot;);</span>
+        }
+        
+        private String getPublishUsername() {
+<span class="nc" id="L139">            return getConfig(project, &quot;OSSRH_USERNAME&quot;);</span>
+        }
+        
+        private String getPublishPassword() {
+<span class="nc" id="L143">            return getConfig(project, &quot;OSSRH_PASSWORD&quot;);</span>
+        }
+        
+        private void registerUploadPublisherBundle() {
+<span class="fc" id="L147">            log(&quot;Registering &quot; + UPLOAD_BUNDLE_TASK_NAME + &quot; ...&quot;);</span>
+            
+<span class="fc" id="L149">            project.getTasks().register(UPLOAD_BUNDLE_TASK_NAME).configure(task -&gt; {</span>
+<span class="nc" id="L150">                task.doLast(action -&gt; {</span>
+<span class="nc" id="L151">                    final String apiUrl = &quot;https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED&quot;;</span>
+<span class="nc" id="L152">                    final String username = getPublishUsername();</span>
+<span class="nc" id="L153">                    final String password = getPublishPassword();</span>
+                    
+<span class="nc bnc" id="L155" title="All 4 branches missed.">                    if (!ofNullable(username).isPresent() || !ofNullable(password).isPresent()) {</span>
+<span class="nc" id="L156">                        throw new GradleException(&quot;Publisher environment variables must be set.&quot;);</span>
+                    }
+                    
+<span class="nc" id="L159">                    final String bundleName = getBundleName();</span>
+<span class="nc" id="L160">                    final File bundleFile = getBundleFile();</span>
+<span class="nc" id="L161">                    final String encodedAuthString = base64Encode(username + &quot;:&quot; + password);</span>
+                    
+<span class="nc bnc" id="L163" title="All 2 branches missed.">                    if (!bundleFile.exists()) {</span>
+<span class="nc" id="L164">                        throw new GradleException(&quot;Bundle file not found at: &quot; + bundleFile.getAbsolutePath());</span>
+                    }
+                    
+<span class="nc" id="L167">                    final OkHttpClient client = new OkHttpClient();</span>
+                    
+<span class="nc" id="L169">                    final RequestBody requestBody = new MultipartBody.Builder()</span>
+<span class="nc" id="L170">                        .setType(MultipartBody.FORM)</span>
+<span class="nc" id="L171">                        .addFormDataPart(&quot;bundle&quot;, bundleName,</span>
+<span class="nc" id="L172">                            RequestBody.create(bundleFile, MediaType.parse(&quot;application/x-tar&quot;)))</span>
+<span class="nc" id="L173">                        .build();</span>
+                    
+<span class="nc" id="L175">                    final Request request = new Request.Builder()</span>
+<span class="nc" id="L176">                        .url(apiUrl)</span>
+<span class="nc" id="L177">                        .post(requestBody)</span>
+<span class="nc" id="L178">                        .header(&quot;Authorization&quot;, &quot;Bearer &quot; + encodedAuthString)</span>
+<span class="nc" id="L179">                        .header(&quot;accept&quot;, &quot;text/plain; charset=UTF-8&quot;)</span>
+<span class="nc" id="L180">                        .build();</span>
+                    
+<span class="nc" id="L182">                    try (Response response = client.newCall(request).execute()) {</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">                        if (!response.isSuccessful()) {</span>
+<span class="nc" id="L184">                            throw new GradleException(&quot;Unexpected code &quot; + response);</span>
+                        }
+<span class="nc" id="L186">                    } catch (IOException thrown) {</span>
+<span class="nc" id="L187">                        throw new GradleException(thrown.getMessage(), thrown);</span>
+<span class="nc" id="L188">                    }</span>
+<span class="nc" id="L189">                });</span>
+<span class="nc" id="L190">            });</span>
+<span class="fc" id="L191">        }</span>
+        
+        private File getBundleFile() {
+<span class="nc" id="L194">            return project.file(&quot;build/distributions/&quot; + project.getGroup() + &quot;-&quot; + project.getVersion() + &quot;.tar&quot;);</span>
+        }
+        
+        private String getBundleName() {
+<span class="nc" id="L198">            return project.getGroup() + &quot;-&quot; + project.getVersion() + &quot; by &quot; + getWorkflowName() + &quot; @ &quot; + createTimestamp();</span>
+        }
+
+        private static final String CREATE_BUNDLE_TASK_NAME = &quot;createPublisherBundle&quot;;
+        private static final String UPLOAD_BUNDLE_TASK_NAME = &quot;uploadPublisherBundle&quot;;
+        
+        private final Project project;
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
