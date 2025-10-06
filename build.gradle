@@ -76,28 +76,28 @@ gradlePlugin {
             implementationClass = 'io.github.jonloucks.gradle.kit.JavaPlugin'
             displayName = 'Gradle Java Kit plugin'
             description = 'Automatic configuration of the Gradle Java plugin'
-            tags.set(['gradle', 'java', 'github', 'workflow', 'java-versions'])
+            tags.set(['java', 'github', 'workflow', 'java-versions'])
         }
         javaLibraryPlugin {
             id = 'io.github.jonloucks.java-library-kit'
             implementationClass = 'io.github.jonloucks.gradle.kit.JavaLibraryPlugin'
             displayName = 'Gradle Java Library Kit plugin'
             description = 'Automatic configuration of the Gradle Java-Library plugin'
-            tags.set(['gradle', 'java', 'github', 'workflow', 'java-versions', 'java-library'])
+            tags.set(['java', 'github', 'workflow', 'java-versions', 'java-library'])
         }
         mavenPublishPlugin {
             id = 'io.github.jonloucks.maven-publish-kit'
             implementationClass = 'io.github.jonloucks.gradle.kit.MavenPublishPlugin'
             displayName = 'Gradle Maven Publish Sonatype plugin'
             description = 'Publishing to https://central.sonatype.com/publishing via new API'
-            tags.set(['gradle', 'java', 'github', 'workflow', 'java-versions', 'OSSRH', 'GPG', 'signing'])
+            tags.set(['java', 'github', 'workflow', 'OSSRH', 'GPG', 'signing'])
         }
         signingPlugin {
             id = 'io.github.jonloucks.signing-kit'
             implementationClass = 'io.github.jonloucks.gradle.kit.SigningPlugin'
             displayName = 'Gradle OSSRH GPG Signing plugin'
             description = 'Signing for publishing to https://central.sonatype.com/publishing via new API'
-            tags.set(['gradle', 'java', 'github', 'workflow', 'java-versions', 'OSSRH', 'GPG', 'signing'])
+            tags.set(['java', 'github', 'workflow', 'OSSRH', 'GPG', 'signing'])
         }
     }
 }
