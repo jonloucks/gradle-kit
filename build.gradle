@@ -30,6 +30,7 @@
 plugins {
     id 'java-gradle-plugin'
     id 'com.gradle.plugin-publish' version '1.2.1'
+    id 'jacoco'
 }
 
 apply from: "${rootDir}/gradle/java-versions.gradle"
@@ -54,23 +55,49 @@ test {
     useJUnitPlatform()
 }
 
+jacoco {
+    toolVersion = "0.8.13"
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = true
+    }
+}
+
 gradlePlugin {
+    website = 'https://github.com/jonloucks/gradle-kit'
+    vcsUrl = 'https://github.com/jonloucks/gradle-kit'
     plugins {
         javaPlugin {
-            id = 'java-kit'
+            id = 'io.github.jonloucks.java-kit'
             implementationClass = 'io.github.jonloucks.gradle.kit.JavaPlugin'
+            displayName = 'Gradle Java Kit plugin'
+            description = 'Automatic configuration of the Gradle Java plugin'
+            tags.set(['gradle', 'java', 'github', 'workflow', 'java-versions'])
         }
         javaLibraryPlugin {
-            id = 'java-library-kit'
+            id = 'io.github.jonloucks.java-library-kit'
             implementationClass = 'io.github.jonloucks.gradle.kit.JavaLibraryPlugin'
+            displayName = 'Gradle Java Library Kit plugin'
+            description = 'Automatic configuration of the Gradle Java-Library plugin'
+            tags.set(['gradle', 'java', 'github', 'workflow', 'java-versions', 'java-library'])
         }
         mavenPublishPlugin {
-            id = 'maven-publish-kit'
+            id = 'io.github.jonloucks.maven-publish-kit'
             implementationClass = 'io.github.jonloucks.gradle.kit.MavenPublishPlugin'
+            displayName = 'Gradle Maven Publish Sonatype plugin'
+            description = 'Publishing to https://central.sonatype.com/publishing via new API'
+            tags.set(['gradle', 'java', 'github', 'workflow', 'java-versions', 'OSSRH', 'GPG', 'signing'])
         }
         signingPlugin {
-            id = 'signing-kit'
+            id = 'io.github.jonloucks.signing-kit'
             implementationClass = 'io.github.jonloucks.gradle.kit.SigningPlugin'
+            displayName = 'Gradle OSSRH GPG Signing plugin'
+            description = 'Signing for publishing to https://central.sonatype.com/publishing via new API'
+            tags.set(['gradle', 'java', 'github', 'workflow', 'java-versions', 'OSSRH', 'GPG', 'signing'])
         }
     }
 }
