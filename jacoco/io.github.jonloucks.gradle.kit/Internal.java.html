@@ -38,20 +38,24 @@ final class Internal {
 <span class="fc" id="L38">        return project.getRootProject().equals(project);</span>
     }
     
+    static boolean isTestProject(Project project) {
+<span class="nc" id="L42">        return project.getName().endsWith(&quot;-test&quot;);</span>
+    }
+    
     static String getConfig(Project project, String name, String defaultValue) {
-<span class="fc" id="L42">        final Provider&lt;@NotNull String&gt; variable = project.getProviders().environmentVariable(name);</span>
-<span class="pc bpc" id="L43" title="1 of 2 branches missed.">        if (variable.isPresent()) {</span>
-<span class="nc" id="L44">            return variable.get();</span>
+<span class="fc" id="L46">        final Provider&lt;@NotNull String&gt; variable = project.getProviders().environmentVariable(name);</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if (variable.isPresent()) {</span>
+<span class="nc" id="L48">            return variable.get();</span>
         }
-<span class="fc" id="L46">        return ofNullable(project.findProperty(name)).map(Object::toString).orElse(defaultValue);</span>
+<span class="fc" id="L50">        return ofNullable(project.findProperty(name)).map(Object::toString).orElse(defaultValue);</span>
     }
     
     static String base64Encode(String text) {
-<span class="nc" id="L50">        return new String(Base64.getEncoder().encode(text.getBytes(UTF_8)), UTF_8);</span>
+<span class="nc" id="L54">        return new String(Base64.getEncoder().encode(text.getBytes(UTF_8)), UTF_8);</span>
     }
     
     static String base64Decode(String text) {
-<span class="nc" id="L54">        return new String(Base64.getDecoder().decode(text), UTF_8);</span>
+<span class="nc" id="L58">        return new String(Base64.getDecoder().decode(text), UTF_8);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
