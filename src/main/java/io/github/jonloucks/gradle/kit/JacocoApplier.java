@@ -1,6 +1,7 @@
 package io.github.jonloucks.gradle.kit;
 
 import org.gradle.api.Action;
+import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.tasks.SourceSet;
@@ -25,8 +26,10 @@ final class JacocoApplier {
         log("Applying jacoco plugin...");
         targetProject.getPlugins().apply("jacoco");
         
-        configureJacocoPlugin();
-        configureExistingReports();
+        targetProject.afterEvaluate(project -> {
+            configureJacocoPlugin();
+            configureExistingReports();
+        });
     }
     
     private void configureExistingReports() {

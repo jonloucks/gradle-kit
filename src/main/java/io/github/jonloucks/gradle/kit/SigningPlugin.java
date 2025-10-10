@@ -35,7 +35,9 @@ public final class SigningPlugin implements Plugin<@NotNull Project> {
         
         private void apply() {
             applySigningPlugin();
-            configureSigning();
+            project.afterEvaluate(x -> {
+                configureSigning();
+            });
         }
         
         private void configureSigning() {

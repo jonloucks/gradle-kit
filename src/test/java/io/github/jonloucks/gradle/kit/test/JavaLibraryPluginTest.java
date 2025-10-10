@@ -26,6 +26,7 @@ public final class JavaLibraryPluginTest {
     public void plugin_JavaAndJdkVersions() {
         final Project project = ProjectBuilder.builder().build();
         project.getPlugins().apply(JAVA_LIBRARY_KIT);
+        project.evaluationDependsOn(":");
         
         final JavaPluginExtension javaPlugin = project.getExtensions().getByType(JavaPluginExtension.class);
         
@@ -43,6 +44,7 @@ public final class JavaLibraryPluginTest {
     public void plugin_TestTagging() {
         final Project project = ProjectBuilder.builder().build();
         project.getPlugins().apply(JAVA_LIBRARY_KIT);
+        project.evaluationDependsOn(":");
         
         assertDoesNotThrow(()-> {
             project.getTasks().named("integrationTest");

@@ -28,9 +28,11 @@ public final class JavaLibraryPlugin implements Plugin<@NotNull Project> {
         
         private void apply() {
             applyJavaLibraryPlugin();
-            new JavaVersioningApplier(project).apply();
-            new JacocoApplier(project).apply();
-            new JavadocApplier(project).apply();
+            project.afterEvaluate(x -> {
+                new JavaVersioningApplier(project).apply();
+                new JacocoApplier(project).apply();
+                new JavadocApplier(project).apply();
+            });
         }
         
         private void applyJavaLibraryPlugin() {
