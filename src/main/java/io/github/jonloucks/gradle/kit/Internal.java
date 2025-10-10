@@ -38,6 +38,10 @@ final class Internal {
         return project.getRootProject().equals(project);
     }
     
+    static boolean isTestProject(Project project) {
+        return project.getName().endsWith("-test");
+    }
+    
     static String getConfig(Project project, String name, String defaultValue) {
         final Provider<@NotNull String> variable = project.getProviders().environmentVariable(name);
         if (variable.isPresent()) {

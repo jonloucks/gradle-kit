@@ -1,7 +1,6 @@
 package io.github.jonloucks.gradle.kit;
 
 import org.gradle.api.Action;
-import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.tasks.SourceSet;
@@ -13,8 +12,7 @@ import org.gradle.testing.jacoco.plugins.JacocoPluginExtension;
 import org.gradle.testing.jacoco.tasks.JacocoReport;
 import org.jetbrains.annotations.NotNull;
 
-import static io.github.jonloucks.gradle.kit.Internal.isRootProject;
-import static io.github.jonloucks.gradle.kit.Internal.log;
+import static io.github.jonloucks.gradle.kit.Internal.*;
 
 final class JacocoApplier {
 
@@ -64,6 +62,9 @@ final class JacocoApplier {
     
     private @NotNull Action<@NotNull Project> getAllJacocoFiles(JacocoReport rootReport) {
         return project -> {
+            if (isTestProject(project)) {
+                return;
+            }
             final TaskCollection<@NotNull Test> testingTasks = getTestingTasks(project);
             rootReport.shouldRunAfter(testingTasks);
             rootReport.dependsOn(testingTasks);
