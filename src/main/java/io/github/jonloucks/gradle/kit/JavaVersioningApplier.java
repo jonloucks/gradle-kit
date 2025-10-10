@@ -26,12 +26,15 @@ final class JavaVersioningApplier {
     }
     
     void apply() {
-        configureJavaVersions();
-        configureTestTaggingRules();
+        log("Applying Java versions ...");
+        
+        targetProject.afterEvaluate(x -> {
+            configureJavaVersions();
+            configureTestTaggingRules();
+        });
     }
     
     private void configureJavaVersions() {
-        log("Applying Java versions ...");
         configureJavaPlugin();
         configureAllJavaCompiles();
     }

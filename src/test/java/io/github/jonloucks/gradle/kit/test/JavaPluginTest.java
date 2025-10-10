@@ -25,7 +25,8 @@ public final class JavaPluginTest {
     public void plugin_JavaAndJdkVersions() {
         final Project project = ProjectBuilder.builder().build();
         project.getPlugins().apply(JAVA_KIT);
-
+        project.evaluationDependsOn(":");
+        
         final JavaPluginExtension javaPlugin = project.getExtensions().getByType(JavaPluginExtension.class);
 
         assertThat(javaPlugin.getSourceCompatibility(), equalTo(JavaVersion.toVersion(SOURCE_VERSION)));

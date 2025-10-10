@@ -42,13 +42,16 @@ public final class MavenPublishPlugin implements Plugin<@NotNull Project> {
         private void apply() {
             applyMavenPublishPlugin();
             
-            if (isRootProject(project)) {
-                registerCreatePublisherBundle();
-                registerUploadPublisherBundle();
-            }
-            
-            createStagingRepository();
-            configureChecksums();
+            project.afterEvaluate(x -> {
+                if (isRootProject(project)) {
+                    registerCreatePublisherBundle();
+                    registerUploadPublisherBundle();
+                }
+                
+                createStagingRepository();
+                configureChecksums();
+            });
+
         }
         
         private void configureChecksums() {
