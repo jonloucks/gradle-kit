@@ -30,13 +30,14 @@ public final class JavaPlugin implements Plugin&lt;@NotNull Project&gt; {
 <span class="fc" id="L30">            applyJavaLibraryPlugin();</span>
 <span class="fc" id="L31">            new JavaVersioningApplier(project).apply();</span>
 <span class="fc" id="L32">            new JacocoApplier(project).apply();</span>
-<span class="fc" id="L33">            new JavadocApplier(project).apply();</span>
-<span class="fc" id="L34">        }</span>
+<span class="fc" id="L33">            new SpotBugsApplier(project).apply();</span>
+<span class="fc" id="L34">            new JavadocApplier(project).apply();</span>
+<span class="fc" id="L35">        }</span>
         
         private void applyJavaLibraryPlugin() {
-<span class="fc" id="L37">            log(&quot;Applying java plugin...&quot;);</span>
-<span class="fc" id="L38">            project.getPlugins().apply(&quot;java&quot;);</span>
-<span class="fc" id="L39">        }</span>
+<span class="fc" id="L38">            log(&quot;Applying java plugin...&quot;);</span>
+<span class="fc" id="L39">            project.getPlugins().apply(&quot;java&quot;);</span>
+<span class="fc" id="L40">        }</span>
         
         private final Project project;
     }
