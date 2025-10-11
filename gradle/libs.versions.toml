@@ -1,12 +1,12 @@
 [versions]
-java-language-version = "9"
+java-language-version = "11"
 jdk-version = "17"
 junit-version = "5.10.0"
 hamcrest-version = "[3.0,4.0)"
 mockito-version = "[5.0,6.0)"
 okhttp-version = "[4.12.0, 4.13.0)"
 jacoco-version = "0.8.13"
-spotbugs-version = "6.1.9"
+spotbugs-version = "6.4.2"
 
 [libraries]
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit-version" }
