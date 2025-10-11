@@ -9,89 +9,127 @@ import org.gradle.api.tasks.TaskCollection;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.testing.jacoco.plugins.JacocoPlugin;
 import org.gradle.testing.jacoco.plugins.JacocoPluginExtension;
+import org.gradle.testing.jacoco.tasks.JacocoCoverageVerification;
 import org.gradle.testing.jacoco.tasks.JacocoReport;
+import org.gradle.testing.jacoco.tasks.JacocoReportBase;
+import org.gradle.testing.jacoco.tasks.rules.JacocoViolationRulesContainer;
 import org.jetbrains.annotations.NotNull;
+
+import java.math.BigDecimal;
 
 import static io.github.jonloucks.gradle.kit.Internal.*;
 
 final class JacocoApplier {
 
-<span class="fc" id="L19">    JacocoApplier(Project project) {</span>
-<span class="fc" id="L20">        this.targetProject = project;</span>
-<span class="fc" id="L21">    }</span>
+<span class="fc" id="L24">    JacocoApplier(Project project) {</span>
+<span class="fc" id="L25">        this.targetProject = project;</span>
+<span class="fc" id="L26">    }</span>
     
     void apply() {
-<span class="fc" id="L24">        log(&quot;Applying jacoco plugin...&quot;);</span>
-<span class="fc" id="L25">        targetProject.getPlugins().apply(&quot;jacoco&quot;);</span>
+<span class="fc" id="L29">        log(&quot;Applying jacoco plugin...&quot;);</span>
+<span class="fc" id="L30">        targetProject.getPlugins().apply(&quot;jacoco&quot;);</span>
         
-<span class="fc" id="L27">        targetProject.afterEvaluate(project -&gt; {</span>
-<span class="fc" id="L28">            configureJacocoPlugin();</span>
-<span class="fc" id="L29">            configureExistingReports();</span>
-<span class="fc" id="L30">        });</span>
-<span class="fc" id="L31">    }</span>
+<span class="fc" id="L32">        targetProject.afterEvaluate(project -&gt; {</span>
+<span class="fc" id="L33">            configureJacocoPlugin();</span>
+<span class="fc" id="L34">            configureExistingReports();</span>
+<span class="fc" id="L35">            configureVerificationReports();</span>
+<span class="fc" id="L36">        });</span>
+<span class="fc" id="L37">    }</span>
     
     private void configureExistingReports() {
-<span class="fc" id="L34">        targetProject.getTasks().named(JACOCO_TEST_REPORT, JacocoReport.class)</span>
-<span class="fc" id="L35">            .configure(configureExistingReport());</span>
-<span class="fc" id="L36">    }</span>
+<span class="fc" id="L40">        targetProject.getTasks().named(JACOCO_TEST_REPORT, JacocoReport.class)</span>
+<span class="fc" id="L41">            .configure(configureExistingReport());</span>
+<span class="fc" id="L42">    }</span>
     
-    private void configureJacocoPlugin() {
-<span class="fc" id="L39">        targetProject.getPlugins().withType(JacocoPlugin.class, jacocoPlugin -&gt; {</span>
-<span class="fc" id="L40">            JacocoPluginExtension jacocoExtension = targetProject.getExtensions().getByType(JacocoPluginExtension.class);</span>
-<span class="fc" id="L41">            jacocoExtension.setToolVersion(&quot;0.8.13&quot;);</span>
-<span class="fc" id="L42">        });</span>
-<span class="fc" id="L43">    }</span>
+    private void configureVerificationReports() {
+<span class="fc" id="L45">        targetProject.getTasks().named(JACOCO_VERIFICATION_REPORT, JacocoCoverageVerification.class)</span>
+<span class="fc" id="L46">            .configure(configureExistingVerificationReport());</span>
+<span class="fc" id="L47">    }</span>
     
-    private @NotNull Action&lt;@NotNull JacocoReport&gt; configureExistingReport() {
-<span class="fc" id="L46">        final boolean isRootProject = isRootProject(targetProject);</span>
-        
-<span class="fc" id="L48">        return reportTask -&gt; {</span>
-<span class="nc" id="L49">            final TaskCollection&lt;@NotNull Test&gt; testingTasks = getTestingTasks(targetProject);</span>
-<span class="nc" id="L50">            reportTask.shouldRunAfter(testingTasks);</span>
-<span class="nc" id="L51">            reportTask.dependsOn(testingTasks);</span>
-<span class="nc" id="L52">            reportTask.reports(reports -&gt; {</span>
-<span class="nc" id="L53">                reports.getHtml().getRequired().set(isRootProject);</span>
-<span class="nc" id="L54">                reports.getXml().getRequired().set(true);</span>
-<span class="nc" id="L55">                reports.getCsv().getRequired().set(isRootProject);</span>
-<span class="nc" id="L56">            });</span>
-<span class="nc bnc" id="L57" title="All 2 branches missed.">            if (isRootProject) {</span>
-<span class="nc" id="L58">                targetProject.allprojects(getAllJacocoFiles(reportTask));</span>
+    private @NotNull Action&lt;@NotNull JacocoCoverageVerification&gt; configureExistingVerificationReport() {
+<span class="fc" id="L50">        final boolean isRootProject = isRootProject(targetProject);</span>
+<span class="fc" id="L51">        return verification -&gt; {</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">            if (isRootProject) {</span>
+<span class="nc" id="L53">                verification.violationRules(rules -&gt; {</span>
+<span class="nc" id="L54">                    addViolationRules(rules, &quot;LINE&quot;, &quot;BRANCH&quot;, &quot;CLASS&quot;, &quot;INSTRUCTION&quot;, &quot;METHOD&quot;);</span>
+<span class="nc" id="L55">                });</span>
+<span class="nc" id="L56">                targetProject.allprojects(getAllJacocoFiles(verification));</span>
+            } else {
+<span class="nc" id="L58">                verification.setEnabled(false);</span>
             }
 <span class="nc" id="L60">        };</span>
     }
     
-    private @NotNull Action&lt;@NotNull Project&gt; getAllJacocoFiles(JacocoReport rootReport) {
-<span class="nc" id="L64">        return project -&gt; {</span>
-<span class="nc bnc" id="L65" title="All 2 branches missed.">            if (isTestProject(project)) {</span>
-<span class="nc" id="L66">                return;</span>
+    private static void addViolationRules(JacocoViolationRulesContainer rules, String ... counters) {
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        for (String counter : counters) {</span>
+<span class="nc" id="L65">            rules.rule(rule -&gt; {</span>
+<span class="nc" id="L66">                rule.limit(limit -&gt; {</span>
+<span class="nc" id="L67">                    limit.setCounter(counter);</span>
+<span class="nc" id="L68">                    limit.setValue(&quot;COVEREDRATIO&quot;);</span>
+<span class="nc" id="L69">                    limit.setMinimum(BigDecimal.valueOf(0.95));</span>
+<span class="nc" id="L70">                });</span>
+<span class="nc" id="L71">            });</span>
+        }
+<span class="nc" id="L73">    }</span>
+    
+    private void configureJacocoPlugin() {
+<span class="fc" id="L76">        targetProject.getPlugins().withType(JacocoPlugin.class, jacocoPlugin -&gt; {</span>
+<span class="fc" id="L77">            JacocoPluginExtension jacocoExtension = targetProject.getExtensions().getByType(JacocoPluginExtension.class);</span>
+<span class="fc" id="L78">            jacocoExtension.setToolVersion(&quot;0.8.13&quot;);</span>
+<span class="fc" id="L79">        });</span>
+<span class="fc" id="L80">    }</span>
+    
+    private @NotNull Action&lt;@NotNull JacocoReport&gt; configureExistingReport() {
+<span class="fc" id="L83">        final boolean isRootProject = isRootProject(targetProject);</span>
+        
+<span class="fc" id="L85">        return reportTask -&gt; {</span>
+<span class="nc" id="L86">            final TaskCollection&lt;@NotNull Test&gt; testingTasks = getTestingTasks(targetProject);</span>
+<span class="nc" id="L87">            reportTask.shouldRunAfter(testingTasks);</span>
+<span class="nc" id="L88">            reportTask.dependsOn(testingTasks);</span>
+<span class="nc" id="L89">            reportTask.reports(reports -&gt; {</span>
+<span class="nc" id="L90">                reports.getHtml().getRequired().set(isRootProject);</span>
+<span class="nc" id="L91">                reports.getXml().getRequired().set(true);</span>
+<span class="nc" id="L92">                reports.getCsv().getRequired().set(isRootProject);</span>
+<span class="nc" id="L93">            });</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">            if (isRootProject) {</span>
+<span class="nc" id="L95">                targetProject.allprojects(getAllJacocoFiles(reportTask));</span>
             }
-<span class="nc" id="L68">            final TaskCollection&lt;@NotNull Test&gt; testingTasks = getTestingTasks(project);</span>
-<span class="nc" id="L69">            rootReport.shouldRunAfter(testingTasks);</span>
-<span class="nc" id="L70">            rootReport.dependsOn(testingTasks);</span>
+<span class="nc" id="L97">        };</span>
+    }
+
+    private @NotNull Action&lt;@NotNull Project&gt; getAllJacocoFiles(JacocoReportBase rootReport) {
+<span class="nc" id="L101">        return project -&gt; {</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">            if (isTestProject(project)) {</span>
+<span class="nc" id="L103">                return;</span>
+            }
+<span class="nc" id="L105">            final TaskCollection&lt;@NotNull Test&gt; testingTasks = getTestingTasks(project);</span>
+<span class="nc" id="L106">            rootReport.shouldRunAfter(testingTasks);</span>
+<span class="nc" id="L107">            rootReport.dependsOn(testingTasks);</span>
             
-<span class="nc" id="L72">            final SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);</span>
-<span class="nc" id="L73">            final SourceSet sourceSet = sourceSets.getByName(&quot;main&quot;);</span>
-<span class="nc" id="L74">            final DirectoryProperty buildDir = project.getLayout().getBuildDirectory();</span>
-<span class="nc" id="L75">            rootReport.getAdditionalSourceDirs().from(sourceSet.getJava().getSrcDirs());</span>
-<span class="nc" id="L76">            rootReport.getAdditionalClassDirs().from(sourceSet.getOutput().getClassesDirs());</span>
-<span class="nc" id="L77">            rootReport.getExecutionData().from(project.fileTree(buildDir.dir(&quot;jacoco&quot;)).include(&quot;**.exec&quot;));</span>
-<span class="nc" id="L78">        };</span>
+<span class="nc" id="L109">            final SourceSetContainer sourceSets = project.getExtensions().getByType(SourceSetContainer.class);</span>
+<span class="nc" id="L110">            final SourceSet sourceSet = sourceSets.getByName(&quot;main&quot;);</span>
+<span class="nc" id="L111">            final DirectoryProperty buildDir = project.getLayout().getBuildDirectory();</span>
+<span class="nc" id="L112">            rootReport.getAdditionalSourceDirs().from(sourceSet.getJava().getSrcDirs());</span>
+<span class="nc" id="L113">            rootReport.getAdditionalClassDirs().from(sourceSet.getOutput().getClassesDirs());</span>
+<span class="nc" id="L114">            rootReport.getExecutionData().from(project.fileTree(buildDir.dir(&quot;jacoco&quot;)).include(&quot;**.exec&quot;));</span>
+<span class="nc" id="L115">        };</span>
     }
     
     private static TaskCollection&lt;@NotNull Test&gt; getTestingTasks(Project project) {
-<span class="nc" id="L82">        return project.getTasks().withType(Test.class).matching(t -&gt; {</span>
-<span class="nc bnc" id="L83" title="All 2 branches missed.">            switch (t.getName()) {</span>
+<span class="nc" id="L119">        return project.getTasks().withType(Test.class).matching(t -&gt; {</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">            switch (t.getName()) {</span>
                 case &quot;test&quot;:
                 case &quot;integrationTest&quot;:
                 case &quot;functionalTest&quot;:
-<span class="nc" id="L87">                    return true;</span>
+<span class="nc" id="L124">                    return true;</span>
                 default:
-<span class="nc" id="L89">                    return false;</span>
+<span class="nc" id="L126">                    return false;</span>
             }
         });
     }
     
     private static final String JACOCO_TEST_REPORT = &quot;jacocoTestReport&quot;;
+    private static final String JACOCO_VERIFICATION_REPORT = &quot;jacocoTestCoverageVerification&quot;;
     
     private final Project targetProject;
 }
