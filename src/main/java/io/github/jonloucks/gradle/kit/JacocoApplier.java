@@ -9,8 +9,13 @@ import org.gradle.api.tasks.TaskCollection;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.testing.jacoco.plugins.JacocoPlugin;
 import org.gradle.testing.jacoco.plugins.JacocoPluginExtension;
+import org.gradle.testing.jacoco.tasks.JacocoCoverageVerification;
 import org.gradle.testing.jacoco.tasks.JacocoReport;
+import org.gradle.testing.jacoco.tasks.JacocoReportBase;
+import org.gradle.testing.jacoco.tasks.rules.JacocoViolationRulesContainer;
 import org.jetbrains.annotations.NotNull;
+
+import java.math.BigDecimal;
 
 import static io.github.jonloucks.gradle.kit.Internal.*;
 
@@ -27,12 +32,44 @@ final class JacocoApplier {
         targetProject.afterEvaluate(project -> {
             configureJacocoPlugin();
             configureExistingReports();
+            configureVerificationReports();
         });
     }
     
     private void configureExistingReports() {
         targetProject.getTasks().named(JACOCO_TEST_REPORT, JacocoReport.class)
             .configure(configureExistingReport());
+    }
+    
+    private void configureVerificationReports() {
+        targetProject.getTasks().named(JACOCO_VERIFICATION_REPORT, JacocoCoverageVerification.class)
+            .configure(configureExistingVerificationReport());
+    }
+    
+    private @NotNull Action<@NotNull JacocoCoverageVerification> configureExistingVerificationReport() {
+        final boolean isRootProject = isRootProject(targetProject);
+        return verification -> {
+            if (isRootProject) {
+                verification.violationRules(rules -> {
+                    addViolationRules(rules, "LINE", "BRANCH", "CLASS", "INSTRUCTION", "METHOD");
+                });
+                targetProject.allprojects(getAllJacocoFiles(verification));
+            } else {
+                verification.setEnabled(false);
+            }
+        };
+    }
+    
+    private static void addViolationRules(JacocoViolationRulesContainer rules, String ... counters) {
+        for (String counter : counters) {
+            rules.rule(rule -> {
+                rule.limit(limit -> {
+                    limit.setCounter(counter);
+                    limit.setValue("COVEREDRATIO");
+                    limit.setMinimum(BigDecimal.valueOf(0.95));
+                });
+            });
+        }
     }
     
     private void configureJacocoPlugin() {
@@ -59,8 +96,8 @@ final class JacocoApplier {
             }
         };
     }
-    
-    private @NotNull Action<@NotNull Project> getAllJacocoFiles(JacocoReport rootReport) {
+
+    private @NotNull Action<@NotNull Project> getAllJacocoFiles(JacocoReportBase rootReport) {
         return project -> {
             if (isTestProject(project)) {
                 return;
@@ -92,6 +129,7 @@ final class JacocoApplier {
     }
     
     private static final String JACOCO_TEST_REPORT = "jacocoTestReport";
+    private static final String JACOCO_VERIFICATION_REPORT = "jacocoTestCoverageVerification";
     
     private final Project targetProject;
 }
