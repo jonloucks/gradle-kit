@@ -36,29 +36,30 @@ final class SpotBugsApplier {
 <span class="pc bpc" id="L36" title="1 of 2 branches missed.">            if (isTestProject) {</span>
 <span class="nc" id="L37">                reportTask.setEnabled(false);</span>
             } else {
-<span class="fc" id="L39">                reportTask.getReports().forEach(report -&gt; {</span>
-<span class="nc" id="L40">                    report.getRequired().set(true);</span>
-<span class="nc" id="L41">                    report.getOutputLocation().set(buildDir.file(&quot;reports/spotbugs/main/spotbugs.html&quot;));</span>
-<span class="nc" id="L42">                    report.setStylesheet(&quot;fancy-hist.xsl&quot;);</span>
-<span class="nc" id="L43">                });</span>
+<span class="fc" id="L39">                reportTask.setEnabled(true);</span>
+<span class="fc" id="L40">                reportTask.getReports().forEach(report -&gt; {</span>
+<span class="nc" id="L41">                    report.getRequired().set(true);</span>
+<span class="nc" id="L42">                    report.getOutputLocation().set(buildDir.file(&quot;reports/spotbugs/main/spotbugs.html&quot;));</span>
+<span class="nc" id="L43">                    report.setStylesheet(&quot;fancy-hist.xsl&quot;);</span>
+<span class="nc" id="L44">                });</span>
             }
-<span class="fc" id="L45">        };</span>
+<span class="fc" id="L46">        };</span>
     }
     
-<span class="fc" id="L48">    SpotBugsApplier(Project project) {</span>
-<span class="fc" id="L49">        this.targetProject = project;</span>
-<span class="fc" id="L50">    }</span>
+<span class="fc" id="L49">    SpotBugsApplier(Project project) {</span>
+<span class="fc" id="L50">        this.targetProject = project;</span>
+<span class="fc" id="L51">    }</span>
  
     private void configureSpotbugsPlugin() {
-<span class="fc" id="L53">        final boolean isTestProject = isTestProject(targetProject);</span>
-<span class="fc" id="L54">        final DirectoryProperty buildDir = targetProject.getLayout().getBuildDirectory();</span>
-<span class="fc" id="L55">        targetProject.getPlugins().withType(SpotBugsPlugin.class, jacocoPlugin -&gt; {</span>
-<span class="fc" id="L56">            final SpotBugsExtension extension = targetProject.getExtensions().getByType(SpotBugsExtension.class);</span>
-<span class="fc" id="L57">            extension.getToolVersion().set(&quot;4.9.6&quot;);</span>
-<span class="fc" id="L58">            extension.getIgnoreFailures().set(isTestProject);</span>
-<span class="fc" id="L59">            extension.getReportsDir().set(buildDir.dir(&quot;reports/spotbugs&quot;));</span>
-<span class="fc" id="L60">        });</span>
-<span class="fc" id="L61">    }</span>
+<span class="fc" id="L54">        final boolean isTestProject = isTestProject(targetProject);</span>
+<span class="fc" id="L55">        final DirectoryProperty buildDir = targetProject.getLayout().getBuildDirectory();</span>
+<span class="fc" id="L56">        targetProject.getPlugins().withType(SpotBugsPlugin.class, jacocoPlugin -&gt; {</span>
+<span class="fc" id="L57">            final SpotBugsExtension extension = targetProject.getExtensions().getByType(SpotBugsExtension.class);</span>
+<span class="fc" id="L58">            extension.getToolVersion().set(&quot;4.9.6&quot;);</span>
+<span class="fc" id="L59">            extension.getIgnoreFailures().set(isTestProject);</span>
+<span class="fc" id="L60">            extension.getReportsDir().set(buildDir.dir(&quot;reports/spotbugs&quot;));</span>
+<span class="fc" id="L61">        });</span>
+<span class="fc" id="L62">    }</span>
     
     private final Project targetProject;
 }
