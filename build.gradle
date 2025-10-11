@@ -1,32 +1,10 @@
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
-//file:noinspection GrUnresolvedAccess
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        google()
+    }
+}
+
 plugins {
     id 'java-gradle-plugin'
     id 'com.gradle.plugin-publish' version '1.2.1'
@@ -36,12 +14,14 @@ plugins {
 apply from: "${rootDir}/gradle/java-versions.gradle"
 
 repositories {
+    gradlePluginPortal()
     mavenCentral()
 }
 
 dependencies {
     implementation libs.okhttp3
     implementation libs.jacoco
+    implementation libs.spotbugs
 
     testImplementation platform(libs.junit.bom)
     testImplementation 'org.junit.jupiter:junit-jupiter'

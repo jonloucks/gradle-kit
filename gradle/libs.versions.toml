@@ -6,6 +6,7 @@ hamcrest-version = "[3.0,4.0)"
 mockito-version = "[5.0,6.0)"
 okhttp-version = "[4.12.0, 4.13.0)"
 jacoco-version = "0.8.13"
+spotbugs-version = "6.1.9"
 
 [libraries]
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit-version" }
@@ -14,4 +15,6 @@ mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito-ver
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito-version"}
 okhttp3 = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp-version" }
 jacoco = { module = "org.jacoco:org.jacoco.core", version.ref = "jacoco-version" }
+spotbugs = { module = "com.github.spotbugs.snom:spotbugs-gradle-plugin", version.ref = "spotbugs-version"}
+
 
