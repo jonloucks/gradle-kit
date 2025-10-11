@@ -36,6 +36,7 @@ final class SpotBugsApplier {
             if (isTestProject) {
                 reportTask.setEnabled(false);
             } else {
+                reportTask.setEnabled(true);
                 reportTask.getReports().forEach(report -> {
                     report.getRequired().set(true);
                     report.getOutputLocation().set(buildDir.file("reports/spotbugs/main/spotbugs.html"));
