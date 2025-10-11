@@ -49,6 +49,8 @@ public final class JavaLibraryPluginTest {
         assertDoesNotThrow(()-> {
             project.getTasks().named("integrationTest");
             project.getTasks().named("functionalTest");
+            project.getTasks().named("jacocoTestReport");
+            project.getTasks().named("spotbugsMain");
         });
     }
     

@@ -57,6 +57,7 @@ public class JavaLibraryPluginFunctionalTest {
         assertThat(output, containsString("Applying java-library plugin..."));
         assertThat(output, containsString("Applying jacoco plugin..."));
         assertThat(output, containsString("Applying javadoc..."));
+        assertThat(output, containsString("Applying spotbugs plugin..."));
         assertThat(output, not(containsString("Applying maven-publish plugin...")));
         assertThat(output, not(containsString("Applying signing plugin...")));
     }
@@ -76,13 +77,15 @@ public class JavaLibraryPluginFunctionalTest {
             "}");
         
         writeString(testFolder.resolve("SomeTest.java"),
-            "import org.junit.jupiter.api.Tag;\n" +
-            "import org.junit.jupiter.api.Test;\n" +
+            "import org.junit.jupiter.api.*;\n" +
             "\n" +
             "public class SomeTest {\n" +
             "    @Test\n" +
             "    public void normalTest() throws Exception {\n" +
-            "       new SomeImpl(); \n" +
+            "       final SomeImpl someImpl = new SomeImpl(); \n" +
+            "       if(null == someImpl.toString()) { \n" +
+            "           Assertions.fail(\"Oh my.\");\n" +
+            "       }\n" +
             "    }\n" +
             "    @Tag(\"integration\")\n" +
             "    @Test\n" +
