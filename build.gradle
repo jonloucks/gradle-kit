@@ -13,6 +13,8 @@ plugins {
 
 apply from: "${rootDir}/gradle/java-versions.gradle"
 
+defaultTasks 'check', 'jacocoTestReport', 'jacocoTestCoverageVerification', 'publishToMavenLocal'
+
 repositories {
     gradlePluginPortal()
     mavenCentral()
