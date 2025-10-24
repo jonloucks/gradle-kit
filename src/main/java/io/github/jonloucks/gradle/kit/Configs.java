@@ -65,7 +65,7 @@ final class Configs {
         .keys("KIT_OSSRH_USERNAME", "OSSRH_USERNAME", "kit.ossrh.username");
     
     static final Config<String> KIT_OSSRH_PASSWORD = new ConfigImpl<>(identity())
-        .name("Kit Publisher Login Password")
+        .name("Kit OSSRH Password")
         .keys( "KIT_OSSRH_PASSWORD", "OSSRH_PASSWORD", "kit.ossrh.password");
     
     static final Config<String> KIT_GPG_SECRET_KEY = new ConfigImpl<>(Configs::ofSecretKey)
@@ -73,7 +73,7 @@ final class Configs {
         .keys( "KIT_OSSRH_GPG_SECRET_KEY", "OSSRH_GPG_SECRET_KEY", "kit.ossrh.gpg.secret.key");
     
     static final Config<String> KIT_GPG_SECRET_KEY_PASSWORD = new ConfigImpl<>(identity())
-        .name("Kit OSSRH Signing Key Password")
+        .name("Kit OSSRH GPG Secret Key Password")
         .keys("KIT_OSSRH_GPG_SECRET_KEY_PASSWORD", "OSSRH_GPG_SECRET_KEY_PASSWORD", "kit.ossrh.gpg.secret.key.password");
     
     private static GradleException getConfigException(Project project, Config<?> config) {
