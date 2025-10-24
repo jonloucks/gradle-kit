@@ -17,6 +17,7 @@ import java.security.MessageDigest;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
+import static io.github.jonloucks.gradle.kit.Configs.*;
 import static io.github.jonloucks.gradle.kit.Internal.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Optional.ofNullable;
@@ -135,15 +136,15 @@ public final class MavenPublishPlugin implements Plugin<@NotNull Project> {
         }
         
         private String getWorkflowName() {
-            return getConfig(project, "PROJECT_WORKFLOW", "developer-release");
+            return getConfig(project, KIT_PROJECT_WORKFLOW).orElse("unknown");
         }
         
         private String getPublishUsername() {
-            return getConfig(project, "OSSRH_USERNAME");
+            return getConfig(project, KIT_OSSRH_USERNAME).orElse(null);
         }
         
         private String getPublishPassword() {
-            return getConfig(project, "OSSRH_PASSWORD");
+            return getConfig(project, KIT_OSSRH_PASSWORD).orElse(null);
         }
         
         private void registerUploadPublisherBundle() {

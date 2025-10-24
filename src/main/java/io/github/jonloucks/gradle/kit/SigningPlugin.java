@@ -1,11 +1,12 @@
 package io.github.jonloucks.gradle.kit;
 
-import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.plugins.signing.SigningExtension;
 import org.jetbrains.annotations.NotNull;
 
+import static io.github.jonloucks.gradle.kit.Configs.KIT_GPG_SECRET_KEY_PASSWORD;
+import static io.github.jonloucks.gradle.kit.Configs.getConfig;
 import static io.github.jonloucks.gradle.kit.Internal.*;
 import static java.util.Optional.ofNullable;
 
@@ -57,22 +58,11 @@ public final class SigningPlugin implements Plugin<@NotNull Project> {
         }
         
         private String getGpgSecretKey() {
-            final String secretKey = getConfig(project, "OSSRH_GPG_SECRET_KEY");
-            if (ofNullable(secretKey).isPresent()) {
-                if (secretKey.startsWith("-")) {
-                    return secretKey;
-                }
-                try {
-                    return base64Decode(secretKey);
-                } catch (IllegalArgumentException thrown) {
-                    throw new GradleException("Invalid gpg secret key: " + secretKey, thrown);
-                }
-            }
-            return null;
+            return getConfig(project, Configs.KIT_GPG_SECRET_KEY).orElse(null);
         }
         
         private String getGpgSecretKeyPassword() {
-            return getConfig(project, "OSSRH_GPG_SECRET_KEY_PASSWORD");
+            return getConfig(project, KIT_GPG_SECRET_KEY_PASSWORD).orElse(null);
         }
     }
 }
