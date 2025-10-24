@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static io.github.jonloucks.gradle.kit.Internal.getConfig;
-import static io.github.jonloucks.gradle.kit.Internal.log;
+import static io.github.jonloucks.gradle.kit.Configs.*;
+import static io.github.jonloucks.gradle.kit.Internal.*;
 import static java.util.Optional.ofNullable;
 
 @SuppressWarnings("CodeBlock2Expr")
@@ -64,31 +64,17 @@ final class JavaVersioningApplier {
         javaPlugin.withSourcesJar();
     }
     
+
     private JavaLanguageVersion getCompilerVersion() {
-        final String text = getConfig(targetProject, "kit.java.compiler.version", null);
-        if (null == text || text.isEmpty()) {
-            return JavaLanguageVersion.of(17);
-        }
-        return JavaLanguageVersion.of(Integer.parseInt(text));
+        return requireConfig(targetProject, KIT_JAVA_COMPILER_VERSION);
     }
     
     private JavaLanguageVersion getTargetVersion() {
-        final String text = getConfig(targetProject, "kit.java.target.version", null);
-        if (null == text || text.isEmpty()) {
-            return getSourceVersion();
-        }
-        
-        return JavaLanguageVersion.of(Integer.parseInt(text));
+        return requireConfig(targetProject, KIT_JAVA_TARGET_VERSION);
     }
     
     private JavaLanguageVersion getSourceVersion() {
-        final String text = getConfig(targetProject, "kit.java.source.version", null);
-        
-        if (null == text || text.isEmpty()) {
-            return JavaLanguageVersion.of(9);
-        }
-        
-        return JavaLanguageVersion.of(Integer.parseInt(text));
+        return requireConfig(targetProject, KIT_JAVA_SOURCE_VERSION);
     }
     
     private String[] splitTagsProperty(String propertyName) {

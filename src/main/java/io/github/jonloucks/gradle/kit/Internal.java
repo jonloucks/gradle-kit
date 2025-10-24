@@ -1,14 +1,11 @@
 package io.github.jonloucks.gradle.kit;
 
 import org.gradle.api.Project;
-import org.gradle.api.provider.Provider;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Base64;
 import java.util.function.Supplier;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Optional.ofNullable;
 
 final class Internal {
     private Internal() {
@@ -29,25 +26,13 @@ final class Internal {
             System.out.println(text);
         }
     }
-    
-    static String getConfig(Project project, String name) {
-        return getConfig(project, name, null);
-    }
-    
+
     static boolean isRootProject(Project project) {
         return project.getRootProject().equals(project);
     }
     
     static boolean isTestProject(Project project) {
         return project.getName().endsWith("-test");
-    }
-    
-    static String getConfig(Project project, String name, String defaultValue) {
-        final Provider<@NotNull String> variable = project.getProviders().environmentVariable(name);
-        if (variable.isPresent()) {
-            return variable.get();
-        }
-        return ofNullable(project.findProperty(name)).map(Object::toString).orElse(defaultValue);
     }
     
     static String base64Encode(String text) {
