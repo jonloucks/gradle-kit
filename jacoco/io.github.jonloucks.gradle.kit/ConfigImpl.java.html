@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConfigImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">main-project</a> &gt; <a href="index.source.html" class="el_package">io.github.jonloucks.gradle.kit</a> &gt; <span class="el_source">ConfigImpl.java</span></div><h1>ConfigImpl.java</h1><pre class="source lang-java linenums">package io.github.jonloucks.gradle.kit;
+
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import static java.util.Arrays.asList;
+import static java.util.Optional.ofNullable;
+
+final class ConfigImpl&lt;T&gt; implements Config.Builder&lt;T&gt; {
+    
+    @Override
+    public ConfigImpl&lt;T&gt; name(String name) {
+<span class="fc" id="L17">        this.name = name;</span>
+<span class="fc" id="L18">        return this;</span>
+    }
+    
+    @Override
+    public ConfigImpl&lt;T&gt; description(String description) {
+<span class="nc" id="L23">        this.description = description;</span>
+<span class="nc" id="L24">        return this;</span>
+    }
+    
+    @Override
+    public ConfigImpl&lt;T&gt; fallback(Supplier&lt;T&gt; fallback) {
+<span class="fc" id="L29">        this.fallback = fallback;</span>
+<span class="fc" id="L30">        return this;</span>
+    }
+    
+    @Override
+    public ConfigImpl&lt;T&gt; keys(String... keys) {
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">        if (keys.length &gt; 0) {</span>
+<span class="fc" id="L36">            this.keys.addAll(asList(keys));</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">            if (null == name) {</span>
+<span class="nc" id="L38">                this.name = keys[0];</span>
+            }
+        }
+<span class="fc" id="L41">        return this;</span>
+    }
+    
+    @Override
+    public Optional&lt;String&gt; getName() {
+<span class="nc" id="L46">        return ofNullable(name);</span>
+    }
+    
+    @Override
+    public Optional&lt;String&gt; getDescription() {
+<span class="nc" id="L51">        return ofNullable(description);</span>
+    }
+    
+    @Override
+    public Optional&lt;T&gt; getFallback() {
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        if (ofNullable(fallback).isPresent()) {</span>
+<span class="fc" id="L57">            return ofNullable(fallback.get());</span>
+        }
+<span class="nc" id="L59">        return Optional.empty();</span>
+    }
+    
+    @Override
+    public List&lt;String&gt; getKeys() {
+<span class="fc" id="L64">        return keys;</span>
+    }
+    
+    @Override
+    public Optional&lt;T&gt; of(String text) {
+<span class="nc" id="L69">        return ofNullable(of.apply(text));</span>
+    }
+    
+<span class="fc" id="L72">    ConfigImpl(Function&lt;String,T&gt; of) {</span>
+<span class="fc" id="L73">        this.of = of;</span>
+<span class="fc" id="L74">    }</span>
+    
+    private String name;
+    private String description;
+    private Supplier&lt;T&gt; fallback;
+<span class="fc" id="L79">    private final List&lt;String&gt; keys = new ArrayList&lt;&gt;() ;</span>
+    private final Function&lt;String, T&gt; of;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SigningPlugin.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">main-project</a> &gt; <a href="index.source.html" class="el_package">io.github.jonloucks.gradle.kit</a> &gt; <span class="el_source">SigningPlugin.java</span></div><h1>SigningPlugin.java</h1><pre class="source lang-java linenums">package io.github.jonloucks.gradle.kit;
 
-import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.plugins.signing.SigningExtension;
 import org.jetbrains.annotations.NotNull;
 
+import static io.github.jonloucks.gradle.kit.Configs.KIT_GPG_SECRET_KEY_PASSWORD;
+import static io.github.jonloucks.gradle.kit.Configs.getConfig;
 import static io.github.jonloucks.gradle.kit.Internal.*;
 import static java.util.Optional.ofNullable;
 
@@ -17,62 +18,51 @@ public final class SigningPlugin implements Plugin&lt;@NotNull Project&gt; {
     /**
      * Invoked via reflection by Gradle
      */
-<span class="fc" id="L20">    public SigningPlugin() {</span>
+<span class="fc" id="L21">    public SigningPlugin() {</span>
     
-<span class="fc" id="L22">    }</span>
+<span class="fc" id="L23">    }</span>
     
     public void apply(Project project) {
-<span class="fc" id="L25">        new Apply(project).apply();</span>
-<span class="fc" id="L26">    }</span>
+<span class="fc" id="L26">        new Apply(project).apply();</span>
+<span class="fc" id="L27">    }</span>
     
     @SuppressWarnings(&quot;CodeBlock2Expr&quot;)
     private static final class Apply {
         private final Project project;
         
-<span class="fc" id="L32">        private Apply(Project project) {</span>
-<span class="fc" id="L33">            this.project = project;</span>
-<span class="fc" id="L34">        }</span>
+<span class="fc" id="L33">        private Apply(Project project) {</span>
+<span class="fc" id="L34">            this.project = project;</span>
+<span class="fc" id="L35">        }</span>
         
         private void apply() {
-<span class="fc" id="L37">            applySigningPlugin();</span>
-<span class="fc" id="L38">            project.afterEvaluate(x -&gt; {</span>
-<span class="nc" id="L39">                configureSigning();</span>
-<span class="nc" id="L40">            });</span>
-<span class="fc" id="L41">        }</span>
+<span class="fc" id="L38">            applySigningPlugin();</span>
+<span class="fc" id="L39">            project.afterEvaluate(x -&gt; {</span>
+<span class="nc" id="L40">                configureSigning();</span>
+<span class="nc" id="L41">            });</span>
+<span class="fc" id="L42">        }</span>
         
         private void configureSigning() {
-<span class="nc" id="L44">            final String secretKey = getGpgSecretKey();</span>
-<span class="nc" id="L45">            final String secretPassword = getGpgSecretKeyPassword();</span>
-<span class="nc bnc" id="L46" title="All 4 branches missed.">            if (ofNullable(secretKey).isPresent() &amp;&amp; ofNullable(secretPassword).isPresent()) {</span>
-<span class="nc" id="L47">                log(&quot;Configuring signing keys...&quot;);</span>
-<span class="nc" id="L48">                project.getExtensions().configure(SigningExtension.class, signing -&gt; {</span>
-<span class="nc" id="L49">                    signing.useInMemoryPgpKeys(secretKey, secretPassword);</span>
-<span class="nc" id="L50">                });</span>
+<span class="nc" id="L45">            final String secretKey = getGpgSecretKey();</span>
+<span class="nc" id="L46">            final String secretPassword = getGpgSecretKeyPassword();</span>
+<span class="nc bnc" id="L47" title="All 4 branches missed.">            if (ofNullable(secretKey).isPresent() &amp;&amp; ofNullable(secretPassword).isPresent()) {</span>
+<span class="nc" id="L48">                log(&quot;Configuring signing keys...&quot;);</span>
+<span class="nc" id="L49">                project.getExtensions().configure(SigningExtension.class, signing -&gt; {</span>
+<span class="nc" id="L50">                    signing.useInMemoryPgpKeys(secretKey, secretPassword);</span>
+<span class="nc" id="L51">                });</span>
             }
-<span class="nc" id="L52">        }</span>
+<span class="nc" id="L53">        }</span>
         
         private void applySigningPlugin() {
-<span class="fc" id="L55">           log(&quot;Applying signing plugin...&quot;);</span>
-<span class="fc" id="L56">            project.getPlugins().apply(&quot;signing&quot;);</span>
-<span class="fc" id="L57">        }</span>
+<span class="fc" id="L56">           log(&quot;Applying signing plugin...&quot;);</span>
+<span class="fc" id="L57">            project.getPlugins().apply(&quot;signing&quot;);</span>
+<span class="fc" id="L58">        }</span>
         
         private String getGpgSecretKey() {
-<span class="nc" id="L60">            final String secretKey = getConfig(project, &quot;OSSRH_GPG_SECRET_KEY&quot;);</span>
-<span class="nc bnc" id="L61" title="All 2 branches missed.">            if (ofNullable(secretKey).isPresent()) {</span>
-<span class="nc bnc" id="L62" title="All 2 branches missed.">                if (secretKey.startsWith(&quot;-&quot;)) {</span>
-<span class="nc" id="L63">                    return secretKey;</span>
-                }
-                try {
-<span class="nc" id="L66">                    return base64Decode(secretKey);</span>
-<span class="nc" id="L67">                } catch (IllegalArgumentException thrown) {</span>
-<span class="nc" id="L68">                    throw new GradleException(&quot;Invalid gpg secret key: &quot; + secretKey, thrown);</span>
-                }
-            }
-<span class="nc" id="L71">            return null;</span>
+<span class="nc" id="L61">            return getConfig(project, Configs.KIT_GPG_SECRET_KEY).orElse(null);</span>
         }
         
         private String getGpgSecretKeyPassword() {
-<span class="nc" id="L75">            return getConfig(project, &quot;OSSRH_GPG_SECRET_KEY_PASSWORD&quot;);</span>
+<span class="nc" id="L65">            return getConfig(project, KIT_GPG_SECRET_KEY_PASSWORD).orElse(null);</span>
         }
     }
 }
