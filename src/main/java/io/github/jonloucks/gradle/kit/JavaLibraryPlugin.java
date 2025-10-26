@@ -4,8 +4,6 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.jetbrains.annotations.NotNull;
 
-import static io.github.jonloucks.gradle.kit.Internal.log;
-
 /**
  * Extension of the Gradle 'java-library' plugin
  */
@@ -17,28 +15,13 @@ public final class JavaLibraryPlugin implements Plugin<@NotNull Project> {
     public JavaLibraryPlugin() {
     }
     
+    @Override
     public void apply(Project project) {
-        new Applier(project).apply();
-    }
-    
-    private static final class Applier {
-        private Applier(Project project) {
-            this.project = project;
-        }
-        
-        private void apply() {
-            applyJavaLibraryPlugin();
-            new JavaVersioningApplier(project).apply();
-            new JacocoApplier(project).apply();
-            new SpotBugsApplier(project).apply();
-            new JavadocApplier(project).apply();
-        }
-        
-        private void applyJavaLibraryPlugin() {
-            log("Applying java-library plugin...");
-            project.getPlugins().apply("java-library");
-        }
-        
-        private final Project project;
+        new JavaLibraryPluginApplier(project).apply();
+        new JavaVersioningApplier(project).apply();
+        new TaggingApplier(project).apply();
+        new JacocoApplier(project).apply();
+        new SpotBugsApplier(project).apply();
+        new JavadocApplier(project).apply();
     }
 }

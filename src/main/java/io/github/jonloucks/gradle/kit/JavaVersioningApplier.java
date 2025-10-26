@@ -2,147 +2,118 @@ package io.github.jonloucks.gradle.kit;
 
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPluginExtension;
-import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.SourceSetContainer;
-import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.compile.JavaCompile;
-import org.gradle.api.tasks.testing.Test;
 import org.gradle.jvm.toolchain.JavaLanguageVersion;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static io.github.jonloucks.gradle.kit.Configs.*;
-import static io.github.jonloucks.gradle.kit.Internal.*;
-import static java.util.Optional.ofNullable;
+import static java.util.Optional.empty;
 
 @SuppressWarnings("CodeBlock2Expr")
-final class JavaVersioningApplier {
+final class JavaVersioningApplier extends ProjectApplier {
     
     JavaVersioningApplier(Project project) {
-        this.targetProject = project;
+        super(project);
     }
     
+    @Override
     void apply() {
         log("Applying Java versions ...");
-        
-        targetProject.afterEvaluate(x -> {
+  
+        getProject().afterEvaluate(x -> {
             configureJavaVersions();
-            configureTestTaggingRules();
         });
     }
     
     private void configureJavaVersions() {
         configureJavaPlugin();
         configureAllJavaCompiles();
+        configureTestJavaCompiles();
+    }
+    
+    private void configureTestJavaCompiles() {
+        if (isTestProject()) {
+            return;
+        }
+        forAllTestJavaCompiles(this::configureTestJavaCompile);
     }
     
     private void configureAllJavaCompiles() {
         forAllJavaCompiles(this::configureJavaCompile);
     }
+
+    private void forAllTestJavaCompiles(Consumer<JavaCompile> consumer) {
+        getProject().getTasks().named("compileTestJava", JavaCompile.class).configure(consumer::accept);
+    }
     
     private void forAllJavaCompiles(Consumer<JavaCompile> consumer) {
-        targetProject.getTasks().withType(JavaCompile.class).configureEach(consumer::accept);
+        getProject().getTasks().withType(JavaCompile.class).configureEach(consumer::accept);
     }
     
     private void configureJavaCompile(JavaCompile compile) {
-        compile.getOptions().getRelease().set(getTargetVersion().asInt());
+        getReleaseVersion().ifPresent(x -> compile.getOptions().getRelease().set(x.asInt()));
+        
         final List<String> compilerArgs = new ArrayList<>(compile.getOptions().getCompilerArgs());
-        compilerArgs.add("-Xlint:all");
-        compile.getOptions().setCompilerArgs(compilerArgs);
+        if (!compilerArgs.contains("-Xlint:all")) {
+            compilerArgs.add("-Xlint:all");
+            compile.getOptions().setCompilerArgs(compilerArgs);
+        }
+    }
+    
+    private void configureTestJavaCompile(JavaCompile compile) {
+        getTestReleaseVersion().ifPresent(x -> compile.getOptions().getRelease().set(x.asInt()));
     }
     
     private void configureJavaPlugin() {
-        final JavaPluginExtension javaPlugin = targetProject.getExtensions().getByType(JavaPluginExtension.class);
+        final JavaPluginExtension javaPlugin = getProject().getExtensions().getByType(JavaPluginExtension.class);
         javaPlugin.getModularity().getInferModulePath().set(true);
-        javaPlugin.setSourceCompatibility(getSourceVersion());
-        javaPlugin.setTargetCompatibility(getTargetVersion());
-        javaPlugin.getToolchain().getLanguageVersion().set(getCompilerVersion());
+        getSourceCompatibility().ifPresent(javaPlugin::setSourceCompatibility);
+        getTargetCompatibility().ifPresent(javaPlugin::setTargetCompatibility);
+        getCompilerVersion().ifPresent(javaPlugin.getToolchain().getLanguageVersion()::set);
         javaPlugin.withJavadocJar();
         javaPlugin.withSourcesJar();
     }
     
-
-    private JavaLanguageVersion getCompilerVersion() {
-        return requireConfig(targetProject, KIT_JAVA_COMPILER_VERSION);
+    private Optional<JavaLanguageVersion> getCompilerVersion() {
+        return Optional.of(requireConfig(KIT_JAVA_COMPILER_VERSION));
     }
     
-    private JavaLanguageVersion getTargetVersion() {
-        return requireConfig(targetProject, KIT_JAVA_TARGET_VERSION);
-    }
-    
-    private JavaLanguageVersion getSourceVersion() {
-        return requireConfig(targetProject, KIT_JAVA_SOURCE_VERSION);
-    }
-    
-    private String[] splitTagsProperty(String propertyName) {
-        if (targetProject.hasProperty(propertyName)) {
-            final Object value = targetProject.findProperty(propertyName);
-            if (ofNullable(value).isPresent()) {
-                return value.toString().split(",");
-            }
+    private Optional<JavaLanguageVersion> getSourceCompatibility() {
+        if (isTestProject()) {
+            return Optional.of(requireConfig(KIT_JAVA_TEST_SOURCE_VERSION));
+        } else {
+            return Optional.of(requireConfig(KIT_JAVA_SOURCE_VERSION));
         }
-        return new String[0];
     }
     
-    private void configureTestTaggingRules() {
-        log("Applying Test Tagging Rules ...");
-        
-        configureDefaultTestTask();
-        
-        registerTaggedTestTask("integration", "unstable", "slow", "functional");
-        registerTaggedTestTask("functional", "unstable", "slow", "integration");
-    }
-    
-    private void registerTaggedTestTask(String includeTag, String... excludeTags) {
-        final String taskName = includeTag + "Test";
-        log("Creating " + taskName + "...");
-        
-        final TaskProvider<@NotNull Test> taggedTaskProvider = targetProject.getTasks().register(taskName, TEST_TYPE, task -> {
-            log("Configuring " + taskName + ".");
-            task.setDescription("Runs tests with tag: " + includeTag);
-            task.setGroup("verification");
-            
-            task.useJUnitPlatform(options -> {
-                options.includeTags(includeTag);
-                options.excludeTags(getPropertyTags("excludeTags", excludeTags));
-            });
-            
-            final SourceSetContainer sourceSets = targetProject.getExtensions().getByType(SourceSetContainer.class);
-            final SourceSet mainTestSourceSet = sourceSets.stream()
-                .filter(ss -> ss.getName().equals("test"))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("No test source set found"));
-            
-            task.setTestClassesDirs(mainTestSourceSet.getOutput().getClassesDirs());
-            task.setClasspath(mainTestSourceSet.getRuntimeClasspath());
-            task.shouldRunAfter("test");
-            log("Configured " + taskName + ".");
-        });
-        
-        targetProject.getTasks().named("check").configure(task -> task.dependsOn(taggedTaskProvider));
-    }
-    
-    private String[] getPropertyTags(String propertyName, String... defaults) {
-        if (targetProject.hasProperty(propertyName)) {
-            return splitTagsProperty(propertyName);
+    private Optional<JavaLanguageVersion> getTargetCompatibility() {
+        if (isTestProject()) {
+            return Optional.of(requireConfig(KIT_JAVA_TEST_TARGET_VERSION));
+        } else {
+            return Optional.of(requireConfig(KIT_JAVA_TARGET_VERSION));
         }
-        return defaults;
     }
     
-    private void configureDefaultTestTask() {
-        targetProject.getTasks().named("test", TEST_TYPE).configure(task -> {
-            task.useJUnitPlatform(configure -> {
-                configure.includeTags(getPropertyTags("includeTags"));
-                configure.excludeTags(getPropertyTags("excludeTags",
-                    "unstable", "slow", "integration", "functional"));
-            });
-        });
+    private Optional<JavaLanguageVersion> getReleaseVersion() {
+        if (isTestProject()) {
+            return getTestReleaseVersion();
+        } else {
+            return Optional.of(requireConfig(KIT_JAVA_TARGET_VERSION));
+        }
     }
     
-    private static final Class<Test> TEST_TYPE = Test.class;
-    private final Project targetProject;
+    private Optional<JavaLanguageVersion> getTestReleaseVersion() {
+        final JavaLanguageVersion testVersion = requireConfig(KIT_JAVA_TEST_TARGET_VERSION);
+        final JavaLanguageVersion implementationVersion = requireConfig(KIT_JAVA_TARGET_VERSION);
+        if (testVersion.compareTo(implementationVersion) > 0) {
+            return Optional.of(testVersion);
+        } else {
+            return empty();
+        }
+    }
 }
 

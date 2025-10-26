@@ -17,19 +17,19 @@ import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 
-import static io.github.jonloucks.gradle.kit.Internal.*;
-
-final class JacocoApplier {
+@SuppressWarnings("CodeBlock2Expr")
+final class JacocoApplier extends ProjectApplier {
 
     JacocoApplier(Project project) {
-        this.targetProject = project;
+        super(project);
     }
     
+    @Override
     void apply() {
         log("Applying jacoco plugin...");
-        targetProject.getPlugins().apply("jacoco");
+        getProject().getPlugins().apply("jacoco");
         
-        targetProject.afterEvaluate(project -> {
+        getProject().afterEvaluate(project -> {
             configureJacocoPlugin();
             configureExistingReports();
             configureVerificationReports();
@@ -37,23 +37,22 @@ final class JacocoApplier {
     }
     
     private void configureExistingReports() {
-        targetProject.getTasks().named(JACOCO_TEST_REPORT, JacocoReport.class)
+        getProject().getTasks().named(JACOCO_TEST_REPORT, JacocoReport.class)
             .configure(configureExistingReport());
     }
     
     private void configureVerificationReports() {
-        targetProject.getTasks().named(JACOCO_VERIFICATION_REPORT, JacocoCoverageVerification.class)
+        getProject().getTasks().named(JACOCO_VERIFICATION_REPORT, JacocoCoverageVerification.class)
             .configure(configureExistingVerificationReport());
     }
     
     private @NotNull Action<@NotNull JacocoCoverageVerification> configureExistingVerificationReport() {
-        final boolean isRootProject = isRootProject(targetProject);
         return verification -> {
-            if (isRootProject) {
+            if (isRootProject()) {
                 verification.violationRules(rules -> {
                     addViolationRules(rules, "LINE", "BRANCH", "CLASS", "INSTRUCTION", "METHOD");
                 });
-                targetProject.allprojects(getAllJacocoFiles(verification));
+                getProject().allprojects(getAllJacocoFiles(verification));
             } else {
                 verification.setEnabled(false);
             }
@@ -73,26 +72,25 @@ final class JacocoApplier {
     }
     
     private void configureJacocoPlugin() {
-        targetProject.getPlugins().withType(JacocoPlugin.class, jacocoPlugin -> {
-            JacocoPluginExtension jacocoExtension = targetProject.getExtensions().getByType(JacocoPluginExtension.class);
+        getProject().getPlugins().withType(JacocoPlugin.class, jacocoPlugin -> {
+            JacocoPluginExtension jacocoExtension = getProject().getExtensions().getByType(JacocoPluginExtension.class);
             jacocoExtension.setToolVersion("0.8.13");
         });
     }
     
     private @NotNull Action<@NotNull JacocoReport> configureExistingReport() {
-        final boolean isRootProject = isRootProject(targetProject);
         
         return reportTask -> {
-            final TaskCollection<@NotNull Test> testingTasks = getTestingTasks(targetProject);
+            final TaskCollection<@NotNull Test> testingTasks = getTestingTasks(getProject());
             reportTask.shouldRunAfter(testingTasks);
             reportTask.dependsOn(testingTasks);
             reportTask.reports(reports -> {
-                reports.getHtml().getRequired().set(isRootProject);
+                reports.getHtml().getRequired().set(isRootProject());
                 reports.getXml().getRequired().set(true);
-                reports.getCsv().getRequired().set(isRootProject);
+                reports.getCsv().getRequired().set(isRootProject());
             });
-            if (isRootProject) {
-                targetProject.allprojects(getAllJacocoFiles(reportTask));
+            if (isRootProject()) {
+                getProject().allprojects(getAllJacocoFiles(reportTask));
             }
         };
     }
@@ -130,6 +128,4 @@ final class JacocoApplier {
     
     private static final String JACOCO_TEST_REPORT = "jacocoTestReport";
     private static final String JACOCO_VERIFICATION_REPORT = "jacocoTestCoverageVerification";
-    
-    private final Project targetProject;
 }
