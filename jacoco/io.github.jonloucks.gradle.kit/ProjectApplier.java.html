@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProjectApplier.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">main-project</a> &gt; <a href="index.source.html" class="el_package">io.github.jonloucks.gradle.kit</a> &gt; <span class="el_source">ProjectApplier.java</span></div><h1>ProjectApplier.java</h1><pre class="source lang-java linenums">package io.github.jonloucks.gradle.kit;
+
+import org.gradle.api.Project;
+
+import java.util.Optional;
+import java.util.function.Supplier;
+
+abstract class ProjectApplier {
+<span class="fc" id="L9">    ProjectApplier(Project project) {</span>
+<span class="fc" id="L10">        this.project = project;</span>
+<span class="fc" id="L11">    }</span>
+    
+    abstract void apply();
+    
+    final Project getProject() {
+<span class="fc" id="L16">        return project;</span>
+    }
+    
+    final boolean isRootProject() {
+<span class="nc" id="L20">        return getProject().getRootProject().equals(getProject());</span>
+    }
+    
+    final boolean isTestProject() {
+<span class="fc" id="L24">        return isTestProject(getProject());</span>
+    }
+    
+    final boolean isTestProject(Project project) {
+<span class="pc bpc" id="L28" title="1 of 4 branches missed.">        return project.getName().endsWith(&quot;-test&quot;) || project.getName().endsWith(&quot;-tests&quot;);</span>
+    }
+
+    final &lt;T&gt; T requireConfig(Config&lt;T&gt; config) {
+<span class="fc" id="L32">        return Configs.requireConfig(getProject(), config);</span>
+    }
+    
+    final &lt;T&gt; Optional&lt;T&gt; getConfig(Config&lt;T&gt; config) {
+<span class="fc" id="L36">        return Configs.getConfig(getProject(), config);</span>
+    }
+    
+    final void log(Supplier&lt;String&gt; messageSupplier) {
+<span class="nc bnc" id="L40" title="All 2 branches missed.">        if (isLogEnabled()) {</span>
+<span class="nc" id="L41">            System.out.println(messageSupplier.get());</span>
+        }
+<span class="nc" id="L43">    }</span>
+    
+    final void log(String text) {
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        if (isLogEnabled()) {</span>
+<span class="fc" id="L47">            System.out.println(text);</span>
+        }
+<span class="fc" id="L49">    }</span>
+    
+    final boolean isLogEnabled() {
+<span class="fc" id="L52">        return getConfig(Configs.KIT_LOG_ENABLED).orElse(false);</span>
+    }
+
+    private final Project project;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

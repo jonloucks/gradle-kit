@@ -2,148 +2,119 @@
 
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaPluginExtension;
-import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.SourceSetContainer;
-import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.compile.JavaCompile;
-import org.gradle.api.tasks.testing.Test;
 import org.gradle.jvm.toolchain.JavaLanguageVersion;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static io.github.jonloucks.gradle.kit.Configs.*;
-import static io.github.jonloucks.gradle.kit.Internal.*;
-import static java.util.Optional.ofNullable;
+import static java.util.Optional.empty;
 
 @SuppressWarnings(&quot;CodeBlock2Expr&quot;)
-final class JavaVersioningApplier {
+final class JavaVersioningApplier extends ProjectApplier {
     
-<span class="fc" id="L24">    JavaVersioningApplier(Project project) {</span>
-<span class="fc" id="L25">        this.targetProject = project;</span>
-<span class="fc" id="L26">    }</span>
+    JavaVersioningApplier(Project project) {
+<span class="fc" id="L20">        super(project);</span>
+<span class="fc" id="L21">    }</span>
     
+    @Override
     void apply() {
-<span class="fc" id="L29">        log(&quot;Applying Java versions ...&quot;);</span>
-        
-<span class="fc" id="L31">        targetProject.afterEvaluate(x -&gt; {</span>
-<span class="fc" id="L32">            configureJavaVersions();</span>
-<span class="fc" id="L33">            configureTestTaggingRules();</span>
-<span class="fc" id="L34">        });</span>
-<span class="fc" id="L35">    }</span>
+<span class="fc" id="L25">        log(&quot;Applying Java versions ...&quot;);</span>
+  
+<span class="fc" id="L27">        getProject().afterEvaluate(x -&gt; {</span>
+<span class="fc" id="L28">            configureJavaVersions();</span>
+<span class="fc" id="L29">        });</span>
+<span class="fc" id="L30">    }</span>
     
     private void configureJavaVersions() {
-<span class="fc" id="L38">        configureJavaPlugin();</span>
-<span class="fc" id="L39">        configureAllJavaCompiles();</span>
-<span class="fc" id="L40">    }</span>
+<span class="fc" id="L33">        configureJavaPlugin();</span>
+<span class="fc" id="L34">        configureAllJavaCompiles();</span>
+<span class="fc" id="L35">        configureTestJavaCompiles();</span>
+<span class="fc" id="L36">    }</span>
+    
+    private void configureTestJavaCompiles() {
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        if (isTestProject()) {</span>
+<span class="fc" id="L40">            return;</span>
+        }
+<span class="fc" id="L42">        forAllTestJavaCompiles(this::configureTestJavaCompile);</span>
+<span class="fc" id="L43">    }</span>
     
     private void configureAllJavaCompiles() {
-<span class="fc" id="L43">        forAllJavaCompiles(this::configureJavaCompile);</span>
-<span class="fc" id="L44">    }</span>
+<span class="fc" id="L46">        forAllJavaCompiles(this::configureJavaCompile);</span>
+<span class="fc" id="L47">    }</span>
+
+    private void forAllTestJavaCompiles(Consumer&lt;JavaCompile&gt; consumer) {
+<span class="fc" id="L50">        getProject().getTasks().named(&quot;compileTestJava&quot;, JavaCompile.class).configure(consumer::accept);</span>
+<span class="fc" id="L51">    }</span>
     
     private void forAllJavaCompiles(Consumer&lt;JavaCompile&gt; consumer) {
-<span class="fc" id="L47">        targetProject.getTasks().withType(JavaCompile.class).configureEach(consumer::accept);</span>
-<span class="fc" id="L48">    }</span>
-    
-    private void configureJavaCompile(JavaCompile compile) {
-<span class="fc" id="L51">        compile.getOptions().getRelease().set(getTargetVersion().asInt());</span>
-<span class="fc" id="L52">        final List&lt;String&gt; compilerArgs = new ArrayList&lt;&gt;(compile.getOptions().getCompilerArgs());</span>
-<span class="fc" id="L53">        compilerArgs.add(&quot;-Xlint:all&quot;);</span>
-<span class="fc" id="L54">        compile.getOptions().setCompilerArgs(compilerArgs);</span>
+<span class="fc" id="L54">        getProject().getTasks().withType(JavaCompile.class).configureEach(consumer::accept);</span>
 <span class="fc" id="L55">    }</span>
     
-    private void configureJavaPlugin() {
-<span class="fc" id="L58">        final JavaPluginExtension javaPlugin = targetProject.getExtensions().getByType(JavaPluginExtension.class);</span>
-<span class="fc" id="L59">        javaPlugin.getModularity().getInferModulePath().set(true);</span>
-<span class="fc" id="L60">        javaPlugin.setSourceCompatibility(getSourceVersion());</span>
-<span class="fc" id="L61">        javaPlugin.setTargetCompatibility(getTargetVersion());</span>
-<span class="fc" id="L62">        javaPlugin.getToolchain().getLanguageVersion().set(getCompilerVersion());</span>
-<span class="fc" id="L63">        javaPlugin.withJavadocJar();</span>
-<span class="fc" id="L64">        javaPlugin.withSourcesJar();</span>
+    private void configureJavaCompile(JavaCompile compile) {
+<span class="fc" id="L58">        getReleaseVersion().ifPresent(x -&gt; compile.getOptions().getRelease().set(x.asInt()));</span>
+        
+<span class="fc" id="L60">        final List&lt;String&gt; compilerArgs = new ArrayList&lt;&gt;(compile.getOptions().getCompilerArgs());</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if (!compilerArgs.contains(&quot;-Xlint:all&quot;)) {</span>
+<span class="fc" id="L62">            compilerArgs.add(&quot;-Xlint:all&quot;);</span>
+<span class="fc" id="L63">            compile.getOptions().setCompilerArgs(compilerArgs);</span>
+        }
 <span class="fc" id="L65">    }</span>
     
-
-    private JavaLanguageVersion getCompilerVersion() {
-<span class="fc" id="L69">        return requireConfig(targetProject, KIT_JAVA_COMPILER_VERSION);</span>
+    private void configureTestJavaCompile(JavaCompile compile) {
+<span class="fc" id="L68">        getTestReleaseVersion().ifPresent(x -&gt; compile.getOptions().getRelease().set(x.asInt()));</span>
+<span class="fc" id="L69">    }</span>
+    
+    private void configureJavaPlugin() {
+<span class="fc" id="L72">        final JavaPluginExtension javaPlugin = getProject().getExtensions().getByType(JavaPluginExtension.class);</span>
+<span class="fc" id="L73">        javaPlugin.getModularity().getInferModulePath().set(true);</span>
+<span class="fc" id="L74">        getSourceCompatibility().ifPresent(javaPlugin::setSourceCompatibility);</span>
+<span class="fc" id="L75">        getTargetCompatibility().ifPresent(javaPlugin::setTargetCompatibility);</span>
+<span class="fc" id="L76">        getCompilerVersion().ifPresent(javaPlugin.getToolchain().getLanguageVersion()::set);</span>
+<span class="fc" id="L77">        javaPlugin.withJavadocJar();</span>
+<span class="fc" id="L78">        javaPlugin.withSourcesJar();</span>
+<span class="fc" id="L79">    }</span>
+    
+    private Optional&lt;JavaLanguageVersion&gt; getCompilerVersion() {
+<span class="fc" id="L82">        return Optional.of(requireConfig(KIT_JAVA_COMPILER_VERSION));</span>
     }
     
-    private JavaLanguageVersion getTargetVersion() {
-<span class="fc" id="L73">        return requireConfig(targetProject, KIT_JAVA_TARGET_VERSION);</span>
-    }
-    
-    private JavaLanguageVersion getSourceVersion() {
-<span class="fc" id="L77">        return requireConfig(targetProject, KIT_JAVA_SOURCE_VERSION);</span>
-    }
-    
-    private String[] splitTagsProperty(String propertyName) {
-<span class="nc bnc" id="L81" title="All 2 branches missed.">        if (targetProject.hasProperty(propertyName)) {</span>
-<span class="nc" id="L82">            final Object value = targetProject.findProperty(propertyName);</span>
-<span class="nc bnc" id="L83" title="All 2 branches missed.">            if (ofNullable(value).isPresent()) {</span>
-<span class="nc" id="L84">                return value.toString().split(&quot;,&quot;);</span>
-            }
+    private Optional&lt;JavaLanguageVersion&gt; getSourceCompatibility() {
+<span class="fc bfc" id="L86" title="All 2 branches covered.">        if (isTestProject()) {</span>
+<span class="fc" id="L87">            return Optional.of(requireConfig(KIT_JAVA_TEST_SOURCE_VERSION));</span>
+        } else {
+<span class="fc" id="L89">            return Optional.of(requireConfig(KIT_JAVA_SOURCE_VERSION));</span>
         }
-<span class="nc" id="L87">        return new String[0];</span>
     }
     
-    private void configureTestTaggingRules() {
-<span class="fc" id="L91">        log(&quot;Applying Test Tagging Rules ...&quot;);</span>
-        
-<span class="fc" id="L93">        configureDefaultTestTask();</span>
-        
-<span class="fc" id="L95">        registerTaggedTestTask(&quot;integration&quot;, &quot;unstable&quot;, &quot;slow&quot;, &quot;functional&quot;);</span>
-<span class="fc" id="L96">        registerTaggedTestTask(&quot;functional&quot;, &quot;unstable&quot;, &quot;slow&quot;, &quot;integration&quot;);</span>
-<span class="fc" id="L97">    }</span>
-    
-    private void registerTaggedTestTask(String includeTag, String... excludeTags) {
-<span class="fc" id="L100">        final String taskName = includeTag + &quot;Test&quot;;</span>
-<span class="fc" id="L101">        log(&quot;Creating &quot; + taskName + &quot;...&quot;);</span>
-        
-<span class="fc" id="L103">        final TaskProvider&lt;@NotNull Test&gt; taggedTaskProvider = targetProject.getTasks().register(taskName, TEST_TYPE, task -&gt; {</span>
-<span class="fc" id="L104">            log(&quot;Configuring &quot; + taskName + &quot;.&quot;);</span>
-<span class="fc" id="L105">            task.setDescription(&quot;Runs tests with tag: &quot; + includeTag);</span>
-<span class="fc" id="L106">            task.setGroup(&quot;verification&quot;);</span>
-            
-<span class="fc" id="L108">            task.useJUnitPlatform(options -&gt; {</span>
-<span class="fc" id="L109">                options.includeTags(includeTag);</span>
-<span class="fc" id="L110">                options.excludeTags(getPropertyTags(&quot;excludeTags&quot;, excludeTags));</span>
-<span class="fc" id="L111">            });</span>
-            
-<span class="fc" id="L113">            final SourceSetContainer sourceSets = targetProject.getExtensions().getByType(SourceSetContainer.class);</span>
-<span class="fc" id="L114">            final SourceSet mainTestSourceSet = sourceSets.stream()</span>
-<span class="fc" id="L115">                .filter(ss -&gt; ss.getName().equals(&quot;test&quot;))</span>
-<span class="fc" id="L116">                .findFirst()</span>
-<span class="pc" id="L117">                .orElseThrow(() -&gt; new IllegalStateException(&quot;No test source set found&quot;));</span>
-            
-<span class="fc" id="L119">            task.setTestClassesDirs(mainTestSourceSet.getOutput().getClassesDirs());</span>
-<span class="fc" id="L120">            task.setClasspath(mainTestSourceSet.getRuntimeClasspath());</span>
-<span class="fc" id="L121">            task.shouldRunAfter(&quot;test&quot;);</span>
-<span class="fc" id="L122">            log(&quot;Configured &quot; + taskName + &quot;.&quot;);</span>
-<span class="fc" id="L123">        });</span>
-        
-<span class="fc" id="L125">        targetProject.getTasks().named(&quot;check&quot;).configure(task -&gt; task.dependsOn(taggedTaskProvider));</span>
-<span class="fc" id="L126">    }</span>
-    
-    private String[] getPropertyTags(String propertyName, String... defaults) {
-<span class="pc bpc" id="L129" title="1 of 2 branches missed.">        if (targetProject.hasProperty(propertyName)) {</span>
-<span class="nc" id="L130">            return splitTagsProperty(propertyName);</span>
+    private Optional&lt;JavaLanguageVersion&gt; getTargetCompatibility() {
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        if (isTestProject()) {</span>
+<span class="fc" id="L95">            return Optional.of(requireConfig(KIT_JAVA_TEST_TARGET_VERSION));</span>
+        } else {
+<span class="fc" id="L97">            return Optional.of(requireConfig(KIT_JAVA_TARGET_VERSION));</span>
         }
-<span class="fc" id="L132">        return defaults;</span>
     }
     
-    private void configureDefaultTestTask() {
-<span class="fc" id="L136">        targetProject.getTasks().named(&quot;test&quot;, TEST_TYPE).configure(task -&gt; {</span>
-<span class="fc" id="L137">            task.useJUnitPlatform(configure -&gt; {</span>
-<span class="fc" id="L138">                configure.includeTags(getPropertyTags(&quot;includeTags&quot;));</span>
-<span class="fc" id="L139">                configure.excludeTags(getPropertyTags(&quot;excludeTags&quot;,</span>
-                    &quot;unstable&quot;, &quot;slow&quot;, &quot;integration&quot;, &quot;functional&quot;));
-<span class="fc" id="L141">            });</span>
-<span class="fc" id="L142">        });</span>
-<span class="fc" id="L143">    }</span>
+    private Optional&lt;JavaLanguageVersion&gt; getReleaseVersion() {
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">        if (isTestProject()) {</span>
+<span class="nc" id="L103">            return getTestReleaseVersion();</span>
+        } else {
+<span class="fc" id="L105">            return Optional.of(requireConfig(KIT_JAVA_TARGET_VERSION));</span>
+        }
+    }
     
-<span class="fc" id="L145">    private static final Class&lt;Test&gt; TEST_TYPE = Test.class;</span>
-    private final Project targetProject;
+    private Optional&lt;JavaLanguageVersion&gt; getTestReleaseVersion() {
+<span class="fc" id="L110">        final JavaLanguageVersion testVersion = requireConfig(KIT_JAVA_TEST_TARGET_VERSION);</span>
+<span class="fc" id="L111">        final JavaLanguageVersion implementationVersion = requireConfig(KIT_JAVA_TARGET_VERSION);</span>
+<span class="fc bfc" id="L112" title="All 2 branches covered.">        if (testVersion.compareTo(implementationVersion) &gt; 0) {</span>
+<span class="fc" id="L113">            return Optional.of(testVersion);</span>
+        } else {
+<span class="fc" id="L115">            return empty();</span>
+        }
+    }
 }
 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

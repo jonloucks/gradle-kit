@@ -4,26 +4,23 @@ import org.gradle.api.Project;
 import org.gradle.api.tasks.javadoc.Javadoc;
 import org.gradle.external.javadoc.MinimalJavadocOptions;
 
-import static io.github.jonloucks.gradle.kit.Internal.log;
-
-final class JavadocApplier {
-<span class="fc" id="L10">    JavadocApplier(Project project) {</span>
-<span class="fc" id="L11">        this.targetProject = project;</span>
-<span class="fc" id="L12">    }</span>
+@SuppressWarnings(&quot;CodeBlock2Expr&quot;)
+final class JavadocApplier extends ProjectApplier {
+    JavadocApplier(Project project) {
+<span class="fc" id="L10">        super(project);</span>
+<span class="fc" id="L11">    }</span>
     
+    @Override
     void apply() {
 <span class="fc" id="L15">        log(&quot;Applying javadoc...&quot;);</span>
         
-<span class="fc" id="L17">        targetProject.afterEvaluate(project -&gt; {</span>
-<span class="fc" id="L18">            targetProject.getTasks().withType(Javadoc.class).configureEach( javadoc -&gt; {</span>
+<span class="fc" id="L17">        getProject().afterEvaluate(project -&gt; {</span>
+<span class="fc" id="L18">            project.getTasks().withType(Javadoc.class).configureEach( javadoc -&gt; {</span>
 <span class="nc" id="L19">                javadoc.setFailOnError(true);</span>
 <span class="nc" id="L20">                javadoc.getModularity().getInferModulePath().set(true);</span>
 <span class="nc" id="L21">                javadoc.options(MinimalJavadocOptions::showFromPublic);</span>
 <span class="nc" id="L22">            });</span>
 <span class="fc" id="L23">        });</span>
- 
-<span class="fc" id="L25">    }</span>
-
-    private final Project targetProject;
+<span class="fc" id="L24">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -42,41 +42,58 @@ final class ConfigImpl&lt;T&gt; implements Config.Builder&lt;T&gt; {
     }
     
     @Override
+    public Builder&lt;T&gt; fallback(Config&lt;T&gt; link) {
+<span class="fc" id="L46">        this.link = link;</span>
+<span class="fc" id="L47">        return this;</span>
+    }
+    
+    @Override
     public Optional&lt;String&gt; getName() {
-<span class="nc" id="L46">        return ofNullable(name);</span>
+<span class="nc" id="L52">        return ofNullable(name);</span>
     }
     
     @Override
     public Optional&lt;String&gt; getDescription() {
-<span class="nc" id="L51">        return ofNullable(description);</span>
+<span class="nc" id="L57">        return ofNullable(description);</span>
     }
     
     @Override
     public Optional&lt;T&gt; getFallback() {
-<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        if (ofNullable(fallback).isPresent()) {</span>
-<span class="fc" id="L57">            return ofNullable(fallback.get());</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if (ofNullable(fallback).isPresent()) {</span>
+<span class="fc" id="L63">            return ofNullable(fallback.get());</span>
         }
-<span class="nc" id="L59">        return Optional.empty();</span>
+<span class="nc" id="L65">        return Optional.empty();</span>
+    }
+    
+    @Override
+    public Optional&lt;Config&lt;T&gt;&gt; getLink() {
+<span class="fc" id="L70">        return ofNullable(link);</span>
     }
     
     @Override
     public List&lt;String&gt; getKeys() {
-<span class="fc" id="L64">        return keys;</span>
+<span class="fc" id="L75">        return keys;</span>
     }
     
     @Override
     public Optional&lt;T&gt; of(String text) {
-<span class="nc" id="L69">        return ofNullable(of.apply(text));</span>
+<span class="fc" id="L80">        return ofNullable(of.apply(text));</span>
     }
     
-<span class="fc" id="L72">    ConfigImpl(Function&lt;String,T&gt; of) {</span>
-<span class="fc" id="L73">        this.of = of;</span>
-<span class="fc" id="L74">    }</span>
+    @Override
+    public String toString() {
+<span class="nc" id="L85">        return ofNullable(name).orElse(&quot;***&quot;);</span>
+    }
+    
+<span class="fc" id="L88">    ConfigImpl(Function&lt;String,T&gt; of) {</span>
+<span class="fc" id="L89">        this.of = of;</span>
+<span class="fc" id="L90">    }</span>
     
     private String name;
     private String description;
     private Supplier&lt;T&gt; fallback;
-<span class="fc" id="L79">    private final List&lt;String&gt; keys = new ArrayList&lt;&gt;() ;</span>
+<span class="fc" id="L95">    private final List&lt;String&gt; keys = new ArrayList&lt;&gt;() ;</span>
     private final Function&lt;String, T&gt; of;
+    private Config&lt;T&gt; link;
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
