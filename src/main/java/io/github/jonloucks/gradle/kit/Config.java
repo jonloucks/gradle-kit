@@ -11,6 +11,8 @@ interface Config<T> {
     
     Optional<T> getFallback();
     
+    Optional<Config<T>> getLink();
+    
     List<String> getKeys();
     
     Optional<T> of(String value);
@@ -23,5 +25,7 @@ interface Config<T> {
         Builder<T> fallback(Supplier<T> fallback);
         
         Builder<T> keys(String... keys);
+        
+        Builder<T> fallback(Config<T> link);
     }
 }

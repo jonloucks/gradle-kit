@@ -5,9 +5,7 @@ import org.gradle.api.Project;
 import org.gradle.plugins.signing.SigningExtension;
 import org.jetbrains.annotations.NotNull;
 
-import static io.github.jonloucks.gradle.kit.Configs.KIT_GPG_SECRET_KEY_PASSWORD;
-import static io.github.jonloucks.gradle.kit.Configs.getConfig;
-import static io.github.jonloucks.gradle.kit.Internal.*;
+import static io.github.jonloucks.gradle.kit.Configs.*;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -27,16 +25,16 @@ public final class SigningPlugin implements Plugin<@NotNull Project> {
     }
     
     @SuppressWarnings("CodeBlock2Expr")
-    private static final class Apply {
-        private final Project project;
+    private static final class Apply extends ProjectApplier {
         
         private Apply(Project project) {
-            this.project = project;
+            super(project);
         }
         
-        private void apply() {
+        @Override
+        void apply() {
             applySigningPlugin();
-            project.afterEvaluate(x -> {
+            getProject().afterEvaluate(x -> {
                 configureSigning();
             });
         }
@@ -46,7 +44,7 @@ public final class SigningPlugin implements Plugin<@NotNull Project> {
             final String secretPassword = getGpgSecretKeyPassword();
             if (ofNullable(secretKey).isPresent() && ofNullable(secretPassword).isPresent()) {
                 log("Configuring signing keys...");
-                project.getExtensions().configure(SigningExtension.class, signing -> {
+                getProject().getExtensions().configure(SigningExtension.class, signing -> {
                     signing.useInMemoryPgpKeys(secretKey, secretPassword);
                 });
             }
@@ -54,15 +52,15 @@ public final class SigningPlugin implements Plugin<@NotNull Project> {
         
         private void applySigningPlugin() {
            log("Applying signing plugin...");
-            project.getPlugins().apply("signing");
+            getProject().getPlugins().apply("signing");
         }
         
         private String getGpgSecretKey() {
-            return getConfig(project, Configs.KIT_GPG_SECRET_KEY).orElse(null);
+            return getConfig(KIT_GPG_SECRET_KEY).orElse(null);
         }
         
         private String getGpgSecretKeyPassword() {
-            return getConfig(project, KIT_GPG_SECRET_KEY_PASSWORD).orElse(null);
+            return getConfig(KIT_GPG_SECRET_KEY_PASSWORD).orElse(null);
         }
     }
 }

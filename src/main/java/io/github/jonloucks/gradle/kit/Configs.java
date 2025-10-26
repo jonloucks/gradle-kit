@@ -17,12 +17,18 @@ final class Configs {
     static <T> T requireConfig(Project project, Config<T> config) {
         return getConfig(project, config).orElseThrow(() -> getConfigException(project, config));
     }
-    
+
     static <T> Optional<T> getConfig(Project project, Config<T> config) {
         for (String name : config.getKeys()) {
             final Optional<String> value = findConfig(project, name);
             if (value.isPresent()) {
                 return config.of(value.get());
+            }
+        }
+        if (config.getLink().isPresent()) {
+            Optional<T> linkValue = getConfig(project, config.getLink().get());
+            if (linkValue.isPresent()) {
+                return linkValue;
             }
         }
         return config.getFallback();
@@ -31,13 +37,14 @@ final class Configs {
     static <T> String formatConfig(Config<T> config) {
         final StringBuilder builder = new StringBuilder();
         config.getName().ifPresent(builder::append);
-        
-        if (config.getDescription().isPresent()) {
-            builder.append(" : ");
-            builder.append(config.getDescription().get());
-        }
+        config.getDescription().ifPresent(d -> builder.append(" : ").append(d));
         return builder.toString();
     }
+    
+    static final Config<Boolean> KIT_LOG_ENABLED = new ConfigImpl<>(Boolean::parseBoolean)
+        .name("KIT_LOG_ENABLED")
+        .keys("KIT_LOG_ENABLED", "kit.log.enabled", "gradle.kit.log.enabled")
+        .fallback(() -> false);
     
     static final Config<JavaLanguageVersion> KIT_JAVA_COMPILER_VERSION = new ConfigImpl<>(JavaLanguageVersion::of)
         .name("Java Compiler Version")
@@ -53,7 +60,17 @@ final class Configs {
     static final Config<JavaLanguageVersion> KIT_JAVA_TARGET_VERSION = new ConfigImpl<>(JavaLanguageVersion::of)
         .name("Java Target Version")
         .keys( "KIT_JAVA_TARGET_VERSION", "kit.java.target.version")
-        .fallback(KIT_JAVA_SOURCE_VERSION.getFallback()::get);
+        .fallback(KIT_JAVA_SOURCE_VERSION);
+    
+    static final Config<JavaLanguageVersion> KIT_JAVA_TEST_SOURCE_VERSION = new ConfigImpl<>(JavaLanguageVersion::of)
+        .name("Java Test Source Version")
+        .keys( "KIT_JAVA_TEST_SOURCE_VERSION", "kit.java.test.source.version")
+        .fallback(KIT_JAVA_SOURCE_VERSION);
+    
+    static final Config<JavaLanguageVersion> KIT_JAVA_TEST_TARGET_VERSION = new ConfigImpl<>(JavaLanguageVersion::of)
+        .name("Java Test Target Version")
+        .keys( "KIT_JAVA_TEST_TARGET_VERSION", "kit.java.test.target.version")
+        .fallback(KIT_JAVA_TEST_SOURCE_VERSION);
     
     static final Config<String> KIT_PROJECT_WORKFLOW = new ConfigImpl<>(identity())
         .name("Project Workflow")
@@ -102,7 +119,21 @@ final class Configs {
         if (variable.isPresent()) {
             return Optional.of(variable.get());
         }
-        return ofNullable(project.findProperty(name)).map(Object::toString);
+        return ofNullable(project.findProperty(name))
+            .or(() -> findGlobalConfig(name))
+            .map(Object::toString);
+    }
+    
+    private static Optional<String> findGlobalConfig(String name) {
+        try {
+            final Object systemValue = System.getProperty(name);
+            if (ofNullable(systemValue).isPresent()) {
+                return Optional.of(systemValue.toString());
+            }
+            return ofNullable(System.getenv(name));
+        } catch (SecurityException ignored) {
+            return Optional.empty();
+        }
     }
     
     private Configs() {

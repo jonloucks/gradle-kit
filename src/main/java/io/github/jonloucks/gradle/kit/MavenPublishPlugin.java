@@ -30,21 +30,23 @@ public final class MavenPublishPlugin implements Plugin<@NotNull Project> {
     /**
      * Invoked via reflection by Gradle
      */
+    @Override
     public void apply(Project project) {
         new Applier(project).apply();
     }
     
     @SuppressWarnings("CodeBlock2Expr")
-    private static final class Applier {
+    private static final class Applier extends ProjectApplier {
         private Applier(Project project) {
-            this.project = project;
+            super(project);
         }
         
-        private void apply() {
+        @Override
+        void apply() {
             applyMavenPublishPlugin();
             
-            project.afterEvaluate(x -> {
-                if (isRootProject(project)) {
+            getProject().afterEvaluate(x -> {
+                if (isRootProject()) {
                     registerCreatePublisherBundle();
                     registerUploadPublisherBundle();
                 }
@@ -56,7 +58,7 @@ public final class MavenPublishPlugin implements Plugin<@NotNull Project> {
         }
         
         private void configureChecksums() {
-            project.getTasks().withType(Zip.class).configureEach(zip -> {
+            getProject().getTasks().withType(Zip.class).configureEach(zip -> {
                 zip.doLast(task -> {
                     final File file = zip.getArchiveFile().get().getAsFile();
                     createMD5Checksum(file);
@@ -106,11 +108,11 @@ public final class MavenPublishPlugin implements Plugin<@NotNull Project> {
         
         private void createStagingRepository() {
             log("Creating staging repository...");
-            project.getExtensions().configure(PublishingExtension.class, extension -> {
+            getProject().getExtensions().configure(PublishingExtension.class, extension -> {
                 extension.repositories(r -> {
                     r.maven(maven -> {
                         maven.setName("LocalMavenWithChecksums");
-                        maven.setUrl(project.getLayout().getBuildDirectory().dir("staging-deploy"));
+                        maven.setUrl(getProject().getLayout().getBuildDirectory().dir("staging-deploy"));
                     });
                 });
             });
@@ -118,16 +120,16 @@ public final class MavenPublishPlugin implements Plugin<@NotNull Project> {
         
         private void applyMavenPublishPlugin() {
             log("Applying maven-publish plugin...");
-            project.getPlugins().apply("maven-publish");
+            getProject().getPlugins().apply("maven-publish");
         }
         
         private void registerCreatePublisherBundle() {
             log("Registering " + CREATE_BUNDLE_TASK_NAME + " ...");
-            project.getTasks().register(CREATE_BUNDLE_TASK_NAME, Tar.class).configure(tar -> {
-                tar.getArchiveBaseName().set(project.getGroup().toString());
-                tar.getArchiveVersion().set(project.getVersion().toString());
-                tar.getDestinationDirectory().set(project.getLayout().getBuildDirectory().dir("distributions"));
-                project.allprojects(p -> tar.from(p.getLayout().getBuildDirectory().dir("staging-deploy")));
+            getProject().getTasks().register(CREATE_BUNDLE_TASK_NAME, Tar.class).configure(tar -> {
+                tar.getArchiveBaseName().set(getProject().getGroup().toString());
+                tar.getArchiveVersion().set(getProject().getVersion().toString());
+                tar.getDestinationDirectory().set(getProject().getLayout().getBuildDirectory().dir("distributions"));
+                getProject().allprojects(p -> tar.from(p.getLayout().getBuildDirectory().dir("staging-deploy")));
             });
         }
         
@@ -136,27 +138,27 @@ public final class MavenPublishPlugin implements Plugin<@NotNull Project> {
         }
         
         private String getWorkflowName() {
-            return getConfig(project, KIT_PROJECT_WORKFLOW).orElse("unknown");
+            return getConfig(KIT_PROJECT_WORKFLOW).orElse("unknown");
         }
         
         private String getPublishUsername() {
-            return getConfig(project, KIT_OSSRH_USERNAME).orElse(null);
+            return getConfig(KIT_OSSRH_USERNAME).orElse(null);
         }
         
         private String getPublishPassword() {
-            return getConfig(project, KIT_OSSRH_PASSWORD).orElse(null);
+            return getConfig(KIT_OSSRH_PASSWORD).orElse(null);
         }
         
         private void registerUploadPublisherBundle() {
             log("Registering " + UPLOAD_BUNDLE_TASK_NAME + " ...");
             
-            project.getTasks().register(UPLOAD_BUNDLE_TASK_NAME).configure(task -> {
+            getProject().getTasks().register(UPLOAD_BUNDLE_TASK_NAME).configure(task -> {
                 task.doLast(action -> {
                     final String apiUrl = "https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED";
                     final String username = getPublishUsername();
                     final String password = getPublishPassword();
                     
-                    if (!ofNullable(username).isPresent() || !ofNullable(password).isPresent()) {
+                    if (ofNullable(username).isEmpty() || ofNullable(password).isEmpty()) {
                         throw new GradleException("Publisher environment variables must be set.");
                     }
                     
@@ -195,16 +197,14 @@ public final class MavenPublishPlugin implements Plugin<@NotNull Project> {
         }
         
         private File getBundleFile() {
-            return project.file("build/distributions/" + project.getGroup() + "-" + project.getVersion() + ".tar");
+            return getProject().file("build/distributions/" + getProject().getGroup() + "-" + getProject().getVersion() + ".tar");
         }
         
         private String getBundleName() {
-            return project.getGroup() + "-" + project.getVersion() + " by " + getWorkflowName() + " @ " + createTimestamp();
+            return getProject().getGroup() + "-" + getProject().getVersion() + " by " + getWorkflowName() + " @ " + createTimestamp();
         }
 
         private static final String CREATE_BUNDLE_TASK_NAME = "createPublisherBundle";
         private static final String UPLOAD_BUNDLE_TASK_NAME = "uploadPublisherBundle";
-        
-        private final Project project;
     }
 }

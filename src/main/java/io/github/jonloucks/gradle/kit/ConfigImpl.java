@@ -42,6 +42,12 @@ final class ConfigImpl<T> implements Config.Builder<T> {
     }
     
     @Override
+    public Builder<T> fallback(Config<T> link) {
+        this.link = link;
+        return this;
+    }
+    
+    @Override
     public Optional<String> getName() {
         return ofNullable(name);
     }
@@ -60,6 +66,11 @@ final class ConfigImpl<T> implements Config.Builder<T> {
     }
     
     @Override
+    public Optional<Config<T>> getLink() {
+        return ofNullable(link);
+    }
+    
+    @Override
     public List<String> getKeys() {
         return keys;
     }
@@ -67,6 +78,11 @@ final class ConfigImpl<T> implements Config.Builder<T> {
     @Override
     public Optional<T> of(String text) {
         return ofNullable(of.apply(text));
+    }
+    
+    @Override
+    public String toString() {
+        return ofNullable(name).orElse("***");
     }
     
     ConfigImpl(Function<String,T> of) {
@@ -78,4 +94,5 @@ final class ConfigImpl<T> implements Config.Builder<T> {
     private Supplier<T> fallback;
     private final List<String> keys = new ArrayList<>() ;
     private final Function<String, T> of;
+    private Config<T> link;
 }

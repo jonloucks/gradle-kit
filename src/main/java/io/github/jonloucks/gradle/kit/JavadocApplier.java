@@ -4,25 +4,22 @@ import org.gradle.api.Project;
 import org.gradle.api.tasks.javadoc.Javadoc;
 import org.gradle.external.javadoc.MinimalJavadocOptions;
 
-import static io.github.jonloucks.gradle.kit.Internal.log;
-
-final class JavadocApplier {
+@SuppressWarnings("CodeBlock2Expr")
+final class JavadocApplier extends ProjectApplier {
     JavadocApplier(Project project) {
-        this.targetProject = project;
+        super(project);
     }
     
+    @Override
     void apply() {
         log("Applying javadoc...");
         
-        targetProject.afterEvaluate(project -> {
-            targetProject.getTasks().withType(Javadoc.class).configureEach( javadoc -> {
+        getProject().afterEvaluate(project -> {
+            project.getTasks().withType(Javadoc.class).configureEach( javadoc -> {
                 javadoc.setFailOnError(true);
                 javadoc.getModularity().getInferModulePath().set(true);
                 javadoc.options(MinimalJavadocOptions::showFromPublic);
             });
         });
- 
     }
-
-    private final Project targetProject;
 }

@@ -8,15 +8,13 @@ import org.gradle.api.Project;
 import org.gradle.api.file.DirectoryProperty;
 import org.jetbrains.annotations.NotNull;
 
-import static io.github.jonloucks.gradle.kit.Internal.*;
-
-final class SpotBugsApplier {
+final class SpotBugsApplier extends ProjectApplier {
     
     void apply() {
         log("Applying spotbugs plugin...");
-        targetProject.getPlugins().apply("com.github.spotbugs");
+        getProject().getPlugins().apply("com.github.spotbugs");
         
-        targetProject.afterEvaluate(project -> {
+        getProject().afterEvaluate(project -> {
             log("After Evaluate SpotBugs Plugin...");
             configureSpotbugsPlugin();
             configureSpotbugsReports();
@@ -24,16 +22,15 @@ final class SpotBugsApplier {
     }
     
     private void configureSpotbugsReports() {
-        targetProject.getTasks().named("spotbugsMain", SpotBugsTask.class)
+        getProject().getTasks().named("spotbugsMain", SpotBugsTask.class)
             .configure(configureSpotbugsReport());
     }
     
     private @NotNull Action<@NotNull SpotBugsTask> configureSpotbugsReport() {
-        final boolean isTestProject = isTestProject(targetProject);
-        final DirectoryProperty buildDir = targetProject.getLayout().getBuildDirectory();
+        final DirectoryProperty buildDir = getProject().getLayout().getBuildDirectory();
         
         return reportTask -> {
-            if (isTestProject) {
+            if (isTestProject()) {
                 reportTask.setEnabled(false);
             } else {
                 reportTask.setEnabled(true);
@@ -47,19 +44,16 @@ final class SpotBugsApplier {
     }
     
     SpotBugsApplier(Project project) {
-        this.targetProject = project;
+        super(project);
     }
  
     private void configureSpotbugsPlugin() {
-        final boolean isTestProject = isTestProject(targetProject);
-        final DirectoryProperty buildDir = targetProject.getLayout().getBuildDirectory();
-        targetProject.getPlugins().withType(SpotBugsPlugin.class, jacocoPlugin -> {
-            final SpotBugsExtension extension = targetProject.getExtensions().getByType(SpotBugsExtension.class);
+        final DirectoryProperty buildDir = getProject().getLayout().getBuildDirectory();
+        getProject().getPlugins().withType(SpotBugsPlugin.class, jacocoPlugin -> {
+            final SpotBugsExtension extension = getProject().getExtensions().getByType(SpotBugsExtension.class);
             extension.getToolVersion().set("4.9.6");
-            extension.getIgnoreFailures().set(isTestProject);
+            extension.getIgnoreFailures().set(isTestProject());
             extension.getReportsDir().set(buildDir.dir("reports/spotbugs"));
         });
     }
-    
-    private final Project targetProject;
 }
