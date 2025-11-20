@@ -5,7 +5,7 @@ import org.gradle.api.Project;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.Test;
 
-import static io.github.jonloucks.gradle.kit.test.Internal.SIGNING_KIT;
+import static io.github.jonloucks.gradle.kit.test.Constants.SIGNING_KIT;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 public final class SigningPluginTest {
@@ -19,6 +19,10 @@ public final class SigningPluginTest {
     public void plugin_PublishMavenIsApplied() {
         final Project project = ProjectBuilder.builder().build();
         
-        assertDoesNotThrow(() -> project.getPluginManager().apply(SIGNING_KIT));
+        assertDoesNotThrow(() -> {
+            project.getPluginManager().apply(SIGNING_KIT);
+            
+            project.evaluationDependsOn(":");
+        });
     }
 }

@@ -42,9 +42,10 @@ final class Configs {
     }
     
     static final Config<Boolean> KIT_LOG_ENABLED = new ConfigImpl<>(Boolean::parseBoolean)
-        .name("KIT_LOG_ENABLED")
+        .name("Kit Log Enabled")
         .keys("KIT_LOG_ENABLED", "kit.log.enabled", "gradle.kit.log.enabled")
-        .fallback(() -> false);
+        .fallback(() -> false)
+        .description("Enable or Disable Kit Logging");
     
     static final Config<JavaLanguageVersion> KIT_JAVA_COMPILER_VERSION = new ConfigImpl<>(JavaLanguageVersion::of)
         .name("Java Compiler Version")
@@ -76,6 +77,11 @@ final class Configs {
         .name("Project Workflow")
         .keys( "KIT_PROJECT_WORKFLOW", "PROJECT_WORKFLOW", "kit.project.workflow")
         .fallback(() -> "unknown");
+    
+    static final Config<String> KIT_OSSRH_URL = new ConfigImpl<>(identity())
+        .name("Kit OSSRH URL")
+        .keys("KIT_OSSRH_URL", "kit.ossrh.url")
+        .fallback(() -> "https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED");
     
     static final Config<String> KIT_OSSRH_USERNAME = new ConfigImpl<>(identity())
         .name("Kit OSSRH User Login Name")
