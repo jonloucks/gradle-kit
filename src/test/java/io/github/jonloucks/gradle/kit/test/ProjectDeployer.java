@@ -21,11 +21,6 @@ final class ProjectDeployer {
     
     private static Path pristineProjectPath() throws IOException {
         final Path projectPath = Paths.get("build/functionalTest");
-        if (projectPath.toFile().exists()) {
-            if (!projectPath.toFile().delete()) {
-                throw new IllegalStateException("Unable to delete " + projectPath.toAbsolutePath());
-            }
-        }
         Files.createDirectories(projectPath);
         return projectPath;
     }
