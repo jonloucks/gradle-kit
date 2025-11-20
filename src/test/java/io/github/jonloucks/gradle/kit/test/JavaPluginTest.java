@@ -3,7 +3,7 @@ package io.github.jonloucks.gradle.kit.test;
 import io.github.jonloucks.gradle.kit.JavaPlugin;
 import org.junit.jupiter.api.Test;
 
-import static io.github.jonloucks.gradle.kit.test.Internal.JAVA_KIT;
+import static io.github.jonloucks.gradle.kit.test.Constants.JAVA_KIT;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 public final class JavaPluginTest extends JavaPluginTestBase {

@@ -154,7 +154,7 @@ public final class MavenPublishPlugin implements Plugin<@NotNull Project> {
             
             getProject().getTasks().register(UPLOAD_BUNDLE_TASK_NAME).configure(task -> {
                 task.doLast(action -> {
-                    final String apiUrl = "https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED";
+                    final String apiUrl = getConfig(KIT_OSSRH_URL).orElseThrow(() -> new GradleException("Publisher url must be set."));
                     final String username = getPublishUsername();
                     final String password = getPublishPassword();
                     
@@ -168,6 +168,10 @@ public final class MavenPublishPlugin implements Plugin<@NotNull Project> {
                     
                     if (!bundleFile.exists()) {
                         throw new GradleException("Bundle file not found at: " + bundleFile.getAbsolutePath());
+                    }
+                    
+                    if (apiUrl.isEmpty()) {
+                        return;
                     }
                     
                     final OkHttpClient client = new OkHttpClient();

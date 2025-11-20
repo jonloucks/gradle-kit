@@ -3,7 +3,6 @@ package io.github.jonloucks.gradle.kit;
 import org.gradle.api.Project;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 abstract class ProjectApplier {
     ProjectApplier(Project project) {
@@ -34,12 +33,6 @@ abstract class ProjectApplier {
     
     final <T> Optional<T> getConfig(Config<T> config) {
         return Configs.getConfig(getProject(), config);
-    }
-    
-    final void log(Supplier<String> messageSupplier) {
-        if (isLogEnabled()) {
-            System.out.println(messageSupplier.get());
-        }
     }
     
     final void log(String text) {

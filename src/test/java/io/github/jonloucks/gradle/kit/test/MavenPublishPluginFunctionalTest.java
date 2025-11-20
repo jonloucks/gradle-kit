@@ -7,13 +7,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
-import static io.github.jonloucks.gradle.kit.test.Internal.MAVEN_PUBLISH_KIT;
+import static io.github.jonloucks.gradle.kit.test.Constants.JAVA_LIBRARY_KIT;
+import static io.github.jonloucks.gradle.kit.test.Constants.MAVEN_PUBLISH_KIT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
@@ -33,35 +32,29 @@ public class MavenPublishPluginFunctionalTest {
     
     @Test
     public void run_WithDefaults_Works() throws Throwable {
-        File projectDir = new File("build/functionalTest");
-        Files.createDirectories(projectDir.toPath());
-        writeString(new File(projectDir, "settings.gradle"), "");
-        writeString(new File(projectDir, "build.gradle"),
-            "plugins {" +
-                "  id('"+MAVEN_PUBLISH_KIT+"')" +
-                "}");
+        Path projectDir =  ProjectDeployer.deploy(JAVA_LIBRARY_KIT, MAVEN_PUBLISH_KIT);
         
+        final Map<String,String> environment = new HashMap<>();
+        environment.put("kit.ossrh.username", "integrationLogin");
+        environment.put("kit.ossrh.password", "integrationPassword");
+        environment.put("kit.ossrh.url", "");
         // Run the build
         BuildResult result = GradleRunner.create()
             .forwardOutput()
             .withPluginClasspath()
-            .withArguments("tasks")
-            .withProjectDir(projectDir)
+            .withEnvironment(environment)
+            .withArguments("build", "publish", "createPublisherBundle", "uploadPublisherBundle")
+            .withProjectDir(projectDir.toFile())
             .build();
+        
+//        project.evaluationDependsOn(":");
+        
         
         final String output = result.getOutput();
         
         assertNotNull(output);
         // Verify the result
         assertThat(output, containsString("Applying maven-publish plugin..."));
-        assertThat(output, not(containsString("Applying java plugin...")));
-        assertThat(output, not(containsString("Applying java-library plugin...")));
         assertThat(output, not(containsString("Applying signing plugin...")));
-    }
-    
-    private void writeString(File file, String string) throws IOException {
-        try (Writer writer = new FileWriter(file)) {
-            writer.write(string);
-        }
     }
 }

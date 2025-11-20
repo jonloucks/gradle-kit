@@ -7,6 +7,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 final class Internal {
     private Internal() {
+        throw new AssertionError("Utility class can't be instantiated.");
     }
   
     static String base64Encode(String text) {
