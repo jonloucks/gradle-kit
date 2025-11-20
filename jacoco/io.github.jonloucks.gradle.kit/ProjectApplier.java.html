@@ -3,53 +3,46 @@
 import org.gradle.api.Project;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 abstract class ProjectApplier {
-<span class="fc" id="L9">    ProjectApplier(Project project) {</span>
-<span class="fc" id="L10">        this.project = project;</span>
-<span class="fc" id="L11">    }</span>
+<span class="fc" id="L8">    ProjectApplier(Project project) {</span>
+<span class="fc" id="L9">        this.project = project;</span>
+<span class="fc" id="L10">    }</span>
     
     abstract void apply();
     
     final Project getProject() {
-<span class="fc" id="L16">        return project;</span>
+<span class="fc" id="L15">        return project;</span>
     }
     
     final boolean isRootProject() {
-<span class="nc" id="L20">        return getProject().getRootProject().equals(getProject());</span>
+<span class="fc" id="L19">        return getProject().getRootProject().equals(getProject());</span>
     }
     
     final boolean isTestProject() {
-<span class="fc" id="L24">        return isTestProject(getProject());</span>
+<span class="fc" id="L23">        return isTestProject(getProject());</span>
     }
     
     final boolean isTestProject(Project project) {
-<span class="pc bpc" id="L28" title="1 of 4 branches missed.">        return project.getName().endsWith(&quot;-test&quot;) || project.getName().endsWith(&quot;-tests&quot;);</span>
+<span class="pc bpc" id="L27" title="1 of 4 branches missed.">        return project.getName().endsWith(&quot;-test&quot;) || project.getName().endsWith(&quot;-tests&quot;);</span>
     }
 
     final &lt;T&gt; T requireConfig(Config&lt;T&gt; config) {
-<span class="fc" id="L32">        return Configs.requireConfig(getProject(), config);</span>
+<span class="fc" id="L31">        return Configs.requireConfig(getProject(), config);</span>
     }
     
     final &lt;T&gt; Optional&lt;T&gt; getConfig(Config&lt;T&gt; config) {
-<span class="fc" id="L36">        return Configs.getConfig(getProject(), config);</span>
+<span class="fc" id="L35">        return Configs.getConfig(getProject(), config);</span>
     }
     
-    final void log(Supplier&lt;String&gt; messageSupplier) {
-<span class="nc bnc" id="L40" title="All 2 branches missed.">        if (isLogEnabled()) {</span>
-<span class="nc" id="L41">            System.out.println(messageSupplier.get());</span>
-        }
-<span class="nc" id="L43">    }</span>
-    
     final void log(String text) {
-<span class="fc bfc" id="L46" title="All 2 branches covered.">        if (isLogEnabled()) {</span>
-<span class="fc" id="L47">            System.out.println(text);</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        if (isLogEnabled()) {</span>
+<span class="fc" id="L40">            System.out.println(text);</span>
         }
-<span class="fc" id="L49">    }</span>
+<span class="fc" id="L42">    }</span>
     
     final boolean isLogEnabled() {
-<span class="fc" id="L52">        return getConfig(Configs.KIT_LOG_ENABLED).orElse(false);</span>
+<span class="fc" id="L45">        return getConfig(Configs.KIT_LOG_ENABLED).orElse(false);</span>
     }
 
     private final Project project;

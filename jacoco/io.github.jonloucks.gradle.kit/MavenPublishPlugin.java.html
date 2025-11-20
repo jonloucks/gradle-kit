@@ -46,26 +46,26 @@ import static java.util.Optional.ofNullable;
 <span class="fc" id="L46">            applyMavenPublishPlugin();</span>
             
 <span class="fc" id="L48">            getProject().afterEvaluate(x -&gt; {</span>
-<span class="nc bnc" id="L49" title="All 2 branches missed.">                if (isRootProject()) {</span>
-<span class="nc" id="L50">                    registerCreatePublisherBundle();</span>
-<span class="nc" id="L51">                    registerUploadPublisherBundle();</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">                if (isRootProject()) {</span>
+<span class="fc" id="L50">                    registerCreatePublisherBundle();</span>
+<span class="fc" id="L51">                    registerUploadPublisherBundle();</span>
                 }
                 
-<span class="nc" id="L54">                createStagingRepository();</span>
-<span class="nc" id="L55">                configureChecksums();</span>
-<span class="nc" id="L56">            });</span>
+<span class="fc" id="L54">                createStagingRepository();</span>
+<span class="fc" id="L55">                configureChecksums();</span>
+<span class="fc" id="L56">            });</span>
 
 <span class="fc" id="L58">        }</span>
         
         private void configureChecksums() {
-<span class="nc" id="L61">            getProject().getTasks().withType(Zip.class).configureEach(zip -&gt; {</span>
+<span class="fc" id="L61">            getProject().getTasks().withType(Zip.class).configureEach(zip -&gt; {</span>
 <span class="nc" id="L62">                zip.doLast(task -&gt; {</span>
 <span class="nc" id="L63">                    final File file = zip.getArchiveFile().get().getAsFile();</span>
 <span class="nc" id="L64">                    createMD5Checksum(file);</span>
 <span class="nc" id="L65">                    createSHA1Checksum(file);</span>
 <span class="nc" id="L66">                });</span>
 <span class="nc" id="L67">            });</span>
-<span class="nc" id="L68">        }</span>
+<span class="fc" id="L68">        }</span>
         
         private void createSHA1Checksum(File file) {
 <span class="nc" id="L71">            generateChecksum(file, new File(file.getAbsolutePath() + &quot;.sha1&quot;), &quot;SHA1&quot;);</span>
@@ -107,16 +107,16 @@ import static java.util.Optional.ofNullable;
         }
         
         private void createStagingRepository() {
-<span class="nc" id="L110">            log(&quot;Creating staging repository...&quot;);</span>
-<span class="nc" id="L111">            getProject().getExtensions().configure(PublishingExtension.class, extension -&gt; {</span>
-<span class="nc" id="L112">                extension.repositories(r -&gt; {</span>
-<span class="nc" id="L113">                    r.maven(maven -&gt; {</span>
-<span class="nc" id="L114">                        maven.setName(&quot;LocalMavenWithChecksums&quot;);</span>
-<span class="nc" id="L115">                        maven.setUrl(getProject().getLayout().getBuildDirectory().dir(&quot;staging-deploy&quot;));</span>
-<span class="nc" id="L116">                    });</span>
-<span class="nc" id="L117">                });</span>
-<span class="nc" id="L118">            });</span>
-<span class="nc" id="L119">        }</span>
+<span class="fc" id="L110">            log(&quot;Creating staging repository...&quot;);</span>
+<span class="fc" id="L111">            getProject().getExtensions().configure(PublishingExtension.class, extension -&gt; {</span>
+<span class="fc" id="L112">                extension.repositories(r -&gt; {</span>
+<span class="fc" id="L113">                    r.maven(maven -&gt; {</span>
+<span class="fc" id="L114">                        maven.setName(&quot;LocalMavenWithChecksums&quot;);</span>
+<span class="fc" id="L115">                        maven.setUrl(getProject().getLayout().getBuildDirectory().dir(&quot;staging-deploy&quot;));</span>
+<span class="fc" id="L116">                    });</span>
+<span class="fc" id="L117">                });</span>
+<span class="fc" id="L118">            });</span>
+<span class="fc" id="L119">        }</span>
         
         private void applyMavenPublishPlugin() {
 <span class="fc" id="L122">            log(&quot;Applying maven-publish plugin...&quot;);</span>
@@ -124,14 +124,14 @@ import static java.util.Optional.ofNullable;
 <span class="fc" id="L124">        }</span>
         
         private void registerCreatePublisherBundle() {
-<span class="nc" id="L127">            log(&quot;Registering &quot; + CREATE_BUNDLE_TASK_NAME + &quot; ...&quot;);</span>
-<span class="nc" id="L128">            getProject().getTasks().register(CREATE_BUNDLE_TASK_NAME, Tar.class).configure(tar -&gt; {</span>
+<span class="fc" id="L127">            log(&quot;Registering &quot; + CREATE_BUNDLE_TASK_NAME + &quot; ...&quot;);</span>
+<span class="fc" id="L128">            getProject().getTasks().register(CREATE_BUNDLE_TASK_NAME, Tar.class).configure(tar -&gt; {</span>
 <span class="nc" id="L129">                tar.getArchiveBaseName().set(getProject().getGroup().toString());</span>
 <span class="nc" id="L130">                tar.getArchiveVersion().set(getProject().getVersion().toString());</span>
 <span class="nc" id="L131">                tar.getDestinationDirectory().set(getProject().getLayout().getBuildDirectory().dir(&quot;distributions&quot;));</span>
 <span class="nc" id="L132">                getProject().allprojects(p -&gt; tar.from(p.getLayout().getBuildDirectory().dir(&quot;staging-deploy&quot;)));</span>
 <span class="nc" id="L133">            });</span>
-<span class="nc" id="L134">        }</span>
+<span class="fc" id="L134">        }</span>
         
         private static String createTimestamp() {
 <span class="nc" id="L137">            return ZonedDateTime.now().format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd HH:mm:ss XXX&quot;));</span>
@@ -150,11 +150,11 @@ import static java.util.Optional.ofNullable;
         }
         
         private void registerUploadPublisherBundle() {
-<span class="nc" id="L153">            log(&quot;Registering &quot; + UPLOAD_BUNDLE_TASK_NAME + &quot; ...&quot;);</span>
+<span class="fc" id="L153">            log(&quot;Registering &quot; + UPLOAD_BUNDLE_TASK_NAME + &quot; ...&quot;);</span>
             
-<span class="nc" id="L155">            getProject().getTasks().register(UPLOAD_BUNDLE_TASK_NAME).configure(task -&gt; {</span>
+<span class="fc" id="L155">            getProject().getTasks().register(UPLOAD_BUNDLE_TASK_NAME).configure(task -&gt; {</span>
 <span class="nc" id="L156">                task.doLast(action -&gt; {</span>
-<span class="nc" id="L157">                    final String apiUrl = &quot;https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED&quot;;</span>
+<span class="nc" id="L157">                    final String apiUrl = getConfig(KIT_OSSRH_URL).orElseThrow(() -&gt; new GradleException(&quot;Publisher url must be set.&quot;));</span>
 <span class="nc" id="L158">                    final String username = getPublishUsername();</span>
 <span class="nc" id="L159">                    final String password = getPublishPassword();</span>
                     
@@ -170,38 +170,42 @@ import static java.util.Optional.ofNullable;
 <span class="nc" id="L170">                        throw new GradleException(&quot;Bundle file not found at: &quot; + bundleFile.getAbsolutePath());</span>
                     }
                     
-<span class="nc" id="L173">                    final OkHttpClient client = new OkHttpClient();</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">                    if (apiUrl.isEmpty()) {</span>
+<span class="nc" id="L174">                        return;</span>
+                    }
                     
-<span class="nc" id="L175">                    final RequestBody requestBody = new MultipartBody.Builder()</span>
-<span class="nc" id="L176">                        .setType(MultipartBody.FORM)</span>
-<span class="nc" id="L177">                        .addFormDataPart(&quot;bundle&quot;, bundleName,</span>
-<span class="nc" id="L178">                            RequestBody.create(bundleFile, MediaType.parse(&quot;application/x-tar&quot;)))</span>
-<span class="nc" id="L179">                        .build();</span>
+<span class="nc" id="L177">                    final OkHttpClient client = new OkHttpClient();</span>
                     
-<span class="nc" id="L181">                    final Request request = new Request.Builder()</span>
-<span class="nc" id="L182">                        .url(apiUrl)</span>
-<span class="nc" id="L183">                        .post(requestBody)</span>
-<span class="nc" id="L184">                        .header(&quot;Authorization&quot;, &quot;Bearer &quot; + encodedAuthString)</span>
-<span class="nc" id="L185">                        .header(&quot;accept&quot;, &quot;text/plain; charset=UTF-8&quot;)</span>
-<span class="nc" id="L186">                        .build();</span>
+<span class="nc" id="L179">                    final RequestBody requestBody = new MultipartBody.Builder()</span>
+<span class="nc" id="L180">                        .setType(MultipartBody.FORM)</span>
+<span class="nc" id="L181">                        .addFormDataPart(&quot;bundle&quot;, bundleName,</span>
+<span class="nc" id="L182">                            RequestBody.create(bundleFile, MediaType.parse(&quot;application/x-tar&quot;)))</span>
+<span class="nc" id="L183">                        .build();</span>
                     
-<span class="nc" id="L188">                    try (Response response = client.newCall(request).execute()) {</span>
-<span class="nc bnc" id="L189" title="All 2 branches missed.">                        if (!response.isSuccessful()) {</span>
-<span class="nc" id="L190">                            throw new GradleException(&quot;Unexpected code &quot; + response);</span>
+<span class="nc" id="L185">                    final Request request = new Request.Builder()</span>
+<span class="nc" id="L186">                        .url(apiUrl)</span>
+<span class="nc" id="L187">                        .post(requestBody)</span>
+<span class="nc" id="L188">                        .header(&quot;Authorization&quot;, &quot;Bearer &quot; + encodedAuthString)</span>
+<span class="nc" id="L189">                        .header(&quot;accept&quot;, &quot;text/plain; charset=UTF-8&quot;)</span>
+<span class="nc" id="L190">                        .build();</span>
+                    
+<span class="nc" id="L192">                    try (Response response = client.newCall(request).execute()) {</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">                        if (!response.isSuccessful()) {</span>
+<span class="nc" id="L194">                            throw new GradleException(&quot;Unexpected code &quot; + response);</span>
                         }
-<span class="nc" id="L192">                    } catch (IOException thrown) {</span>
-<span class="nc" id="L193">                        throw new GradleException(thrown.getMessage(), thrown);</span>
-<span class="nc" id="L194">                    }</span>
-<span class="nc" id="L195">                });</span>
-<span class="nc" id="L196">            });</span>
-<span class="nc" id="L197">        }</span>
+<span class="nc" id="L196">                    } catch (IOException thrown) {</span>
+<span class="nc" id="L197">                        throw new GradleException(thrown.getMessage(), thrown);</span>
+<span class="nc" id="L198">                    }</span>
+<span class="nc" id="L199">                });</span>
+<span class="nc" id="L200">            });</span>
+<span class="fc" id="L201">        }</span>
         
         private File getBundleFile() {
-<span class="nc" id="L200">            return getProject().file(&quot;build/distributions/&quot; + getProject().getGroup() + &quot;-&quot; + getProject().getVersion() + &quot;.tar&quot;);</span>
+<span class="nc" id="L204">            return getProject().file(&quot;build/distributions/&quot; + getProject().getGroup() + &quot;-&quot; + getProject().getVersion() + &quot;.tar&quot;);</span>
         }
         
         private String getBundleName() {
-<span class="nc" id="L204">            return getProject().getGroup() + &quot;-&quot; + getProject().getVersion() + &quot; by &quot; + getWorkflowName() + &quot; @ &quot; + createTimestamp();</span>
+<span class="nc" id="L208">            return getProject().getGroup() + &quot;-&quot; + getProject().getVersion() + &quot; by &quot; + getWorkflowName() + &quot; @ &quot; + createTimestamp();</span>
         }
 
         private static final String CREATE_BUNDLE_TASK_NAME = &quot;createPublisherBundle&quot;;

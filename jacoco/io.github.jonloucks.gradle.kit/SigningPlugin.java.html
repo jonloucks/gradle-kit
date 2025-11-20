@@ -35,20 +35,20 @@ public final class SigningPlugin implements Plugin&lt;@NotNull Project&gt; {
         void apply() {
 <span class="fc" id="L36">            applySigningPlugin();</span>
 <span class="fc" id="L37">            getProject().afterEvaluate(x -&gt; {</span>
-<span class="nc" id="L38">                configureSigning();</span>
-<span class="nc" id="L39">            });</span>
+<span class="fc" id="L38">                configureSigning();</span>
+<span class="fc" id="L39">            });</span>
 <span class="fc" id="L40">        }</span>
         
         private void configureSigning() {
-<span class="nc" id="L43">            final String secretKey = getGpgSecretKey();</span>
-<span class="nc" id="L44">            final String secretPassword = getGpgSecretKeyPassword();</span>
-<span class="nc bnc" id="L45" title="All 4 branches missed.">            if (ofNullable(secretKey).isPresent() &amp;&amp; ofNullable(secretPassword).isPresent()) {</span>
+<span class="fc" id="L43">            final String secretKey = getGpgSecretKey();</span>
+<span class="fc" id="L44">            final String secretPassword = getGpgSecretKeyPassword();</span>
+<span class="pc bpc" id="L45" title="3 of 4 branches missed.">            if (ofNullable(secretKey).isPresent() &amp;&amp; ofNullable(secretPassword).isPresent()) {</span>
 <span class="nc" id="L46">                log(&quot;Configuring signing keys...&quot;);</span>
 <span class="nc" id="L47">                getProject().getExtensions().configure(SigningExtension.class, signing -&gt; {</span>
 <span class="nc" id="L48">                    signing.useInMemoryPgpKeys(secretKey, secretPassword);</span>
 <span class="nc" id="L49">                });</span>
             }
-<span class="nc" id="L51">        }</span>
+<span class="fc" id="L51">        }</span>
         
         private void applySigningPlugin() {
 <span class="fc" id="L54">           log(&quot;Applying signing plugin...&quot;);</span>
@@ -56,11 +56,11 @@ public final class SigningPlugin implements Plugin&lt;@NotNull Project&gt; {
 <span class="fc" id="L56">        }</span>
         
         private String getGpgSecretKey() {
-<span class="nc" id="L59">            return getConfig(KIT_GPG_SECRET_KEY).orElse(null);</span>
+<span class="fc" id="L59">            return getConfig(KIT_GPG_SECRET_KEY).orElse(null);</span>
         }
         
         private String getGpgSecretKeyPassword() {
-<span class="nc" id="L63">            return getConfig(KIT_GPG_SECRET_KEY_PASSWORD).orElse(null);</span>
+<span class="fc" id="L63">            return getConfig(KIT_GPG_SECRET_KEY_PASSWORD).orElse(null);</span>
         }
     }
 }

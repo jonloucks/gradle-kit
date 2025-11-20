@@ -16,10 +16,10 @@ final class JavadocApplier extends ProjectApplier {
         
 <span class="fc" id="L17">        getProject().afterEvaluate(project -&gt; {</span>
 <span class="fc" id="L18">            project.getTasks().withType(Javadoc.class).configureEach( javadoc -&gt; {</span>
-<span class="nc" id="L19">                javadoc.setFailOnError(true);</span>
-<span class="nc" id="L20">                javadoc.getModularity().getInferModulePath().set(true);</span>
-<span class="nc" id="L21">                javadoc.options(MinimalJavadocOptions::showFromPublic);</span>
-<span class="nc" id="L22">            });</span>
+<span class="fc" id="L19">                javadoc.setFailOnError(true);</span>
+<span class="fc" id="L20">                javadoc.getModularity().getInferModulePath().set(true);</span>
+<span class="fc" id="L21">                javadoc.options(MinimalJavadocOptions::showFromPublic);</span>
+<span class="fc" id="L22">            });</span>
 <span class="fc" id="L23">        });</span>
 <span class="fc" id="L24">    }</span>
 }

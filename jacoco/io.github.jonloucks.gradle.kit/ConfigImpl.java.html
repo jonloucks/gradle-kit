@@ -20,8 +20,8 @@ final class ConfigImpl&lt;T&gt; implements Config.Builder&lt;T&gt; {
     
     @Override
     public ConfigImpl&lt;T&gt; description(String description) {
-<span class="nc" id="L23">        this.description = description;</span>
-<span class="nc" id="L24">        return this;</span>
+<span class="fc" id="L23">        this.description = description;</span>
+<span class="fc" id="L24">        return this;</span>
     }
     
     @Override
@@ -49,20 +49,20 @@ final class ConfigImpl&lt;T&gt; implements Config.Builder&lt;T&gt; {
     
     @Override
     public Optional&lt;String&gt; getName() {
-<span class="nc" id="L52">        return ofNullable(name);</span>
+<span class="fc" id="L52">        return ofNullable(name);</span>
     }
     
     @Override
     public Optional&lt;String&gt; getDescription() {
-<span class="nc" id="L57">        return ofNullable(description);</span>
+<span class="fc" id="L57">        return ofNullable(description);</span>
     }
     
     @Override
     public Optional&lt;T&gt; getFallback() {
-<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if (ofNullable(fallback).isPresent()) {</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        if (ofNullable(fallback).isPresent()) {</span>
 <span class="fc" id="L63">            return ofNullable(fallback.get());</span>
         }
-<span class="nc" id="L65">        return Optional.empty();</span>
+<span class="fc" id="L65">        return Optional.empty();</span>
     }
     
     @Override
