@@ -68,8 +68,9 @@ public final class ConfigsTests {
     private static Optional<String> withGetConfig(final Config<String> config, final String input) {
         final Project project = ProjectBuilder.builder().build();
         
-        project.getExtensions().getExtraProperties().set(config.getKeys().get(0), input);
-        
+        for (String name : config.getKeys()) {
+            project.getExtensions().getExtraProperties().set(name, input);
+        }
         return Configs.getConfig(project, config);
     }
 }
