@@ -52,27 +52,27 @@ final class Configs {
 <span class="fc" id="L52">    static final Variant&lt;String&gt; KIT_PROJECT_WORKFLOW = createVariant(b -&gt; b //</span>
 <span class="fc" id="L53">        .name(&quot;Project Workflow&quot;) //</span>
 <span class="fc" id="L54">        .keys( &quot;KIT_PROJECT_WORKFLOW&quot;, &quot;PROJECT_WORKFLOW&quot;, &quot;kit.project.workflow&quot;) //</span>
-<span class="fc" id="L55">        .parser(CharSequence::toString) //</span>
+<span class="fc" id="L55">        .parser(Configs::ofTrimAndNotEmpty) //</span>
 <span class="fc" id="L56">        .fallback(() -&gt; &quot;unknown&quot;)</span>
     );
     
 <span class="fc" id="L59">    static final Variant&lt;String&gt; KIT_OSSRH_URL = createVariant(b -&gt; b //</span>
 <span class="fc" id="L60">        .name(&quot;Kit OSSRH URL&quot;) //</span>
 <span class="fc" id="L61">        .keys(&quot;KIT_OSSRH_URL&quot;, &quot;kit.ossrh.url&quot;) //</span>
-<span class="fc" id="L62">        .parser(CharSequence::toString) //</span>
+<span class="fc" id="L62">        .parser(Configs::ofTrimAndNotEmpty) //</span>
 <span class="fc" id="L63">        .fallback(() -&gt; &quot;https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED&quot;) //</span>
     );
     
 <span class="fc" id="L66">    static final Variant&lt;String&gt; KIT_OSSRH_USERNAME = createVariant(b -&gt; b //</span>
 <span class="fc" id="L67">        .name(&quot;Kit OSSRH User Login Name&quot;) //</span>
 <span class="fc" id="L68">        .keys(&quot;KIT_OSSRH_USERNAME&quot;, &quot;OSSRH_USERNAME&quot;, &quot;kit.ossrh.username&quot;)</span>
-<span class="fc" id="L69">        .parser(CharSequence::toString) //</span>
+<span class="fc" id="L69">        .parser(Configs::ofTrimAndNotEmpty) //</span>
     );
     
 <span class="fc" id="L72">    static final Variant&lt;String&gt; KIT_OSSRH_PASSWORD = createVariant(b -&gt; b //</span>
 <span class="fc" id="L73">        .name(&quot;Kit OSSRH Password&quot;) //</span>
 <span class="fc" id="L74">        .keys( &quot;KIT_OSSRH_PASSWORD&quot;, &quot;OSSRH_PASSWORD&quot;, &quot;kit.ossrh.password&quot;) //</span>
-<span class="fc" id="L75">        .parser(CharSequence::toString) //</span>
+<span class="fc" id="L75">        .parser(Configs::ofTrimAndNotEmpty) //</span>
     );
     
 <span class="fc" id="L78">    static final Variant&lt;String&gt; KIT_GPG_SECRET_KEY = createVariant(b -&gt; b //</span>
@@ -84,7 +84,7 @@ final class Configs {
 <span class="fc" id="L84">    static final Variant&lt;String&gt; KIT_GPG_SECRET_KEY_PASSWORD = createVariant(b -&gt; b //</span>
 <span class="fc" id="L85">        .name(&quot;Kit OSSRH GPG Secret Key Password&quot;) //</span>
 <span class="fc" id="L86">        .keys(&quot;KIT_OSSRH_GPG_SECRET_KEY_PASSWORD&quot;, &quot;OSSRH_GPG_SECRET_KEY_PASSWORD&quot;, &quot;kit.ossrh.gpg.secret.key.password&quot;) //</span>
-<span class="fc" id="L87">        .parser(CharSequence::toString)</span>
+<span class="fc" id="L87">        .parser(Configs::ofTrimAndNotEmpty)</span>
     );
     
 <span class="fc" id="L90">    static final Variant&lt;String[]&gt; KIT_INCLUDE_TAGS = createVariant(b -&gt; b //</span>
@@ -117,36 +117,47 @@ final class Configs {
 <span class="fc" id="L117">        .fallback(() -&gt; new String[] { &quot;unstable&quot;, &quot;slow&quot;, &quot;integration&quot; })</span>
     );
     
+    private static String ofTrimAndNotEmpty(CharSequence value) {
+<span class="pc bpc" id="L121" title="1 of 2 branches missed.">        if (ofNullable(value).isPresent()) {</span>
+<span class="fc" id="L122">            final String string = value.toString().trim();</span>
+<span class="pc bpc" id="L123" title="1 of 2 branches missed.">            if (string.isEmpty()) {</span>
+<span class="nc" id="L124">                return null;</span>
+            }
+<span class="fc" id="L126">            return string;</span>
+        }
+<span class="nc" id="L128">        return null;</span>
+    }
+    
     private static String[] splitTextByCommaAndTrim(CharSequence chars) {
-<span class="pc bpc" id="L121" title="1 of 2 branches missed.">        if (ofNullable(chars).isPresent()) {</span>
-<span class="fc" id="L122">            return Arrays.stream(chars.toString().split(&quot;,&quot;))</span>
-<span class="fc" id="L123">                .map(String::trim)</span>
-<span class="fc" id="L124">                .toArray(String[]::new);</span>
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">        if (ofNullable(chars).isPresent()) {</span>
+<span class="fc" id="L133">            return Arrays.stream(chars.toString().split(&quot;,&quot;))</span>
+<span class="fc" id="L134">                .map(String::trim)</span>
+<span class="fc" id="L135">                .toArray(String[]::new);</span>
         } else {
-<span class="nc" id="L126">            return new String[0];</span>
+<span class="nc" id="L137">            return new String[0];</span>
         }
     }
 
     private static String ofSecretKey(CharSequence chars) {
-<span class="pc bpc" id="L131" title="1 of 2 branches missed.">        if (ofNullable(chars).isPresent()) {</span>
-<span class="fc" id="L132">            final String text = chars.toString();</span>
-<span class="fc bfc" id="L133" title="All 2 branches covered.">            if (text.isEmpty()) {</span>
-<span class="fc" id="L134">                return null;</span>
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">        if (ofNullable(chars).isPresent()) {</span>
+<span class="fc" id="L143">            final String text = chars.toString();</span>
+<span class="fc bfc" id="L144" title="All 2 branches covered.">            if (text.isEmpty()) {</span>
+<span class="fc" id="L145">                return null;</span>
             }
-<span class="fc bfc" id="L136" title="All 2 branches covered.">            if (text.startsWith(&quot;-&quot;)) {</span>
-<span class="fc" id="L137">                return text;</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">            if (text.startsWith(&quot;-&quot;)) {</span>
+<span class="fc" id="L148">                return text;</span>
             }
             try {
-<span class="fc" id="L140">                return base64Decode(text);</span>
-<span class="fc" id="L141">            } catch (IllegalArgumentException thrown) {</span>
-<span class="fc" id="L142">                throw new GradleException(&quot;Invalid gpg secret key.&quot;);</span>
+<span class="fc" id="L151">                return base64Decode(text);</span>
+<span class="fc" id="L152">            } catch (IllegalArgumentException thrown) {</span>
+<span class="fc" id="L153">                throw new GradleException(&quot;Invalid gpg secret key.&quot;);</span>
             }
         }
-<span class="nc" id="L145">        return null;</span>
+<span class="nc" id="L156">        return null;</span>
     }
 
-<span class="fc" id="L148">    private Configs() {</span>
-<span class="fc" id="L149">        throw new AssertionError(&quot;Utility class&quot;);</span>
+<span class="fc" id="L159">    private Configs() {</span>
+<span class="fc" id="L160">        throw new AssertionError(&quot;Utility class&quot;);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
