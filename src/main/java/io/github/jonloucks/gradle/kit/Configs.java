@@ -4,6 +4,8 @@ import io.github.jonloucks.variants.api.Variant;
 import org.gradle.api.GradleException;
 import org.gradle.jvm.toolchain.JavaLanguageVersion;
 
+import java.util.Arrays;
+
 import static io.github.jonloucks.gradle.kit.Internal.base64Decode;
 import static io.github.jonloucks.variants.api.GlobalVariants.createVariant;
 import static java.util.Optional.ofNullable;
@@ -84,6 +86,46 @@ final class Configs {
         .keys("KIT_OSSRH_GPG_SECRET_KEY_PASSWORD", "OSSRH_GPG_SECRET_KEY_PASSWORD", "kit.ossrh.gpg.secret.key.password") //
         .parser(CharSequence::toString)
     );
+    
+    static final Variant<String[]> KIT_INCLUDE_TAGS = createVariant(b -> b //
+        .name("Java Test Include Tagging") //
+        .keys("KIT_INCLUDE_TAGS", "kit.include.tags", "includeTags") //
+        .parser(Configs::splitTextByCommaAndTrim) //
+        .fallback(() -> new String[0])
+    );
+
+    static final Variant<String[]> KIT_EXCLUDE_TAGS = createVariant(b -> b //
+        .name("Java Test Exclude Tagging") //
+        .keys("KIT_EXCLUDE_TAGS", "kit.exclude.tags", "excludeTags") //
+        .parser(Configs::splitTextByCommaAndTrim) //
+        .fallback(() -> new String[] { "unstable", "slow", "integration", "functional"})
+    );
+    
+    static final Variant<String[]> KIT_INTEGRATION_EXCLUDE_TAGS = createVariant(b -> b //
+        .name("Java Integration Test Exclude Tagging") //
+        .keys("KIT_INTEGRATION_EXCLUDE_TAGS", "kit.integration.exclude.tags", "excludeIntegrationTags") //
+        .parser(Configs::splitTextByCommaAndTrim) //
+        .link(KIT_EXCLUDE_TAGS) //
+        .fallback(() -> new String[] { "unstable", "slow", "functional" })
+    );
+    
+    static final Variant<String[]> KIT_FUNCTIONAL_EXCLUDE_TAGS = createVariant(b -> b //
+        .name("Java Functional Exclude Test Tagging") //
+        .keys("KIT_FUNCTIONAL_EXCLUDE_TAGS", "kit.functional.exclude.tags") //
+        .parser(Configs::splitTextByCommaAndTrim) //
+        .link(KIT_EXCLUDE_TAGS) //
+        .fallback(() -> new String[] { "unstable", "slow", "integration" })
+    );
+    
+    private static String[] splitTextByCommaAndTrim(CharSequence chars) {
+        if (ofNullable(chars).isPresent()) {
+            return Arrays.stream(chars.toString().split(","))
+                .map(String::trim)
+                .toArray(String[]::new);
+        } else {
+            return new String[0];
+        }
+    }
 
     private static String ofSecretKey(CharSequence chars) {
         if (ofNullable(chars).isPresent()) {
