@@ -1,110 +1,93 @@
 package io.github.jonloucks.gradle.kit;
 
+import io.github.jonloucks.variants.api.Variant;
 import org.gradle.api.GradleException;
-import org.gradle.api.Project;
-import org.gradle.api.provider.Provider;
 import org.gradle.jvm.toolchain.JavaLanguageVersion;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Optional;
 
 import static io.github.jonloucks.gradle.kit.Internal.base64Decode;
+import static io.github.jonloucks.variants.api.GlobalVariants.createVariant;
 import static java.util.Optional.ofNullable;
-import static java.util.function.Function.identity;
 
 final class Configs {
     
-    static <T> T requireConfig(Project project, Config<T> config) {
-        return getConfig(project, config).orElseThrow(() -> getConfigException(project, config));
-    }
-
-    static <T> Optional<T> getConfig(Project project, Config<T> config) {
-        for (String name : config.getKeys()) {
-            final Optional<String> value = findConfig(project, name);
-            if (value.isPresent()) {
-                return config.of(value.get());
-            }
-        }
-        if (config.getLink().isPresent()) {
-            Optional<T> linkValue = getConfig(project, config.getLink().get());
-            if (linkValue.isPresent()) {
-                return linkValue;
-            }
-        }
-        return config.getFallback();
-    }
+    static final Variant<Boolean> KIT_LOG_ENABLED = createVariant(b -> b //
+        .name("Kit Log Enabled") //
+        .keys("KIT_LOG_ENABLED", "kit.log.enabled", "gradle.kit.log.enabled") //
+        .parser(t -> Boolean.parseBoolean(t.toString()))
+        .fallback(() -> false) //
+        .description("Enable or Disable Kit Logging"));
     
-    static <T> String formatConfig(Config<T> config) {
-        final StringBuilder builder = new StringBuilder();
-        config.getName().ifPresent(builder::append);
-        config.getDescription().ifPresent(d -> builder.append(" : ").append(d));
-        return builder.toString();
-    }
+    static final Variant<JavaLanguageVersion> KIT_JAVA_COMPILER_VERSION = createVariant(b -> b //
+        .name("Java Compiler Version") //
+        .keys("KIT_JAVA_COMPILER_VERSION", "kit.java.compiler.version") //
+        .parser(c -> JavaLanguageVersion.of(c.toString())) //
+        .fallback(() -> JavaLanguageVersion.of("17")));
     
-    static final Config<Boolean> KIT_LOG_ENABLED = new ConfigImpl<>(Boolean::parseBoolean)
-        .name("Kit Log Enabled")
-        .keys("KIT_LOG_ENABLED", "kit.log.enabled", "gradle.kit.log.enabled")
-        .fallback(() -> false)
-        .description("Enable or Disable Kit Logging");
+    static final Variant<JavaLanguageVersion> KIT_JAVA_SOURCE_VERSION = createVariant(b -> b //
+        .name("Java Source Version") //
+        .keys( "KIT_JAVA_SOURCE_VERSION", "kit.java.source.version") //
+        .parser(c -> JavaLanguageVersion.of(c.toString())) //
+        .fallback(() -> JavaLanguageVersion.of("9")));
     
-    static final Config<JavaLanguageVersion> KIT_JAVA_COMPILER_VERSION = new ConfigImpl<>(JavaLanguageVersion::of)
-        .name("Java Compiler Version")
-        .keys( "KIT_JAVA_COMPILER_VERSION", "kit.java.compiler.version")
-        .fallback(() -> JavaLanguageVersion.of("17"));
+    static final Variant<JavaLanguageVersion> KIT_JAVA_TARGET_VERSION = createVariant(b -> b //
+        .name("Java Target Version") //
+        .keys( "KIT_JAVA_TARGET_VERSION", "kit.java.target.version") //
+        .parser(c -> JavaLanguageVersion.of(c.toString())) //
+        .link(KIT_JAVA_SOURCE_VERSION));
     
-    static final Config<JavaLanguageVersion> KIT_JAVA_SOURCE_VERSION =
-        new ConfigImpl<>(JavaLanguageVersion::of)
-        .name("Java Source Version")
-        .keys( "KIT_JAVA_SOURCE_VERSION", "kit.java.source.version")
-        .fallback(() -> JavaLanguageVersion.of("9"));
+    static final Variant<JavaLanguageVersion> KIT_JAVA_TEST_SOURCE_VERSION = createVariant(b -> b //
+        .name("Java Test Source Version") //
+        .keys( "KIT_JAVA_TEST_SOURCE_VERSION", "kit.java.test.source.version") //
+        .parser(c -> JavaLanguageVersion.of(c.toString())) //
+        .link(KIT_JAVA_SOURCE_VERSION));
     
-    static final Config<JavaLanguageVersion> KIT_JAVA_TARGET_VERSION = new ConfigImpl<>(JavaLanguageVersion::of)
-        .name("Java Target Version")
-        .keys( "KIT_JAVA_TARGET_VERSION", "kit.java.target.version")
-        .fallback(KIT_JAVA_SOURCE_VERSION);
+    static final Variant<JavaLanguageVersion> KIT_JAVA_TEST_TARGET_VERSION = createVariant(b -> b //
+        .name("Java Test Target Version") //
+        .keys( "KIT_JAVA_TEST_TARGET_VERSION", "kit.java.test.target.version") //
+        .parser(c -> JavaLanguageVersion.of(c.toString())) //
+        .link(KIT_JAVA_TEST_SOURCE_VERSION));
     
-    static final Config<JavaLanguageVersion> KIT_JAVA_TEST_SOURCE_VERSION = new ConfigImpl<>(JavaLanguageVersion::of)
-        .name("Java Test Source Version")
-        .keys( "KIT_JAVA_TEST_SOURCE_VERSION", "kit.java.test.source.version")
-        .fallback(KIT_JAVA_SOURCE_VERSION);
+    static final Variant<String> KIT_PROJECT_WORKFLOW = createVariant(b -> b //
+        .name("Project Workflow") //
+        .keys( "KIT_PROJECT_WORKFLOW", "PROJECT_WORKFLOW", "kit.project.workflow") //
+        .parser(CharSequence::toString) //
+        .fallback(() -> "unknown")
+    );
     
-    static final Config<JavaLanguageVersion> KIT_JAVA_TEST_TARGET_VERSION = new ConfigImpl<>(JavaLanguageVersion::of)
-        .name("Java Test Target Version")
-        .keys( "KIT_JAVA_TEST_TARGET_VERSION", "kit.java.test.target.version")
-        .fallback(KIT_JAVA_TEST_SOURCE_VERSION);
+    static final Variant<String> KIT_OSSRH_URL = createVariant(b -> b //
+        .name("Kit OSSRH URL") //
+        .keys("KIT_OSSRH_URL", "kit.ossrh.url") //
+        .parser(CharSequence::toString) //
+        .fallback(() -> "https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED") //
+    );
     
-    static final Config<String> KIT_PROJECT_WORKFLOW = new ConfigImpl<>(identity())
-        .name("Project Workflow")
-        .keys( "KIT_PROJECT_WORKFLOW", "PROJECT_WORKFLOW", "kit.project.workflow")
-        .fallback(() -> "unknown");
+    static final Variant<String> KIT_OSSRH_USERNAME = createVariant(b -> b //
+        .name("Kit OSSRH User Login Name") //
+        .keys("KIT_OSSRH_USERNAME", "OSSRH_USERNAME", "kit.ossrh.username")
+        .parser(CharSequence::toString) //
+    );
     
-    static final Config<String> KIT_OSSRH_URL = new ConfigImpl<>(identity())
-        .name("Kit OSSRH URL")
-        .keys("KIT_OSSRH_URL", "kit.ossrh.url")
-        .fallback(() -> "https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED");
+    static final Variant<String> KIT_OSSRH_PASSWORD = createVariant(b -> b //
+        .name("Kit OSSRH Password") //
+        .keys( "KIT_OSSRH_PASSWORD", "OSSRH_PASSWORD", "kit.ossrh.password") //
+        .parser(CharSequence::toString) //
+    );
     
-    static final Config<String> KIT_OSSRH_USERNAME = new ConfigImpl<>(identity())
-        .name("Kit OSSRH User Login Name")
-        .keys("KIT_OSSRH_USERNAME", "OSSRH_USERNAME", "kit.ossrh.username");
-    
-    static final Config<String> KIT_OSSRH_PASSWORD = new ConfigImpl<>(identity())
-        .name("Kit OSSRH Password")
-        .keys( "KIT_OSSRH_PASSWORD", "OSSRH_PASSWORD", "kit.ossrh.password");
-    
-    static final Config<String> KIT_GPG_SECRET_KEY = new ConfigImpl<>(Configs::ofSecretKey)
+    static final Variant<String> KIT_GPG_SECRET_KEY = createVariant(b -> b //
         .name("Kit OSSRH GPG Secret Key")
-        .keys( "KIT_OSSRH_GPG_SECRET_KEY", "OSSRH_GPG_SECRET_KEY", "kit.ossrh.gpg.secret.key");
+        .keys("KIT_OSSRH_GPG_SECRET_KEY", "OSSRH_GPG_SECRET_KEY", "kit.ossrh.gpg.secret.key")
+        .parser(Configs::ofSecretKey)
+    );
     
-    static final Config<String> KIT_GPG_SECRET_KEY_PASSWORD = new ConfigImpl<>(identity())
-        .name("Kit OSSRH GPG Secret Key Password")
-        .keys("KIT_OSSRH_GPG_SECRET_KEY_PASSWORD", "OSSRH_GPG_SECRET_KEY_PASSWORD", "kit.ossrh.gpg.secret.key.password");
-    
-    private static GradleException getConfigException(Project project, Config<?> config) {
-        return new GradleException("Missing config for project " + project.getName() + " " + formatConfig(config));
-    }
-    
-    private static String ofSecretKey(String text) {
-        if (ofNullable(text).isPresent()) {
+    static final Variant<String> KIT_GPG_SECRET_KEY_PASSWORD = createVariant(b -> b //
+        .name("Kit OSSRH GPG Secret Key Password") //
+        .keys("KIT_OSSRH_GPG_SECRET_KEY_PASSWORD", "OSSRH_GPG_SECRET_KEY_PASSWORD", "kit.ossrh.gpg.secret.key.password") //
+        .parser(CharSequence::toString)
+    );
+
+    private static String ofSecretKey(CharSequence chars) {
+        if (ofNullable(chars).isPresent()) {
+            final String text = chars.toString();
             if (text.isEmpty()) {
                 return null;
             }
@@ -119,29 +102,7 @@ final class Configs {
         }
         return null;
     }
-    
-    private static Optional<String> findConfig(Project project, String name) {
-        final Provider<@NotNull String> variable = project.getProviders().environmentVariable(name);
-        if (variable.isPresent()) {
-            return Optional.of(variable.get());
-        }
-        return ofNullable(project.findProperty(name))
-            .or(() -> findGlobalConfig(name))
-            .map(Object::toString);
-    }
-    
-    private static Optional<String> findGlobalConfig(String name) {
-        try {
-            final Object systemValue = System.getProperty(name);
-            if (ofNullable(systemValue).isPresent()) {
-                return Optional.of(systemValue.toString());
-            }
-            return ofNullable(System.getenv(name));
-        } catch (SecurityException ignored) {
-            return Optional.empty();
-        }
-    }
-    
+
     private Configs() {
         throw new AssertionError("Utility class");
     }
