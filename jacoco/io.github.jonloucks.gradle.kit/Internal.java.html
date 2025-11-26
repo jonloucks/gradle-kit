@@ -1,21 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Internal.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">main-project</a> &gt; <a href="index.source.html" class="el_package">io.github.jonloucks.gradle.kit</a> &gt; <span class="el_source">Internal.java</span></div><h1>Internal.java</h1><pre class="source lang-java linenums">package io.github.jonloucks.gradle.kit;
 
 
+import org.gradle.api.GradleException;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.security.MessageDigest;
 import java.util.Base64;
 
+import static io.github.jonloucks.contracts.api.Checks.nullCheck;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 final class Internal {
-<span class="fc" id="L9">    private Internal() {</span>
-<span class="fc" id="L10">        throw new AssertionError(&quot;Utility class can't be instantiated.&quot;);</span>
+<span class="fc" id="L16">    private Internal() {</span>
+<span class="fc" id="L17">        throw new AssertionError(&quot;Utility class can't be instantiated.&quot;);</span>
     }
   
     static String base64Encode(String text) {
-<span class="fc" id="L14">        return new String(Base64.getEncoder().encode(text.getBytes(UTF_8)), UTF_8);</span>
+<span class="fc" id="L21">        return new String(Base64.getEncoder().encode(text.getBytes(UTF_8)), UTF_8);</span>
     }
     
     static String base64Decode(String text) {
-<span class="fc" id="L18">        return new String(Base64.getDecoder().decode(text), UTF_8);</span>
+<span class="fc" id="L25">        return new String(Base64.getDecoder().decode(text), UTF_8);</span>
+    }
+    
+    static void createChecksums(File file) {
+<span class="fc" id="L29">        final File validFile = nullCheck(file, &quot;File must be present.&quot;);</span>
+<span class="fc" id="L30">        createMD5Checksum(validFile);</span>
+<span class="fc" id="L31">        createSHA1Checksum(validFile);</span>
+<span class="fc" id="L32">    }</span>
+    
+    private static void createSHA1Checksum(File file) {
+<span class="fc" id="L35">        generateChecksum(file, new File(file.getAbsolutePath() + &quot;.sha1&quot;), &quot;SHA1&quot;);</span>
+<span class="fc" id="L36">    }</span>
+    
+    private static void createMD5Checksum(File file) {
+<span class="fc" id="L39">        generateChecksum(file, new File(file.getAbsolutePath() + &quot;.md5&quot;), &quot;MD5&quot;);</span>
+<span class="fc" id="L40">    }</span>
+    
+    private static void generateChecksum(File inputFile, File outputFile, String algorithm) {
+        try {
+<span class="fc" id="L44">            writeDigestBytes(outputFile, createDigestBytes(inputFile, algorithm));</span>
+<span class="fc" id="L45">        } catch (Exception thrown) {</span>
+<span class="fc" id="L46">            throw new GradleException(&quot;Unable to generate checksums.&quot;, thrown);</span>
+<span class="fc" id="L47">        }</span>
+<span class="fc" id="L48">    }</span>
+    
+    private static void writeDigestBytes(File outputFile, byte[] digestBytes) throws Exception {
+<span class="fc" id="L51">        final StringBuilder stringBuilder = new StringBuilder();</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        for (byte b : digestBytes) {</span>
+<span class="fc" id="L53">            stringBuilder.append(String.format(&quot;%02x&quot;, b));</span>
+        }
+<span class="fc" id="L55">        try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {</span>
+<span class="fc" id="L56">            outputStream.write(stringBuilder.toString().getBytes(UTF_8));</span>
+        }
+<span class="fc" id="L58">    }</span>
+    
+    private static byte[] createDigestBytes(File inputFile, String algorithm) throws Exception {
+<span class="fc" id="L61">        final MessageDigest digest = MessageDigest.getInstance(algorithm);</span>
+        
+<span class="fc" id="L63">        try (FileInputStream inputStream = new FileInputStream(inputFile)) {</span>
+<span class="fc" id="L64">            final byte[] buffer = new byte[1024];</span>
+            int bytesCount;
+<span class="fc bfc" id="L66" title="All 2 branches covered.">            while ((bytesCount = inputStream.read(buffer)) != -1) {</span>
+<span class="fc" id="L67">                digest.update(buffer, 0, bytesCount);</span>
+            }
+<span class="fc" id="L69">            return digest.digest();</span>
+        }
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
