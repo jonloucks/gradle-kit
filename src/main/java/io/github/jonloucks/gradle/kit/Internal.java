@@ -1,6 +1,7 @@
 package io.github.jonloucks.gradle.kit;
 
 
+import io.github.jonloucks.variants.api.Environment;
 import org.gradle.api.GradleException;
 
 import java.io.File;
@@ -29,6 +30,10 @@ final class Internal {
         final File validFile = nullCheck(file, "File must be present.");
         createMD5Checksum(validFile);
         createSHA1Checksum(validFile);
+    }
+    
+    static void uploadBundle(Environment environment, String bundleName, File bundleFile) {
+        new UploadBundleImpl(environment, bundleName, bundleFile).upload();
     }
     
     private static void createSHA1Checksum(File file) {
