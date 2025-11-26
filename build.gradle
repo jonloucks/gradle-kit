@@ -24,6 +24,8 @@ dependencies {
     implementation libs.okhttp3
     implementation libs.jacoco
     implementation libs.spotbugs
+    implementation libs.contracts
+    implementation libs.variants
 
     testImplementation platform(libs.junit.bom)
     testImplementation 'org.junit.jupiter:junit-jupiter'

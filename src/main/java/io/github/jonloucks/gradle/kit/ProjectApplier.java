@@ -1,12 +1,37 @@
 package io.github.jonloucks.gradle.kit;
 
+import io.github.jonloucks.variants.api.Environment;
+import io.github.jonloucks.variants.api.Variant;
 import org.gradle.api.Project;
+import org.gradle.api.provider.Provider;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
+
+import static io.github.jonloucks.variants.api.GlobalVariants.createEnvironment;
 
 abstract class ProjectApplier {
     ProjectApplier(Project project) {
         this.project = project;
+        this.environment = createEnvironment( b -> b //
+            .addSystemEnvironmentSource() //
+            .addSource(this::projectEnvironmentVariable) //
+            .addSystemPropertiesSource() //
+            .addSource(this::projectProperty) //
+        );
+    }
+    
+    private Optional<CharSequence> projectProperty(String key) {
+        return Optional.ofNullable(project.findProperty(key)).map(Object::toString);
+    }
+    
+    private Optional<CharSequence> projectEnvironmentVariable(String key) {
+        final Provider<@NotNull String> variable = project.getProviders().environmentVariable(key);
+        if (variable.isPresent()) {
+            return Optional.of(variable.get());
+        } else {
+            return Optional.empty();
+        }
     }
     
     abstract void apply();
@@ -27,12 +52,12 @@ abstract class ProjectApplier {
         return project.getName().endsWith("-test") || project.getName().endsWith("-tests");
     }
 
-    final <T> T requireConfig(Config<T> config) {
-        return Configs.requireConfig(getProject(), config);
+    final <T> Optional<T> getConfig(Variant<T> variant) {
+        return environment.findVariance(variant);
     }
     
-    final <T> Optional<T> getConfig(Config<T> config) {
-        return Configs.getConfig(getProject(), config);
+    final <T> T requireConfig(Variant<T> variant) {
+        return environment.getVariance(variant);
     }
     
     final void log(String text) {
@@ -42,8 +67,9 @@ abstract class ProjectApplier {
     }
     
     final boolean isLogEnabled() {
-        return getConfig(Configs.KIT_LOG_ENABLED).orElse(false);
+        return environment.findVariance(Configs.KIT_LOG_ENABLED).orElse(false);
     }
 
     private final Project project;
+    private final Environment environment;
 }

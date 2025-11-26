@@ -7,6 +7,8 @@ mockito-version = "[5.0,6.0)"
 okhttp-version = "[4.12.0, 4.13.0)"
 jacoco-version = "0.8.13"
 spotbugs-version = "6.4.2"
+contracts-version = "[2.5.2,3.0.0)"
+variants-version = "[1.0.1,2.0.0)"
 
 [libraries]
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit-version" }
@@ -16,5 +18,11 @@ mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.
 okhttp3 = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp-version" }
 jacoco = { module = "org.jacoco:org.jacoco.core", version.ref = "jacoco-version" }
 spotbugs = { module = "com.github.spotbugs.snom:spotbugs-gradle-plugin", version.ref = "spotbugs-version"}
+contracts-api = { module = "io.github.jonloucks.contracts:contracts-api", version.ref = "contracts-version" }
+contracts-test = { module = "io.github.jonloucks.contracts:contracts-test", version.ref = "contracts-version" }
+contracts = { module = "io.github.jonloucks.contracts:contracts", version.ref = "contracts-version" }
+variants-api = { module = "io.github.jonloucks.variants:variants-api", version.ref = "variants-version" }
+variants-test = { module = "io.github.jonloucks.variants:variants-test", version.ref = "variants-version" }
+variants = { module = "io.github.jonloucks.variants:variants", version.ref = "variants-version" }
 
 
