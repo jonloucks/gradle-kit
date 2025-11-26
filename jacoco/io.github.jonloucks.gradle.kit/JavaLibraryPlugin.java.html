@@ -2,27 +2,26 @@
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Extension of the Gradle 'java-library' plugin
  */
-public final class JavaLibraryPlugin implements Plugin&lt;@NotNull Project&gt; {
+public final class JavaLibraryPlugin implements Plugin&lt;Project&gt; {
     
     /**
      * Invoked via reflection by Gradle
      */
-<span class="fc" id="L15">    public JavaLibraryPlugin() {</span>
-<span class="fc" id="L16">    }</span>
+<span class="fc" id="L14">    public JavaLibraryPlugin() {</span>
+<span class="fc" id="L15">    }</span>
     
     @Override
     public void apply(Project project) {
-<span class="fc" id="L20">        new JavaLibraryPluginApplier(project).apply();</span>
-<span class="fc" id="L21">        new JavaVersioningApplier(project).apply();</span>
-<span class="fc" id="L22">        new TaggingApplier(project).apply();</span>
-<span class="fc" id="L23">        new JacocoApplier(project).apply();</span>
-<span class="fc" id="L24">        new SpotBugsApplier(project).apply();</span>
-<span class="fc" id="L25">        new JavadocApplier(project).apply();</span>
-<span class="fc" id="L26">    }</span>
+<span class="fc" id="L19">        new JavaLibraryPluginApplier(project).apply();</span>
+<span class="fc" id="L20">        new JavaVersioningApplier(project).apply();</span>
+<span class="fc" id="L21">        new TaggingApplier(project).apply();</span>
+<span class="fc" id="L22">        new JacocoApplier(project).apply();</span>
+<span class="fc" id="L23">        new SpotBugsApplier(project).apply();</span>
+<span class="fc" id="L24">        new JavadocApplier(project).apply();</span>
+<span class="fc" id="L25">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

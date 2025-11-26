@@ -6,55 +6,54 @@ import com.github.spotbugs.snom.SpotBugsTask;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.file.DirectoryProperty;
-import org.jetbrains.annotations.NotNull;
 
 final class SpotBugsApplier extends ProjectApplier {
     
     void apply() {
-<span class="fc" id="L14">        log(&quot;Applying spotbugs plugin...&quot;);</span>
-<span class="fc" id="L15">        getProject().getPlugins().apply(&quot;com.github.spotbugs&quot;);</span>
+<span class="fc" id="L13">        log(&quot;Applying spotbugs plugin...&quot;);</span>
+<span class="fc" id="L14">        getProject().getPlugins().apply(&quot;com.github.spotbugs&quot;);</span>
         
-<span class="fc" id="L17">        getProject().afterEvaluate(project -&gt; {</span>
-<span class="fc" id="L18">            log(&quot;After Evaluate SpotBugs Plugin...&quot;);</span>
-<span class="fc" id="L19">            configureSpotbugsPlugin();</span>
-<span class="fc" id="L20">            configureSpotbugsReports();</span>
-<span class="fc" id="L21">        });</span>
-<span class="fc" id="L22">    }</span>
+<span class="fc" id="L16">        getProject().afterEvaluate(project -&gt; {</span>
+<span class="fc" id="L17">            log(&quot;After Evaluate SpotBugs Plugin...&quot;);</span>
+<span class="fc" id="L18">            configureSpotbugsPlugin();</span>
+<span class="fc" id="L19">            configureSpotbugsReports();</span>
+<span class="fc" id="L20">        });</span>
+<span class="fc" id="L21">    }</span>
     
     private void configureSpotbugsReports() {
-<span class="fc" id="L25">        getProject().getTasks().named(&quot;spotbugsMain&quot;, SpotBugsTask.class)</span>
-<span class="fc" id="L26">            .configure(configureSpotbugsReport());</span>
-<span class="fc" id="L27">    }</span>
+<span class="fc" id="L24">        getProject().getTasks().named(&quot;spotbugsMain&quot;, SpotBugsTask.class)</span>
+<span class="fc" id="L25">            .configure(configureSpotbugsReport());</span>
+<span class="fc" id="L26">    }</span>
     
-    private @NotNull Action&lt;@NotNull SpotBugsTask&gt; configureSpotbugsReport() {
-<span class="fc" id="L30">        final DirectoryProperty buildDir = getProject().getLayout().getBuildDirectory();</span>
+    private Action&lt;SpotBugsTask&gt; configureSpotbugsReport() {
+<span class="fc" id="L29">        final DirectoryProperty buildDir = getProject().getLayout().getBuildDirectory();</span>
         
-<span class="fc" id="L32">        return reportTask -&gt; {</span>
-<span class="pc bpc" id="L33" title="1 of 2 branches missed.">            if (isTestProject()) {</span>
-<span class="nc" id="L34">                reportTask.setEnabled(false);</span>
+<span class="fc" id="L31">        return reportTask -&gt; {</span>
+<span class="pc bpc" id="L32" title="1 of 2 branches missed.">            if (isTestProject()) {</span>
+<span class="nc" id="L33">                reportTask.setEnabled(false);</span>
             } else {
-<span class="fc" id="L36">                reportTask.setEnabled(true);</span>
-<span class="fc" id="L37">                reportTask.getReports().forEach(report -&gt; {</span>
-<span class="nc" id="L38">                    report.getRequired().set(true);</span>
-<span class="nc" id="L39">                    report.getOutputLocation().set(buildDir.file(&quot;reports/spotbugs/main/spotbugs.html&quot;));</span>
-<span class="nc" id="L40">                    report.setStylesheet(&quot;fancy-hist.xsl&quot;);</span>
-<span class="nc" id="L41">                });</span>
+<span class="fc" id="L35">                reportTask.setEnabled(true);</span>
+<span class="fc" id="L36">                reportTask.getReports().forEach(report -&gt; {</span>
+<span class="nc" id="L37">                    report.getRequired().set(true);</span>
+<span class="nc" id="L38">                    report.getOutputLocation().set(buildDir.file(&quot;reports/spotbugs/main/spotbugs.html&quot;));</span>
+<span class="nc" id="L39">                    report.setStylesheet(&quot;fancy-hist.xsl&quot;);</span>
+<span class="nc" id="L40">                });</span>
             }
-<span class="fc" id="L43">        };</span>
+<span class="fc" id="L42">        };</span>
     }
     
     SpotBugsApplier(Project project) {
-<span class="fc" id="L47">        super(project);</span>
-<span class="fc" id="L48">    }</span>
+<span class="fc" id="L46">        super(project);</span>
+<span class="fc" id="L47">    }</span>
  
     private void configureSpotbugsPlugin() {
-<span class="fc" id="L51">        final DirectoryProperty buildDir = getProject().getLayout().getBuildDirectory();</span>
-<span class="fc" id="L52">        getProject().getPlugins().withType(SpotBugsPlugin.class, jacocoPlugin -&gt; {</span>
-<span class="fc" id="L53">            final SpotBugsExtension extension = getProject().getExtensions().getByType(SpotBugsExtension.class);</span>
-<span class="fc" id="L54">            extension.getToolVersion().set(&quot;4.9.6&quot;);</span>
-<span class="fc" id="L55">            extension.getIgnoreFailures().set(isTestProject());</span>
-<span class="fc" id="L56">            extension.getReportsDir().set(buildDir.dir(&quot;reports/spotbugs&quot;));</span>
-<span class="fc" id="L57">        });</span>
-<span class="fc" id="L58">    }</span>
+<span class="fc" id="L50">        final DirectoryProperty buildDir = getProject().getLayout().getBuildDirectory();</span>
+<span class="fc" id="L51">        getProject().getPlugins().withType(SpotBugsPlugin.class, jacocoPlugin -&gt; {</span>
+<span class="fc" id="L52">            final SpotBugsExtension extension = getProject().getExtensions().getByType(SpotBugsExtension.class);</span>
+<span class="fc" id="L53">            extension.getToolVersion().set(&quot;4.9.6&quot;);</span>
+<span class="fc" id="L54">            extension.getIgnoreFailures().set(isTestProject());</span>
+<span class="fc" id="L55">            extension.getReportsDir().set(buildDir.dir(&quot;reports/spotbugs&quot;));</span>
+<span class="fc" id="L56">        });</span>
+<span class="fc" id="L57">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

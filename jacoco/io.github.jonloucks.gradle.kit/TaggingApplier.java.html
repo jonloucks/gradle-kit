@@ -5,85 +5,84 @@ import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
-import org.jetbrains.annotations.NotNull;
 
 import static java.util.Optional.ofNullable;
 
 final class TaggingApplier extends ProjectApplier {
     
     TaggingApplier(Project project) {
-<span class="fc" id="L15">        super(project);</span>
-<span class="fc" id="L16">    }</span>
+<span class="fc" id="L14">        super(project);</span>
+<span class="fc" id="L15">    }</span>
     
     @Override
     void apply() {
-<span class="fc" id="L20">        getProject().afterEvaluate(x -&gt; {</span>
+<span class="fc" id="L19">        getProject().afterEvaluate(x -&gt; {</span>
             
-<span class="fc" id="L22">            log(&quot;Applying Test Tagging Rules ...&quot;);</span>
+<span class="fc" id="L21">            log(&quot;Applying Test Tagging Rules ...&quot;);</span>
             
-<span class="fc" id="L24">            configureDefaultTestTask();</span>
+<span class="fc" id="L23">            configureDefaultTestTask();</span>
             
-<span class="fc" id="L26">            registerTaggedTestTask(&quot;integration&quot;, &quot;unstable&quot;, &quot;slow&quot;, &quot;functional&quot;);</span>
-<span class="fc" id="L27">            registerTaggedTestTask(&quot;functional&quot;, &quot;unstable&quot;, &quot;slow&quot;, &quot;integration&quot;);</span>
-<span class="fc" id="L28">        });</span>
-<span class="fc" id="L29">    }</span>
+<span class="fc" id="L25">            registerTaggedTestTask(&quot;integration&quot;, &quot;unstable&quot;, &quot;slow&quot;, &quot;functional&quot;);</span>
+<span class="fc" id="L26">            registerTaggedTestTask(&quot;functional&quot;, &quot;unstable&quot;, &quot;slow&quot;, &quot;integration&quot;);</span>
+<span class="fc" id="L27">        });</span>
+<span class="fc" id="L28">    }</span>
     
     private void registerTaggedTestTask(String includeTag, String... excludeTags) {
-<span class="fc" id="L32">        final String taskName = includeTag + &quot;Test&quot;;</span>
-<span class="fc" id="L33">        log(&quot;Creating &quot; + taskName + &quot;...&quot;);</span>
+<span class="fc" id="L31">        final String taskName = includeTag + &quot;Test&quot;;</span>
+<span class="fc" id="L32">        log(&quot;Creating &quot; + taskName + &quot;...&quot;);</span>
         
-<span class="fc" id="L35">        final TaskProvider&lt;@NotNull Test&gt; taggedTaskProvider = getProject().getTasks().register(taskName, TEST_TYPE, task -&gt; {</span>
-<span class="fc" id="L36">            log(&quot;Configuring &quot; + taskName + &quot;.&quot;);</span>
-<span class="fc" id="L37">            task.setDescription(&quot;Runs tests with tag: &quot; + includeTag);</span>
-<span class="fc" id="L38">            task.setGroup(&quot;verification&quot;);</span>
+<span class="fc" id="L34">        final TaskProvider&lt;Test&gt; taggedTaskProvider = getProject().getTasks().register(taskName, TEST_TYPE, task -&gt; {</span>
+<span class="fc" id="L35">            log(&quot;Configuring &quot; + taskName + &quot;.&quot;);</span>
+<span class="fc" id="L36">            task.setDescription(&quot;Runs tests with tag: &quot; + includeTag);</span>
+<span class="fc" id="L37">            task.setGroup(&quot;verification&quot;);</span>
             
-<span class="fc" id="L40">            task.useJUnitPlatform(options -&gt; {</span>
-<span class="fc" id="L41">                options.includeTags(includeTag);</span>
-<span class="fc" id="L42">                options.excludeTags(getPropertyTags(&quot;excludeTags&quot;, excludeTags));</span>
-<span class="fc" id="L43">            });</span>
+<span class="fc" id="L39">            task.useJUnitPlatform(options -&gt; {</span>
+<span class="fc" id="L40">                options.includeTags(includeTag);</span>
+<span class="fc" id="L41">                options.excludeTags(getPropertyTags(&quot;excludeTags&quot;, excludeTags));</span>
+<span class="fc" id="L42">            });</span>
             
-<span class="fc" id="L45">            final SourceSetContainer sourceSets = getProject().getExtensions().getByType(SourceSetContainer.class);</span>
-<span class="fc" id="L46">            final SourceSet mainTestSourceSet = sourceSets.stream()</span>
-<span class="fc" id="L47">                .filter(ss -&gt; ss.getName().equals(&quot;test&quot;))</span>
-<span class="fc" id="L48">                .findFirst()</span>
-<span class="pc" id="L49">                .orElseThrow(() -&gt; new IllegalStateException(&quot;No test source set found&quot;));</span>
+<span class="fc" id="L44">            final SourceSetContainer sourceSets = getProject().getExtensions().getByType(SourceSetContainer.class);</span>
+<span class="fc" id="L45">            final SourceSet mainTestSourceSet = sourceSets.stream()</span>
+<span class="fc" id="L46">                .filter(ss -&gt; ss.getName().equals(&quot;test&quot;))</span>
+<span class="fc" id="L47">                .findFirst()</span>
+<span class="pc" id="L48">                .orElseThrow(() -&gt; new IllegalStateException(&quot;No test source set found&quot;));</span>
             
-<span class="fc" id="L51">            task.setTestClassesDirs(mainTestSourceSet.getOutput().getClassesDirs());</span>
-<span class="fc" id="L52">            task.setClasspath(mainTestSourceSet.getRuntimeClasspath());</span>
-<span class="fc" id="L53">            task.shouldRunAfter(&quot;test&quot;);</span>
-<span class="fc" id="L54">            log(&quot;Configured &quot; + taskName + &quot;.&quot;);</span>
-<span class="fc" id="L55">        });</span>
+<span class="fc" id="L50">            task.setTestClassesDirs(mainTestSourceSet.getOutput().getClassesDirs());</span>
+<span class="fc" id="L51">            task.setClasspath(mainTestSourceSet.getRuntimeClasspath());</span>
+<span class="fc" id="L52">            task.shouldRunAfter(&quot;test&quot;);</span>
+<span class="fc" id="L53">            log(&quot;Configured &quot; + taskName + &quot;.&quot;);</span>
+<span class="fc" id="L54">        });</span>
         
-<span class="fc" id="L57">        getProject().getTasks().named(&quot;check&quot;).configure(task -&gt; task.dependsOn(taggedTaskProvider));</span>
-<span class="fc" id="L58">    }</span>
+<span class="fc" id="L56">        getProject().getTasks().named(&quot;check&quot;).configure(task -&gt; task.dependsOn(taggedTaskProvider));</span>
+<span class="fc" id="L57">    }</span>
     
     private String[] getPropertyTags(String propertyName, String... defaults) {
-<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if (getProject().hasProperty(propertyName)) {</span>
-<span class="nc" id="L62">            return splitTagsProperty(propertyName);</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if (getProject().hasProperty(propertyName)) {</span>
+<span class="nc" id="L61">            return splitTagsProperty(propertyName);</span>
         }
-<span class="fc" id="L64">        return defaults;</span>
+<span class="fc" id="L63">        return defaults;</span>
     }
     
     private void configureDefaultTestTask() {
-<span class="fc" id="L68">        getProject().getTasks().named(&quot;test&quot;, TEST_TYPE).configure(task -&gt; {</span>
-<span class="fc" id="L69">            task.useJUnitPlatform(configure -&gt; {</span>
-<span class="fc" id="L70">                configure.includeTags(getPropertyTags(&quot;includeTags&quot;));</span>
-<span class="fc" id="L71">                configure.excludeTags(getPropertyTags(&quot;excludeTags&quot;,</span>
+<span class="fc" id="L67">        getProject().getTasks().named(&quot;test&quot;, TEST_TYPE).configure(task -&gt; {</span>
+<span class="fc" id="L68">            task.useJUnitPlatform(configure -&gt; {</span>
+<span class="fc" id="L69">                configure.includeTags(getPropertyTags(&quot;includeTags&quot;));</span>
+<span class="fc" id="L70">                configure.excludeTags(getPropertyTags(&quot;excludeTags&quot;,</span>
                     &quot;unstable&quot;, &quot;slow&quot;, &quot;integration&quot;, &quot;functional&quot;));
-<span class="fc" id="L73">            });</span>
-<span class="fc" id="L74">        });</span>
-<span class="fc" id="L75">    }</span>
+<span class="fc" id="L72">            });</span>
+<span class="fc" id="L73">        });</span>
+<span class="fc" id="L74">    }</span>
     
     private String[] splitTagsProperty(String propertyName) {
-<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (getProject().hasProperty(propertyName)) {</span>
-<span class="nc" id="L79">            final Object value = getProject().findProperty(propertyName);</span>
-<span class="nc bnc" id="L80" title="All 2 branches missed.">            if (ofNullable(value).isPresent()) {</span>
-<span class="nc" id="L81">                return value.toString().split(&quot;,&quot;);</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        if (getProject().hasProperty(propertyName)) {</span>
+<span class="nc" id="L78">            final Object value = getProject().findProperty(propertyName);</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">            if (ofNullable(value).isPresent()) {</span>
+<span class="nc" id="L80">                return value.toString().split(&quot;,&quot;);</span>
             }
         }
-<span class="nc" id="L84">        return new String[0];</span>
+<span class="nc" id="L83">        return new String[0];</span>
     }
     
-<span class="fc" id="L87">    private static final Class&lt;Test&gt; TEST_TYPE = Test.class;</span>
+<span class="fc" id="L86">    private static final Class&lt;Test&gt; TEST_TYPE = Test.class;</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -3,7 +3,6 @@
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.plugins.signing.SigningExtension;
-import org.jetbrains.annotations.NotNull;
 
 import static io.github.jonloucks.gradle.kit.Configs.*;
 import static java.util.Optional.ofNullable;
@@ -11,56 +10,56 @@ import static java.util.Optional.ofNullable;
 /**
  * Extension of the Gradle 'signing' plugin
  */
-public final class SigningPlugin implements Plugin&lt;@NotNull Project&gt; {
+public final class SigningPlugin implements Plugin&lt;Project&gt; {
     
     /**
      * Invoked via reflection by Gradle
      */
-<span class="fc" id="L19">    public SigningPlugin() {</span>
+<span class="fc" id="L18">    public SigningPlugin() {</span>
     
-<span class="fc" id="L21">    }</span>
+<span class="fc" id="L20">    }</span>
     
     public void apply(Project project) {
-<span class="fc" id="L24">        new Apply(project).apply();</span>
-<span class="fc" id="L25">    }</span>
+<span class="fc" id="L23">        new Apply(project).apply();</span>
+<span class="fc" id="L24">    }</span>
     
     @SuppressWarnings(&quot;CodeBlock2Expr&quot;)
     private static final class Apply extends ProjectApplier {
         
         private Apply(Project project) {
-<span class="fc" id="L31">            super(project);</span>
-<span class="fc" id="L32">        }</span>
+<span class="fc" id="L30">            super(project);</span>
+<span class="fc" id="L31">        }</span>
         
         @Override
         void apply() {
-<span class="fc" id="L36">            applySigningPlugin();</span>
-<span class="fc" id="L37">            getProject().afterEvaluate(x -&gt; {</span>
-<span class="fc" id="L38">                configureSigning();</span>
-<span class="fc" id="L39">            });</span>
-<span class="fc" id="L40">        }</span>
+<span class="fc" id="L35">            applySigningPlugin();</span>
+<span class="fc" id="L36">            getProject().afterEvaluate(x -&gt; {</span>
+<span class="fc" id="L37">                configureSigning();</span>
+<span class="fc" id="L38">            });</span>
+<span class="fc" id="L39">        }</span>
         
         private void configureSigning() {
-<span class="fc" id="L43">            final String secretKey = getGpgSecretKey();</span>
-<span class="fc" id="L44">            final String secretPassword = getGpgSecretKeyPassword();</span>
-<span class="pc bpc" id="L45" title="3 of 4 branches missed.">            if (ofNullable(secretKey).isPresent() &amp;&amp; ofNullable(secretPassword).isPresent()) {</span>
-<span class="nc" id="L46">                log(&quot;Configuring signing keys...&quot;);</span>
-<span class="nc" id="L47">                getProject().getExtensions().configure(SigningExtension.class, signing -&gt; {</span>
-<span class="nc" id="L48">                    signing.useInMemoryPgpKeys(secretKey, secretPassword);</span>
-<span class="nc" id="L49">                });</span>
+<span class="fc" id="L42">            final String secretKey = getGpgSecretKey();</span>
+<span class="fc" id="L43">            final String secretPassword = getGpgSecretKeyPassword();</span>
+<span class="pc bpc" id="L44" title="3 of 4 branches missed.">            if (ofNullable(secretKey).isPresent() &amp;&amp; ofNullable(secretPassword).isPresent()) {</span>
+<span class="nc" id="L45">                log(&quot;Configuring signing keys...&quot;);</span>
+<span class="nc" id="L46">                getProject().getExtensions().configure(SigningExtension.class, signing -&gt; {</span>
+<span class="nc" id="L47">                    signing.useInMemoryPgpKeys(secretKey, secretPassword);</span>
+<span class="nc" id="L48">                });</span>
             }
-<span class="fc" id="L51">        }</span>
+<span class="fc" id="L50">        }</span>
         
         private void applySigningPlugin() {
-<span class="fc" id="L54">           log(&quot;Applying signing plugin...&quot;);</span>
-<span class="fc" id="L55">            getProject().getPlugins().apply(&quot;signing&quot;);</span>
-<span class="fc" id="L56">        }</span>
+<span class="fc" id="L53">           log(&quot;Applying signing plugin...&quot;);</span>
+<span class="fc" id="L54">            getProject().getPlugins().apply(&quot;signing&quot;);</span>
+<span class="fc" id="L55">        }</span>
         
         private String getGpgSecretKey() {
-<span class="fc" id="L59">            return getConfig(KIT_GPG_SECRET_KEY).orElse(null);</span>
+<span class="fc" id="L58">            return getConfig(KIT_GPG_SECRET_KEY).orElse(null);</span>
         }
         
         private String getGpgSecretKeyPassword() {
-<span class="fc" id="L63">            return getConfig(KIT_GPG_SECRET_KEY_PASSWORD).orElse(null);</span>
+<span class="fc" id="L62">            return getConfig(KIT_GPG_SECRET_KEY_PASSWORD).orElse(null);</span>
         }
     }
 }
