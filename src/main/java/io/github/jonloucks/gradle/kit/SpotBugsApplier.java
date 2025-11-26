@@ -6,7 +6,6 @@ import com.github.spotbugs.snom.SpotBugsTask;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.file.DirectoryProperty;
-import org.jetbrains.annotations.NotNull;
 
 final class SpotBugsApplier extends ProjectApplier {
     
@@ -26,7 +25,7 @@ final class SpotBugsApplier extends ProjectApplier {
             .configure(configureSpotbugsReport());
     }
     
-    private @NotNull Action<@NotNull SpotBugsTask> configureSpotbugsReport() {
+    private Action<SpotBugsTask> configureSpotbugsReport() {
         final DirectoryProperty buildDir = getProject().getLayout().getBuildDirectory();
         
         return reportTask -> {

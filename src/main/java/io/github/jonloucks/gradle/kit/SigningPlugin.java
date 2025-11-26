@@ -3,7 +3,6 @@ package io.github.jonloucks.gradle.kit;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.plugins.signing.SigningExtension;
-import org.jetbrains.annotations.NotNull;
 
 import static io.github.jonloucks.gradle.kit.Configs.*;
 import static java.util.Optional.ofNullable;
@@ -11,7 +10,7 @@ import static java.util.Optional.ofNullable;
 /**
  * Extension of the Gradle 'signing' plugin
  */
-public final class SigningPlugin implements Plugin<@NotNull Project> {
+public final class SigningPlugin implements Plugin<Project> {
     
     /**
      * Invoked via reflection by Gradle
