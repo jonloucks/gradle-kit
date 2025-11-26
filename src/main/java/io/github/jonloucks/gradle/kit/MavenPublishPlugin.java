@@ -1,7 +1,5 @@
 package io.github.jonloucks.gradle.kit;
 
-import okhttp3.*;
-import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.publish.PublishingExtension;
@@ -9,13 +7,11 @@ import org.gradle.api.tasks.bundling.Tar;
 import org.gradle.api.tasks.bundling.Zip;
 
 import java.io.File;
-import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static io.github.jonloucks.gradle.kit.Configs.*;
 import static io.github.jonloucks.gradle.kit.Internal.*;
-import static java.util.Optional.ofNullable;
 
 /**
  * Extension of the Gradle 'maven-publish' plugin
@@ -89,62 +85,13 @@ public final class MavenPublishPlugin implements Plugin<Project> {
         private static String createTimestamp() {
             return ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss XXX"));
         }
-
-        private String getPublishUsername() {
-            return getConfig(KIT_OSSRH_USERNAME).orElse(null);
-        }
-        
-        private String getPublishPassword() {
-            return getConfig(KIT_OSSRH_PASSWORD).orElse(null);
-        }
         
         private void registerUploadPublisherBundle() {
             log("Registering " + UPLOAD_BUNDLE_TASK_NAME + " ...");
             
             getProject().getTasks().register(UPLOAD_BUNDLE_TASK_NAME).configure(task -> {
                 task.doLast(action -> {
-                    final String apiUrl = getConfig(KIT_OSSRH_URL).orElseThrow(() -> new GradleException("Publisher url must be set."));
-                    final String username = getPublishUsername();
-                    final String password = getPublishPassword();
-                    
-                    if (ofNullable(username).isEmpty() || ofNullable(password).isEmpty()) {
-                        throw new GradleException("Publisher environment variables must be set.");
-                    }
-                    
-                    final String bundleName = getBundleName();
-                    final File bundleFile = getBundleFile();
-                    final String encodedAuthString = base64Encode(username + ":" + password);
-                    
-                    if (!bundleFile.exists()) {
-                        throw new GradleException("Bundle file not found at: " + bundleFile.getAbsolutePath());
-                    }
-                    
-                    if (apiUrl.isEmpty()) {
-                        return;
-                    }
-                    
-                    final OkHttpClient client = new OkHttpClient();
-                    
-                    final RequestBody requestBody = new MultipartBody.Builder()
-                        .setType(MultipartBody.FORM)
-                        .addFormDataPart("bundle", bundleName,
-                            RequestBody.create(bundleFile, MediaType.parse("application/x-tar")))
-                        .build();
-                    
-                    final Request request = new Request.Builder()
-                        .url(apiUrl)
-                        .post(requestBody)
-                        .header("Authorization", "Bearer " + encodedAuthString)
-                        .header("accept", "text/plain; charset=UTF-8")
-                        .build();
-                    
-                    try (Response response = client.newCall(request).execute()) {
-                        if (!response.isSuccessful()) {
-                            throw new GradleException("Unexpected code " + response);
-                        }
-                    } catch (IOException thrown) {
-                        throw new GradleException(thrown.getMessage(), thrown);
-                    }
+                    uploadBundle(getEnvironment(), getBundleName(), getBundleFile());
                 });
             });
         }

@@ -52,27 +52,27 @@ final class Configs {
     static final Variant<String> KIT_PROJECT_WORKFLOW = createVariant(b -> b //
         .name("Project Workflow") //
         .keys( "KIT_PROJECT_WORKFLOW", "PROJECT_WORKFLOW", "kit.project.workflow") //
-        .parser(CharSequence::toString) //
+        .parser(Configs::ofTrimAndNotEmpty) //
         .fallback(() -> "unknown")
     );
     
     static final Variant<String> KIT_OSSRH_URL = createVariant(b -> b //
         .name("Kit OSSRH URL") //
         .keys("KIT_OSSRH_URL", "kit.ossrh.url") //
-        .parser(CharSequence::toString) //
+        .parser(Configs::ofTrimAndNotEmpty) //
         .fallback(() -> "https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED") //
     );
     
     static final Variant<String> KIT_OSSRH_USERNAME = createVariant(b -> b //
         .name("Kit OSSRH User Login Name") //
         .keys("KIT_OSSRH_USERNAME", "OSSRH_USERNAME", "kit.ossrh.username")
-        .parser(CharSequence::toString) //
+        .parser(Configs::ofTrimAndNotEmpty) //
     );
     
     static final Variant<String> KIT_OSSRH_PASSWORD = createVariant(b -> b //
         .name("Kit OSSRH Password") //
         .keys( "KIT_OSSRH_PASSWORD", "OSSRH_PASSWORD", "kit.ossrh.password") //
-        .parser(CharSequence::toString) //
+        .parser(Configs::ofTrimAndNotEmpty) //
     );
     
     static final Variant<String> KIT_GPG_SECRET_KEY = createVariant(b -> b //
@@ -84,7 +84,7 @@ final class Configs {
     static final Variant<String> KIT_GPG_SECRET_KEY_PASSWORD = createVariant(b -> b //
         .name("Kit OSSRH GPG Secret Key Password") //
         .keys("KIT_OSSRH_GPG_SECRET_KEY_PASSWORD", "OSSRH_GPG_SECRET_KEY_PASSWORD", "kit.ossrh.gpg.secret.key.password") //
-        .parser(CharSequence::toString)
+        .parser(Configs::ofTrimAndNotEmpty)
     );
     
     static final Variant<String[]> KIT_INCLUDE_TAGS = createVariant(b -> b //
@@ -116,6 +116,17 @@ final class Configs {
         .link(KIT_EXCLUDE_TAGS) //
         .fallback(() -> new String[] { "unstable", "slow", "integration" })
     );
+    
+    private static String ofTrimAndNotEmpty(CharSequence value) {
+        if (ofNullable(value).isPresent()) {
+            final String string = value.toString().trim();
+            if (string.isEmpty()) {
+                return null;
+            }
+            return string;
+        }
+        return null;
+    }
     
     private static String[] splitTextByCommaAndTrim(CharSequence chars) {
         if (ofNullable(chars).isPresent()) {

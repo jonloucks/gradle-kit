@@ -35,9 +35,8 @@ public class MavenPublishPluginFunctionalTest {
         Path projectDir =  ProjectDeployer.deploy(JAVA_LIBRARY_KIT, MAVEN_PUBLISH_KIT);
         
         final Map<String,String> environment = new HashMap<>();
-        environment.put("kit.ossrh.username", "integrationLogin");
-        environment.put("kit.ossrh.password", "integrationPassword");
-        environment.put("kit.ossrh.url", "");
+        environment.put("kit.ossrh.username", "dry-run");
+        environment.put("kit.ossrh.password", "dry-run");
         // Run the build
         BuildResult result = GradleRunner.create()
             .forwardOutput()
@@ -46,9 +45,6 @@ public class MavenPublishPluginFunctionalTest {
             .withArguments("build", "publish", "createPublisherBundle", "uploadPublisherBundle")
             .withProjectDir(projectDir.toFile())
             .build();
-        
-//        project.evaluationDependsOn(":");
-        
         
         final String output = result.getOutput();
         

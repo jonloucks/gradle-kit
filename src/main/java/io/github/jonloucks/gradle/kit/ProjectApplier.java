@@ -19,20 +19,7 @@ abstract class ProjectApplier {
             .addSource(this::projectProperty) //
         );
     }
-    
-    private Optional<CharSequence> projectProperty(String key) {
-        return Optional.ofNullable(project.findProperty(key)).map(Object::toString);
-    }
-    
-    private Optional<CharSequence> projectEnvironmentVariable(String key) {
-        final Provider<String> variable = project.getProviders().environmentVariable(key);
-        if (variable.isPresent()) {
-            return Optional.of(variable.get());
-        } else {
-            return Optional.empty();
-        }
-    }
-    
+
     abstract void apply();
     
     final Project getProject() {
@@ -68,7 +55,25 @@ abstract class ProjectApplier {
     final boolean isLogEnabled() {
         return environment.findVariance(Configs.KIT_LOG_ENABLED).orElse(false);
     }
-
+    
+    final Environment getEnvironment() {
+        return environment;
+    }
+    
+    private Optional<CharSequence> projectProperty(String key) {
+        return Optional.ofNullable(project.findProperty(key)).map(Object::toString);
+    }
+    
+    private Optional<CharSequence> projectEnvironmentVariable(String key) {
+        final Provider<String> variable = project.getProviders().environmentVariable(key);
+        if (variable.isPresent()) {
+            return Optional.of(variable.get());
+        } else {
+            return Optional.empty();
+        }
+    }
+    
+    
     private final Project project;
     private final Environment environment;
 }
