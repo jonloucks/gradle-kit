@@ -39,6 +39,25 @@ public final class ConfigsTests {
     }
     
     @Test
+    public void configs_getConfig_SplitWorks() {
+        final Optional<String[]> optional = withGetConfig(KIT_EXCLUDE_TAGS, "green,blue,red");
+        assertTrue(optional.isPresent());
+        assertArrayEquals(new String[]{"green", "blue", "red"}, optional.get());
+    }
+    
+    @Test
+    public void configs_KIT_EXCLUDE_TAGS_of_WithNull_Works() {
+        assertFalse(KIT_EXCLUDE_TAGS.of(null).isPresent());
+    }
+    
+    @Test
+    public void configs_getConfig_Split_WithWhitespace_Works() {
+        final Optional<String[]> optional = withGetConfig(KIT_EXCLUDE_TAGS, " green , blue , red ");
+        assertTrue(optional.isPresent());
+        assertArrayEquals(new String[]{"green", "blue", "red"}, optional.get());
+    }
+    
+    @Test
     public void configs_getConfig_WithEmptyValue_Works() {
         final Optional<String> optional = withGetConfig(KIT_GPG_SECRET_KEY, "");
         
@@ -51,6 +70,11 @@ public final class ConfigsTests {
 
         assertTrue(optional.isPresent());
         assertEquals("Hello World!", optional.get());
+    }
+    
+    @Test
+    public void configs_KIT_GPG_SECRET_KEY_of_WithNull_Works() {
+        assertFalse(KIT_GPG_SECRET_KEY.of(null).isPresent());
     }
     
     @Test
