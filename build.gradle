@@ -32,6 +32,7 @@ dependencies {
     testImplementation libs.hamcrest
     testImplementation libs.mockito.core
     testImplementation libs.mockito.junit.jupiter
+    testImplementation libs.contracts.test
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 

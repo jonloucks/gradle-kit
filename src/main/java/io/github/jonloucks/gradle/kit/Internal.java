@@ -1,8 +1,15 @@
 package io.github.jonloucks.gradle.kit;
 
 
+import org.gradle.api.GradleException;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.security.MessageDigest;
 import java.util.Base64;
 
+import static io.github.jonloucks.contracts.api.Checks.nullCheck;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 final class Internal {
@@ -16,5 +23,50 @@ final class Internal {
     
     static String base64Decode(String text) {
         return new String(Base64.getDecoder().decode(text), UTF_8);
+    }
+    
+    static void createChecksums(File file) {
+        final File validFile = nullCheck(file, "File must be present.");
+        createMD5Checksum(validFile);
+        createSHA1Checksum(validFile);
+    }
+    
+    private static void createSHA1Checksum(File file) {
+        generateChecksum(file, new File(file.getAbsolutePath() + ".sha1"), "SHA1");
+    }
+    
+    private static void createMD5Checksum(File file) {
+        generateChecksum(file, new File(file.getAbsolutePath() + ".md5"), "MD5");
+    }
+    
+    private static void generateChecksum(File inputFile, File outputFile, String algorithm) {
+        try {
+            writeDigestBytes(outputFile, createDigestBytes(inputFile, algorithm));
+        } catch (Exception thrown) {
+            throw new GradleException("Unable to generate checksums.", thrown);
+        }
+    }
+    
+    private static void writeDigestBytes(File outputFile, byte[] digestBytes) throws Exception {
+        final StringBuilder stringBuilder = new StringBuilder();
+        for (byte b : digestBytes) {
+            stringBuilder.append(String.format("%02x", b));
+        }
+        try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+            outputStream.write(stringBuilder.toString().getBytes(UTF_8));
+        }
+    }
+    
+    private static byte[] createDigestBytes(File inputFile, String algorithm) throws Exception {
+        final MessageDigest digest = MessageDigest.getInstance(algorithm);
+        
+        try (FileInputStream inputStream = new FileInputStream(inputFile)) {
+            final byte[] buffer = new byte[1024];
+            int bytesCount;
+            while ((bytesCount = inputStream.read(buffer)) != -1) {
+                digest.update(buffer, 0, bytesCount);
+            }
+            return digest.digest();
+        }
     }
 }
