@@ -10,9 +10,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.github.jonloucks.contracts.test.Tools.assertInstantiateThrows;
+import static io.github.jonloucks.contracts.test.Tools.assertThrown;
 import static io.github.jonloucks.gradle.kit.Configs.*;
 import static io.github.jonloucks.gradle.kit.Internal.base64Encode;
-import static io.github.jonloucks.gradle.kit.test.Tools.assertInstantiateThrows;
 import static io.github.jonloucks.variants.api.GlobalVariants.createEnvironment;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -87,11 +88,8 @@ public final class ConfigsTests {
     
     @Test
     public void configs_getConfig_WithBadFormat_Throws() {
-        final GradleException thrown = assertThrows(GradleException.class,
+        assertThrown(GradleException.class,
             () -> withGetConfig(KIT_GPG_SECRET_KEY, "Hello World!"));
-   
-        assertNotNull(thrown);
-        assertNotNull(thrown.getMessage());
     }
     
     private static <T> Optional<T> withGetConfig(final Variant<T> variant, final String input) {

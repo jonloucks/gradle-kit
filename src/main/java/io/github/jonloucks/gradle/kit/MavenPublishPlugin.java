@@ -9,16 +9,12 @@ import org.gradle.api.tasks.bundling.Tar;
 import org.gradle.api.tasks.bundling.Zip;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.MessageDigest;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static io.github.jonloucks.gradle.kit.Configs.*;
 import static io.github.jonloucks.gradle.kit.Internal.*;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -53,56 +49,14 @@ public final class MavenPublishPlugin implements Plugin<Project> {
                 createStagingRepository();
                 configureChecksums();
             });
-
         }
         
         private void configureChecksums() {
             getProject().getTasks().withType(Zip.class).configureEach(zip -> {
                 zip.doLast(task -> {
-                    final File file = zip.getArchiveFile().get().getAsFile();
-                    createMD5Checksum(file);
-                    createSHA1Checksum(file);
+                    createChecksums(zip.getArchiveFile().get().getAsFile());
                 });
             });
-        }
-        
-        private void createSHA1Checksum(File file) {
-            generateChecksum(file, new File(file.getAbsolutePath() + ".sha1"), "SHA1");
-        }
-        
-        private void createMD5Checksum(File file) {
-            generateChecksum(file, new File(file.getAbsolutePath() + ".md5"), "MD5");
-        }
-        
-        public static void generateChecksum(File inputFile, File outputFile, String algorithm) {
-            try {
-                writeDigestBytes(outputFile, createDigestBytes(inputFile, algorithm));
-            } catch (Exception thrown) {
-                throw new GradleException(thrown.getMessage(), thrown);
-            }
-        }
-        
-        private static void writeDigestBytes(File outputFile, byte[] digestBytes) throws Exception {
-            final StringBuilder stringBuilder = new StringBuilder();
-            for (byte b : digestBytes) {
-                stringBuilder.append(String.format("%02x", b));
-            }
-            try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
-                outputStream.write(stringBuilder.toString().getBytes(UTF_8));
-            }
-        }
-        
-        private static byte[] createDigestBytes(File inputFile, String algorithm) throws Exception {
-            final MessageDigest digest = MessageDigest.getInstance(algorithm);
-            
-            try (FileInputStream inputStream = new FileInputStream(inputFile)) {
-                final byte[] buffer = new byte[1024];
-                int bytesCount;
-                while ((bytesCount = inputStream.read(buffer)) != -1) {
-                    digest.update(buffer, 0, bytesCount);
-                }
-                return digest.digest();
-            }
         }
         
         private void createStagingRepository() {
@@ -135,11 +89,7 @@ public final class MavenPublishPlugin implements Plugin<Project> {
         private static String createTimestamp() {
             return ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss XXX"));
         }
-        
-        private String getWorkflowName() {
-            return getConfig(KIT_PROJECT_WORKFLOW).orElse("unknown");
-        }
-        
+
         private String getPublishUsername() {
             return getConfig(KIT_OSSRH_USERNAME).orElse(null);
         }
@@ -204,7 +154,8 @@ public final class MavenPublishPlugin implements Plugin<Project> {
         }
         
         private String getBundleName() {
-            return getProject().getGroup() + "-" + getProject().getVersion() + " by " + getWorkflowName() + " @ " + createTimestamp();
+            final String workflowName = requireConfig(KIT_PROJECT_WORKFLOW);
+            return getProject().getGroup() + "-" + getProject().getVersion() + " by " + workflowName + " @ " + createTimestamp();
         }
 
         private static final String CREATE_BUNDLE_TASK_NAME = "createPublisherBundle";
