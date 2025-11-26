@@ -1,149 +1,110 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Configs.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">main-project</a> &gt; <a href="index.source.html" class="el_package">io.github.jonloucks.gradle.kit</a> &gt; <span class="el_source">Configs.java</span></div><h1>Configs.java</h1><pre class="source lang-java linenums">package io.github.jonloucks.gradle.kit;
 
+import io.github.jonloucks.variants.api.Variant;
 import org.gradle.api.GradleException;
-import org.gradle.api.Project;
-import org.gradle.api.provider.Provider;
 import org.gradle.jvm.toolchain.JavaLanguageVersion;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Optional;
 
 import static io.github.jonloucks.gradle.kit.Internal.base64Decode;
+import static io.github.jonloucks.variants.api.GlobalVariants.createVariant;
 import static java.util.Optional.ofNullable;
-import static java.util.function.Function.identity;
 
 final class Configs {
     
-    static &lt;T&gt; T requireConfig(Project project, Config&lt;T&gt; config) {
-<span class="fc" id="L18">        return getConfig(project, config).orElseThrow(() -&gt; getConfigException(project, config));</span>
-    }
+<span class="fc" id="L13">    static final Variant&lt;Boolean&gt; KIT_LOG_ENABLED = createVariant(b -&gt; b //</span>
+<span class="fc" id="L14">        .name(&quot;Kit Log Enabled&quot;) //</span>
+<span class="fc" id="L15">        .keys(&quot;KIT_LOG_ENABLED&quot;, &quot;kit.log.enabled&quot;, &quot;gradle.kit.log.enabled&quot;) //</span>
+<span class="fc" id="L16">        .parser(t -&gt; Boolean.parseBoolean(t.toString()))</span>
+<span class="fc" id="L17">        .fallback(() -&gt; false) //</span>
+<span class="fc" id="L18">        .description(&quot;Enable or Disable Kit Logging&quot;));</span>
+    
+<span class="fc" id="L20">    static final Variant&lt;JavaLanguageVersion&gt; KIT_JAVA_COMPILER_VERSION = createVariant(b -&gt; b //</span>
+<span class="fc" id="L21">        .name(&quot;Java Compiler Version&quot;) //</span>
+<span class="fc" id="L22">        .keys(&quot;KIT_JAVA_COMPILER_VERSION&quot;, &quot;kit.java.compiler.version&quot;) //</span>
+<span class="fc" id="L23">        .parser(c -&gt; JavaLanguageVersion.of(c.toString())) //</span>
+<span class="fc" id="L24">        .fallback(() -&gt; JavaLanguageVersion.of(&quot;17&quot;)));</span>
+    
+<span class="fc" id="L26">    static final Variant&lt;JavaLanguageVersion&gt; KIT_JAVA_SOURCE_VERSION = createVariant(b -&gt; b //</span>
+<span class="fc" id="L27">        .name(&quot;Java Source Version&quot;) //</span>
+<span class="fc" id="L28">        .keys( &quot;KIT_JAVA_SOURCE_VERSION&quot;, &quot;kit.java.source.version&quot;) //</span>
+<span class="fc" id="L29">        .parser(c -&gt; JavaLanguageVersion.of(c.toString())) //</span>
+<span class="fc" id="L30">        .fallback(() -&gt; JavaLanguageVersion.of(&quot;9&quot;)));</span>
+    
+<span class="fc" id="L32">    static final Variant&lt;JavaLanguageVersion&gt; KIT_JAVA_TARGET_VERSION = createVariant(b -&gt; b //</span>
+<span class="fc" id="L33">        .name(&quot;Java Target Version&quot;) //</span>
+<span class="fc" id="L34">        .keys( &quot;KIT_JAVA_TARGET_VERSION&quot;, &quot;kit.java.target.version&quot;) //</span>
+<span class="fc" id="L35">        .parser(c -&gt; JavaLanguageVersion.of(c.toString())) //</span>
+<span class="fc" id="L36">        .link(KIT_JAVA_SOURCE_VERSION));</span>
+    
+<span class="fc" id="L38">    static final Variant&lt;JavaLanguageVersion&gt; KIT_JAVA_TEST_SOURCE_VERSION = createVariant(b -&gt; b //</span>
+<span class="fc" id="L39">        .name(&quot;Java Test Source Version&quot;) //</span>
+<span class="fc" id="L40">        .keys( &quot;KIT_JAVA_TEST_SOURCE_VERSION&quot;, &quot;kit.java.test.source.version&quot;) //</span>
+<span class="fc" id="L41">        .parser(c -&gt; JavaLanguageVersion.of(c.toString())) //</span>
+<span class="fc" id="L42">        .link(KIT_JAVA_SOURCE_VERSION));</span>
+    
+<span class="fc" id="L44">    static final Variant&lt;JavaLanguageVersion&gt; KIT_JAVA_TEST_TARGET_VERSION = createVariant(b -&gt; b //</span>
+<span class="fc" id="L45">        .name(&quot;Java Test Target Version&quot;) //</span>
+<span class="fc" id="L46">        .keys( &quot;KIT_JAVA_TEST_TARGET_VERSION&quot;, &quot;kit.java.test.target.version&quot;) //</span>
+<span class="fc" id="L47">        .parser(c -&gt; JavaLanguageVersion.of(c.toString())) //</span>
+<span class="fc" id="L48">        .link(KIT_JAVA_TEST_SOURCE_VERSION));</span>
+    
+<span class="fc" id="L50">    static final Variant&lt;String&gt; KIT_PROJECT_WORKFLOW = createVariant(b -&gt; b //</span>
+<span class="fc" id="L51">        .name(&quot;Project Workflow&quot;) //</span>
+<span class="fc" id="L52">        .keys( &quot;KIT_PROJECT_WORKFLOW&quot;, &quot;PROJECT_WORKFLOW&quot;, &quot;kit.project.workflow&quot;) //</span>
+<span class="fc" id="L53">        .parser(CharSequence::toString) //</span>
+<span class="fc" id="L54">        .fallback(() -&gt; &quot;unknown&quot;)</span>
+    );
+    
+<span class="fc" id="L57">    static final Variant&lt;String&gt; KIT_OSSRH_URL = createVariant(b -&gt; b //</span>
+<span class="fc" id="L58">        .name(&quot;Kit OSSRH URL&quot;) //</span>
+<span class="fc" id="L59">        .keys(&quot;KIT_OSSRH_URL&quot;, &quot;kit.ossrh.url&quot;) //</span>
+<span class="fc" id="L60">        .parser(CharSequence::toString) //</span>
+<span class="fc" id="L61">        .fallback(() -&gt; &quot;https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED&quot;) //</span>
+    );
+    
+<span class="fc" id="L64">    static final Variant&lt;String&gt; KIT_OSSRH_USERNAME = createVariant(b -&gt; b //</span>
+<span class="fc" id="L65">        .name(&quot;Kit OSSRH User Login Name&quot;) //</span>
+<span class="fc" id="L66">        .keys(&quot;KIT_OSSRH_USERNAME&quot;, &quot;OSSRH_USERNAME&quot;, &quot;kit.ossrh.username&quot;)</span>
+<span class="fc" id="L67">        .parser(CharSequence::toString) //</span>
+    );
+    
+<span class="fc" id="L70">    static final Variant&lt;String&gt; KIT_OSSRH_PASSWORD = createVariant(b -&gt; b //</span>
+<span class="fc" id="L71">        .name(&quot;Kit OSSRH Password&quot;) //</span>
+<span class="fc" id="L72">        .keys( &quot;KIT_OSSRH_PASSWORD&quot;, &quot;OSSRH_PASSWORD&quot;, &quot;kit.ossrh.password&quot;) //</span>
+<span class="fc" id="L73">        .parser(CharSequence::toString) //</span>
+    );
+    
+<span class="fc" id="L76">    static final Variant&lt;String&gt; KIT_GPG_SECRET_KEY = createVariant(b -&gt; b //</span>
+<span class="fc" id="L77">        .name(&quot;Kit OSSRH GPG Secret Key&quot;)</span>
+<span class="fc" id="L78">        .keys(&quot;KIT_OSSRH_GPG_SECRET_KEY&quot;, &quot;OSSRH_GPG_SECRET_KEY&quot;, &quot;kit.ossrh.gpg.secret.key&quot;)</span>
+<span class="fc" id="L79">        .parser(Configs::ofSecretKey)</span>
+    );
+    
+<span class="fc" id="L82">    static final Variant&lt;String&gt; KIT_GPG_SECRET_KEY_PASSWORD = createVariant(b -&gt; b //</span>
+<span class="fc" id="L83">        .name(&quot;Kit OSSRH GPG Secret Key Password&quot;) //</span>
+<span class="fc" id="L84">        .keys(&quot;KIT_OSSRH_GPG_SECRET_KEY_PASSWORD&quot;, &quot;OSSRH_GPG_SECRET_KEY_PASSWORD&quot;, &quot;kit.ossrh.gpg.secret.key.password&quot;) //</span>
+<span class="fc" id="L85">        .parser(CharSequence::toString)</span>
+    );
 
-    static &lt;T&gt; Optional&lt;T&gt; getConfig(Project project, Config&lt;T&gt; config) {
-<span class="fc bfc" id="L22" title="All 2 branches covered.">        for (String name : config.getKeys()) {</span>
-<span class="fc" id="L23">            final Optional&lt;String&gt; value = findConfig(project, name);</span>
-<span class="fc bfc" id="L24" title="All 2 branches covered.">            if (value.isPresent()) {</span>
-<span class="fc" id="L25">                return config.of(value.get());</span>
+    private static String ofSecretKey(CharSequence chars) {
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">        if (ofNullable(chars).isPresent()) {</span>
+<span class="fc" id="L90">            final String text = chars.toString();</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">            if (text.isEmpty()) {</span>
+<span class="fc" id="L92">                return null;</span>
             }
-<span class="fc" id="L27">        }</span>
-<span class="fc bfc" id="L28" title="All 2 branches covered.">        if (config.getLink().isPresent()) {</span>
-<span class="fc" id="L29">            Optional&lt;T&gt; linkValue = getConfig(project, config.getLink().get());</span>
-<span class="pc bpc" id="L30" title="1 of 2 branches missed.">            if (linkValue.isPresent()) {</span>
-<span class="fc" id="L31">                return linkValue;</span>
-            }
-        }
-<span class="fc" id="L34">        return config.getFallback();</span>
-    }
-    
-    static &lt;T&gt; String formatConfig(Config&lt;T&gt; config) {
-<span class="fc" id="L38">        final StringBuilder builder = new StringBuilder();</span>
-<span class="fc" id="L39">        config.getName().ifPresent(builder::append);</span>
-<span class="pc" id="L40">        config.getDescription().ifPresent(d -&gt; builder.append(&quot; : &quot;).append(d));</span>
-<span class="fc" id="L41">        return builder.toString();</span>
-    }
-    
-<span class="fc" id="L44">    static final Config&lt;Boolean&gt; KIT_LOG_ENABLED = new ConfigImpl&lt;&gt;(Boolean::parseBoolean)</span>
-<span class="fc" id="L45">        .name(&quot;Kit Log Enabled&quot;)</span>
-<span class="fc" id="L46">        .keys(&quot;KIT_LOG_ENABLED&quot;, &quot;kit.log.enabled&quot;, &quot;gradle.kit.log.enabled&quot;)</span>
-<span class="pc" id="L47">        .fallback(() -&gt; false)</span>
-<span class="fc" id="L48">        .description(&quot;Enable or Disable Kit Logging&quot;);</span>
-    
-<span class="fc" id="L50">    static final Config&lt;JavaLanguageVersion&gt; KIT_JAVA_COMPILER_VERSION = new ConfigImpl&lt;&gt;(JavaLanguageVersion::of)</span>
-<span class="fc" id="L51">        .name(&quot;Java Compiler Version&quot;)</span>
-<span class="fc" id="L52">        .keys( &quot;KIT_JAVA_COMPILER_VERSION&quot;, &quot;kit.java.compiler.version&quot;)</span>
-<span class="fc" id="L53">        .fallback(() -&gt; JavaLanguageVersion.of(&quot;17&quot;));</span>
-    
-<span class="fc" id="L55">    static final Config&lt;JavaLanguageVersion&gt; KIT_JAVA_SOURCE_VERSION =</span>
-        new ConfigImpl&lt;&gt;(JavaLanguageVersion::of)
-<span class="fc" id="L57">        .name(&quot;Java Source Version&quot;)</span>
-<span class="fc" id="L58">        .keys( &quot;KIT_JAVA_SOURCE_VERSION&quot;, &quot;kit.java.source.version&quot;)</span>
-<span class="fc" id="L59">        .fallback(() -&gt; JavaLanguageVersion.of(&quot;9&quot;));</span>
-    
-<span class="fc" id="L61">    static final Config&lt;JavaLanguageVersion&gt; KIT_JAVA_TARGET_VERSION = new ConfigImpl&lt;&gt;(JavaLanguageVersion::of)</span>
-<span class="fc" id="L62">        .name(&quot;Java Target Version&quot;)</span>
-<span class="fc" id="L63">        .keys( &quot;KIT_JAVA_TARGET_VERSION&quot;, &quot;kit.java.target.version&quot;)</span>
-<span class="fc" id="L64">        .fallback(KIT_JAVA_SOURCE_VERSION);</span>
-    
-<span class="fc" id="L66">    static final Config&lt;JavaLanguageVersion&gt; KIT_JAVA_TEST_SOURCE_VERSION = new ConfigImpl&lt;&gt;(JavaLanguageVersion::of)</span>
-<span class="fc" id="L67">        .name(&quot;Java Test Source Version&quot;)</span>
-<span class="fc" id="L68">        .keys( &quot;KIT_JAVA_TEST_SOURCE_VERSION&quot;, &quot;kit.java.test.source.version&quot;)</span>
-<span class="fc" id="L69">        .fallback(KIT_JAVA_SOURCE_VERSION);</span>
-    
-<span class="fc" id="L71">    static final Config&lt;JavaLanguageVersion&gt; KIT_JAVA_TEST_TARGET_VERSION = new ConfigImpl&lt;&gt;(JavaLanguageVersion::of)</span>
-<span class="fc" id="L72">        .name(&quot;Java Test Target Version&quot;)</span>
-<span class="fc" id="L73">        .keys( &quot;KIT_JAVA_TEST_TARGET_VERSION&quot;, &quot;kit.java.test.target.version&quot;)</span>
-<span class="fc" id="L74">        .fallback(KIT_JAVA_TEST_SOURCE_VERSION);</span>
-    
-<span class="fc" id="L76">    static final Config&lt;String&gt; KIT_PROJECT_WORKFLOW = new ConfigImpl&lt;&gt;(identity())</span>
-<span class="fc" id="L77">        .name(&quot;Project Workflow&quot;)</span>
-<span class="fc" id="L78">        .keys( &quot;KIT_PROJECT_WORKFLOW&quot;, &quot;PROJECT_WORKFLOW&quot;, &quot;kit.project.workflow&quot;)</span>
-<span class="pc" id="L79">        .fallback(() -&gt; &quot;unknown&quot;);</span>
-    
-<span class="fc" id="L81">    static final Config&lt;String&gt; KIT_OSSRH_URL = new ConfigImpl&lt;&gt;(identity())</span>
-<span class="fc" id="L82">        .name(&quot;Kit OSSRH URL&quot;)</span>
-<span class="fc" id="L83">        .keys(&quot;KIT_OSSRH_URL&quot;, &quot;kit.ossrh.url&quot;)</span>
-<span class="pc" id="L84">        .fallback(() -&gt; &quot;https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED&quot;);</span>
-    
-<span class="fc" id="L86">    static final Config&lt;String&gt; KIT_OSSRH_USERNAME = new ConfigImpl&lt;&gt;(identity())</span>
-<span class="fc" id="L87">        .name(&quot;Kit OSSRH User Login Name&quot;)</span>
-<span class="fc" id="L88">        .keys(&quot;KIT_OSSRH_USERNAME&quot;, &quot;OSSRH_USERNAME&quot;, &quot;kit.ossrh.username&quot;);</span>
-    
-<span class="fc" id="L90">    static final Config&lt;String&gt; KIT_OSSRH_PASSWORD = new ConfigImpl&lt;&gt;(identity())</span>
-<span class="fc" id="L91">        .name(&quot;Kit OSSRH Password&quot;)</span>
-<span class="fc" id="L92">        .keys( &quot;KIT_OSSRH_PASSWORD&quot;, &quot;OSSRH_PASSWORD&quot;, &quot;kit.ossrh.password&quot;);</span>
-    
-<span class="fc" id="L94">    static final Config&lt;String&gt; KIT_GPG_SECRET_KEY = new ConfigImpl&lt;&gt;(Configs::ofSecretKey)</span>
-<span class="fc" id="L95">        .name(&quot;Kit OSSRH GPG Secret Key&quot;)</span>
-<span class="fc" id="L96">        .keys( &quot;KIT_OSSRH_GPG_SECRET_KEY&quot;, &quot;OSSRH_GPG_SECRET_KEY&quot;, &quot;kit.ossrh.gpg.secret.key&quot;);</span>
-    
-<span class="fc" id="L98">    static final Config&lt;String&gt; KIT_GPG_SECRET_KEY_PASSWORD = new ConfigImpl&lt;&gt;(identity())</span>
-<span class="fc" id="L99">        .name(&quot;Kit OSSRH GPG Secret Key Password&quot;)</span>
-<span class="fc" id="L100">        .keys(&quot;KIT_OSSRH_GPG_SECRET_KEY_PASSWORD&quot;, &quot;OSSRH_GPG_SECRET_KEY_PASSWORD&quot;, &quot;kit.ossrh.gpg.secret.key.password&quot;);</span>
-    
-    private static GradleException getConfigException(Project project, Config&lt;?&gt; config) {
-<span class="fc" id="L103">        return new GradleException(&quot;Missing config for project &quot; + project.getName() + &quot; &quot; + formatConfig(config));</span>
-    }
-    
-    private static String ofSecretKey(String text) {
-<span class="pc bpc" id="L107" title="1 of 2 branches missed.">        if (ofNullable(text).isPresent()) {</span>
-<span class="fc bfc" id="L108" title="All 2 branches covered.">            if (text.isEmpty()) {</span>
-<span class="fc" id="L109">                return null;</span>
-            }
-<span class="fc bfc" id="L111" title="All 2 branches covered.">            if (text.startsWith(&quot;-&quot;)) {</span>
-<span class="fc" id="L112">                return text;</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">            if (text.startsWith(&quot;-&quot;)) {</span>
+<span class="fc" id="L95">                return text;</span>
             }
             try {
-<span class="fc" id="L115">                return base64Decode(text);</span>
-<span class="fc" id="L116">            } catch (IllegalArgumentException thrown) {</span>
-<span class="fc" id="L117">                throw new GradleException(&quot;Invalid gpg secret key.&quot;);</span>
+<span class="fc" id="L98">                return base64Decode(text);</span>
+<span class="fc" id="L99">            } catch (IllegalArgumentException thrown) {</span>
+<span class="fc" id="L100">                throw new GradleException(&quot;Invalid gpg secret key.&quot;);</span>
             }
         }
-<span class="nc" id="L120">        return null;</span>
+<span class="nc" id="L103">        return null;</span>
     }
-    
-    private static Optional&lt;String&gt; findConfig(Project project, String name) {
-<span class="fc" id="L124">        final Provider&lt;@NotNull String&gt; variable = project.getProviders().environmentVariable(name);</span>
-<span class="pc bpc" id="L125" title="1 of 2 branches missed.">        if (variable.isPresent()) {</span>
-<span class="nc" id="L126">            return Optional.of(variable.get());</span>
-        }
-<span class="fc" id="L128">        return ofNullable(project.findProperty(name))</span>
-<span class="fc" id="L129">            .or(() -&gt; findGlobalConfig(name))</span>
-<span class="fc" id="L130">            .map(Object::toString);</span>
-    }
-    
-    private static Optional&lt;String&gt; findGlobalConfig(String name) {
-        try {
-<span class="fc" id="L135">            final Object systemValue = System.getProperty(name);</span>
-<span class="fc bfc" id="L136" title="All 2 branches covered.">            if (ofNullable(systemValue).isPresent()) {</span>
-<span class="fc" id="L137">                return Optional.of(systemValue.toString());</span>
-            }
-<span class="fc" id="L139">            return ofNullable(System.getenv(name));</span>
-<span class="nc" id="L140">        } catch (SecurityException ignored) {</span>
-<span class="nc" id="L141">            return Optional.empty();</span>
-        }
-    }
-    
-<span class="fc" id="L145">    private Configs() {</span>
-<span class="fc" id="L146">        throw new AssertionError(&quot;Utility class&quot;);</span>
+
+<span class="fc" id="L106">    private Configs() {</span>
+<span class="fc" id="L107">        throw new AssertionError(&quot;Utility class&quot;);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

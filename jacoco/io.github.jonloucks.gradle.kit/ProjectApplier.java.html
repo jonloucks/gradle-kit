@@ -1,50 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProjectApplier.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">main-project</a> &gt; <a href="index.source.html" class="el_package">io.github.jonloucks.gradle.kit</a> &gt; <span class="el_source">ProjectApplier.java</span></div><h1>ProjectApplier.java</h1><pre class="source lang-java linenums">package io.github.jonloucks.gradle.kit;
 
+import io.github.jonloucks.variants.api.Environment;
+import io.github.jonloucks.variants.api.Variant;
 import org.gradle.api.Project;
+import org.gradle.api.provider.Provider;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
+import static io.github.jonloucks.variants.api.GlobalVariants.createEnvironment;
+
 abstract class ProjectApplier {
-<span class="fc" id="L8">    ProjectApplier(Project project) {</span>
-<span class="fc" id="L9">        this.project = project;</span>
-<span class="fc" id="L10">    }</span>
+<span class="fc" id="L14">    ProjectApplier(Project project) {</span>
+<span class="fc" id="L15">        this.project = project;</span>
+<span class="fc" id="L16">        this.environment = createEnvironment( b -&gt; b //</span>
+<span class="fc" id="L17">            .addSystemEnvironmentSource() //</span>
+<span class="fc" id="L18">            .addSource(this::projectEnvironmentVariable) //</span>
+<span class="fc" id="L19">            .addSystemPropertiesSource() //</span>
+<span class="fc" id="L20">            .addSource(this::projectProperty) //</span>
+        );
+<span class="fc" id="L22">    }</span>
+    
+    private Optional&lt;CharSequence&gt; projectProperty(String key) {
+<span class="fc" id="L25">        return Optional.ofNullable(project.findProperty(key)).map(Object::toString);</span>
+    }
+    
+    private Optional&lt;CharSequence&gt; projectEnvironmentVariable(String key) {
+<span class="fc" id="L29">        final Provider&lt;@NotNull String&gt; variable = project.getProviders().environmentVariable(key);</span>
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">        if (variable.isPresent()) {</span>
+<span class="nc" id="L31">            return Optional.of(variable.get());</span>
+        } else {
+<span class="fc" id="L33">            return Optional.empty();</span>
+        }
+    }
     
     abstract void apply();
     
     final Project getProject() {
-<span class="fc" id="L15">        return project;</span>
+<span class="fc" id="L40">        return project;</span>
     }
     
     final boolean isRootProject() {
-<span class="fc" id="L19">        return getProject().getRootProject().equals(getProject());</span>
+<span class="fc" id="L44">        return getProject().getRootProject().equals(getProject());</span>
     }
     
     final boolean isTestProject() {
-<span class="fc" id="L23">        return isTestProject(getProject());</span>
+<span class="fc" id="L48">        return isTestProject(getProject());</span>
     }
     
     final boolean isTestProject(Project project) {
-<span class="pc bpc" id="L27" title="1 of 4 branches missed.">        return project.getName().endsWith(&quot;-test&quot;) || project.getName().endsWith(&quot;-tests&quot;);</span>
+<span class="pc bpc" id="L52" title="1 of 4 branches missed.">        return project.getName().endsWith(&quot;-test&quot;) || project.getName().endsWith(&quot;-tests&quot;);</span>
     }
 
-    final &lt;T&gt; T requireConfig(Config&lt;T&gt; config) {
-<span class="fc" id="L31">        return Configs.requireConfig(getProject(), config);</span>
+    final &lt;T&gt; Optional&lt;T&gt; getConfig(Variant&lt;T&gt; variant) {
+<span class="fc" id="L56">        return environment.findVariance(variant);</span>
     }
     
-    final &lt;T&gt; Optional&lt;T&gt; getConfig(Config&lt;T&gt; config) {
-<span class="fc" id="L35">        return Configs.getConfig(getProject(), config);</span>
+    final &lt;T&gt; T requireConfig(Variant&lt;T&gt; variant) {
+<span class="fc" id="L60">        return environment.getVariance(variant);</span>
     }
     
     final void log(String text) {
-<span class="fc bfc" id="L39" title="All 2 branches covered.">        if (isLogEnabled()) {</span>
-<span class="fc" id="L40">            System.out.println(text);</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        if (isLogEnabled()) {</span>
+<span class="fc" id="L65">            System.out.println(text);</span>
         }
-<span class="fc" id="L42">    }</span>
+<span class="fc" id="L67">    }</span>
     
     final boolean isLogEnabled() {
-<span class="fc" id="L45">        return getConfig(Configs.KIT_LOG_ENABLED).orElse(false);</span>
+<span class="fc" id="L70">        return environment.findVariance(Configs.KIT_LOG_ENABLED).orElse(false);</span>
     }
 
     private final Project project;
+    private final Environment environment;
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
