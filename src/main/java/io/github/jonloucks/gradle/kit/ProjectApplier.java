@@ -4,7 +4,6 @@ import io.github.jonloucks.variants.api.Environment;
 import io.github.jonloucks.variants.api.Variant;
 import org.gradle.api.Project;
 import org.gradle.api.provider.Provider;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -26,7 +25,7 @@ abstract class ProjectApplier {
     }
     
     private Optional<CharSequence> projectEnvironmentVariable(String key) {
-        final Provider<@NotNull String> variable = project.getProviders().environmentVariable(key);
+        final Provider<String> variable = project.getProviders().environmentVariable(key);
         if (variable.isPresent()) {
             return Optional.of(variable.get());
         } else {

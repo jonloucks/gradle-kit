@@ -7,7 +7,6 @@ import org.gradle.api.Project;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.tasks.bundling.Tar;
 import org.gradle.api.tasks.bundling.Zip;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,7 +24,7 @@ import static java.util.Optional.ofNullable;
 /**
  * Extension of the Gradle 'maven-publish' plugin
  */
-public final class MavenPublishPlugin implements Plugin<@NotNull Project> {
+public final class MavenPublishPlugin implements Plugin<Project> {
     
     /**
      * Invoked via reflection by Gradle

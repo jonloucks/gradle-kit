@@ -2,12 +2,11 @@ package io.github.jonloucks.gradle.kit;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Extension of the Gradle 'java-library' plugin
  */
-public final class JavaLibraryPlugin implements Plugin<@NotNull Project> {
+public final class JavaLibraryPlugin implements Plugin<Project> {
     
     /**
      * Invoked via reflection by Gradle

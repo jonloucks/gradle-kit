@@ -13,7 +13,6 @@ import org.gradle.testing.jacoco.tasks.JacocoCoverageVerification;
 import org.gradle.testing.jacoco.tasks.JacocoReport;
 import org.gradle.testing.jacoco.tasks.JacocoReportBase;
 import org.gradle.testing.jacoco.tasks.rules.JacocoViolationRulesContainer;
-import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 
@@ -46,7 +45,7 @@ final class JacocoApplier extends ProjectApplier {
             .configure(configureExistingVerificationReport());
     }
     
-    private @NotNull Action<@NotNull JacocoCoverageVerification> configureExistingVerificationReport() {
+    private Action<JacocoCoverageVerification> configureExistingVerificationReport() {
         return verification -> {
             if (isRootProject()) {
                 verification.violationRules(rules -> {
@@ -78,10 +77,10 @@ final class JacocoApplier extends ProjectApplier {
         });
     }
     
-    private @NotNull Action<@NotNull JacocoReport> configureExistingReport() {
+    private Action<JacocoReport> configureExistingReport() {
         
         return reportTask -> {
-            final TaskCollection<@NotNull Test> testingTasks = getTestingTasks(getProject());
+            final TaskCollection<Test> testingTasks = getTestingTasks(getProject());
             reportTask.shouldRunAfter(testingTasks);
             reportTask.dependsOn(testingTasks);
             reportTask.reports(reports -> {
@@ -95,12 +94,12 @@ final class JacocoApplier extends ProjectApplier {
         };
     }
 
-    private @NotNull Action<@NotNull Project> getAllJacocoFiles(JacocoReportBase rootReport) {
+    private Action<Project> getAllJacocoFiles(JacocoReportBase rootReport) {
         return project -> {
             if (isTestProject(project)) {
                 return;
             }
-            final TaskCollection<@NotNull Test> testingTasks = getTestingTasks(project);
+            final TaskCollection<Test> testingTasks = getTestingTasks(project);
             rootReport.shouldRunAfter(testingTasks);
             rootReport.dependsOn(testingTasks);
             
@@ -113,7 +112,7 @@ final class JacocoApplier extends ProjectApplier {
         };
     }
     
-    private static TaskCollection<@NotNull Test> getTestingTasks(Project project) {
+    private static TaskCollection<Test> getTestingTasks(Project project) {
         return project.getTasks().withType(Test.class).matching(t -> {
             switch (t.getName()) {
                 case "test":

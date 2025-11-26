@@ -5,7 +5,6 @@ import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
-import org.jetbrains.annotations.NotNull;
 
 import static java.util.Optional.ofNullable;
 
@@ -32,7 +31,7 @@ final class TaggingApplier extends ProjectApplier {
         final String taskName = includeTag + "Test";
         log("Creating " + taskName + "...");
         
-        final TaskProvider<@NotNull Test> taggedTaskProvider = getProject().getTasks().register(taskName, TEST_TYPE, task -> {
+        final TaskProvider<Test> taggedTaskProvider = getProject().getTasks().register(taskName, TEST_TYPE, task -> {
             log("Configuring " + taskName + ".");
             task.setDescription("Runs tests with tag: " + includeTag);
             task.setGroup("verification");
