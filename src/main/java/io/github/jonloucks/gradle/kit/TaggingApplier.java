@@ -7,6 +7,8 @@ import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
 
+import java.util.Optional;
+
 import static io.github.jonloucks.gradle.kit.Configs.*;
 
 final class TaggingApplier extends ProjectApplier {
@@ -18,7 +20,6 @@ final class TaggingApplier extends ProjectApplier {
     @Override
     void apply() {
         getProject().afterEvaluate(x -> {
-            
             log("Applying Test Tagging Rules ...");
             
             configureStandardTestTasks();
@@ -42,14 +43,11 @@ final class TaggingApplier extends ProjectApplier {
                 options.excludeTags(requireConfig(excludeVariant));
             });
             
-            final SourceSetContainer sourceSets = getProject().getExtensions().getByType(SourceSetContainer.class);
-            final SourceSet mainTestSourceSet = sourceSets.stream()
-                .filter(ss -> ss.getName().equals("test"))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("No test source set found"));
+            findTestSourceSet().ifPresent(sourceSet -> {
+                task.setTestClassesDirs(sourceSet.getOutput().getClassesDirs());
+                task.setClasspath(sourceSet.getRuntimeClasspath());
+            });
             
-            task.setTestClassesDirs(mainTestSourceSet.getOutput().getClassesDirs());
-            task.setClasspath(mainTestSourceSet.getRuntimeClasspath());
             task.shouldRunAfter("test");
             log("Configured " + taskName + ".");
         });
@@ -57,8 +55,17 @@ final class TaggingApplier extends ProjectApplier {
         getProject().getTasks().named("check").configure(task -> task.dependsOn(taggedTaskProvider));
     }
     
+    private Optional<SourceSet> findTestSourceSet() {
+        return getProject()
+            .getExtensions() //
+            .getByType(SourceSetContainer.class) //
+            .stream() //
+            .filter(ss -> ss.getName().equals("test")) //
+            .findFirst();
+    }
+    
     private void configureStandardTestTasks() {
-        getProject().getTasks().named("test", TEST_TYPE).configure(task -> {
+        getProject().getTasks().named("test", TEST_TYPE).configure(task -> { //
             task.useJUnitPlatform(configure -> {
                 configure.includeTags(requireConfig(KIT_INCLUDE_TAGS));
                 configure.excludeTags(requireConfig(KIT_EXCLUDE_TAGS));
