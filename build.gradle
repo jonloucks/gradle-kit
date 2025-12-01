@@ -2,6 +2,7 @@ buildscript {
     repositories {
         gradlePluginPortal()
         google()
+        mavenLocal()
     }
 }
 
@@ -18,6 +19,7 @@ defaultTasks 'check', 'jacocoTestReport', 'jacocoTestCoverageVerification', 'pub
 repositories {
     gradlePluginPortal()
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {

@@ -1,159 +1,147 @@
 package io.github.jonloucks.gradle.kit;
 
+import io.github.jonloucks.variants.api.Parsers;
 import io.github.jonloucks.variants.api.Variant;
 import org.gradle.api.GradleException;
 import org.gradle.jvm.toolchain.JavaLanguageVersion;
 
-import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 import static io.github.jonloucks.gradle.kit.Internal.base64Decode;
+import static io.github.jonloucks.variants.api.Checks.textCheck;
 import static io.github.jonloucks.variants.api.GlobalVariants.createVariant;
-import static java.util.Optional.ofNullable;
 
 final class Configs {
     
-    static final Variant<Boolean> KIT_LOG_ENABLED = createVariant(b -> b //
+    static final Variant<Boolean> KIT_LOG_ENABLED = createVariant((b,p) -> b //
         .name("Kit Log Enabled") //
         .keys("KIT_LOG_ENABLED", "kit.log.enabled", "gradle.kit.log.enabled") //
-        .parser(t -> Boolean.parseBoolean(t.toString()))
+        .of(p.ofBoolean())
         .fallback(() -> false) //
         .description("Enable or Disable Kit Logging"));
     
-    static final Variant<JavaLanguageVersion> KIT_JAVA_COMPILER_VERSION = createVariant(b -> b //
+    static final Variant<JavaLanguageVersion> KIT_JAVA_COMPILER_VERSION = createVariant((b,p) -> b //
         .name("Java Compiler Version") //
         .keys("KIT_JAVA_COMPILER_VERSION", "kit.java.compiler.version") //
-        .parser(c -> JavaLanguageVersion.of(c.toString())) //
+        .of(ofJavaLanguageVersion(p)) //
         .fallback(() -> JavaLanguageVersion.of("17")));
     
-    static final Variant<JavaLanguageVersion> KIT_JAVA_SOURCE_VERSION = createVariant(b -> b //
+    static final Variant<JavaLanguageVersion> KIT_JAVA_SOURCE_VERSION = createVariant((b,p) -> b //
         .name("Java Source Version") //
         .keys( "KIT_JAVA_SOURCE_VERSION", "kit.java.source.version") //
-        .parser(c -> JavaLanguageVersion.of(c.toString())) //
+        .of(ofJavaLanguageVersion(p)) //
         .fallback(() -> JavaLanguageVersion.of("9")));
     
-    static final Variant<JavaLanguageVersion> KIT_JAVA_TARGET_VERSION = createVariant(b -> b //
+    static final Variant<JavaLanguageVersion> KIT_JAVA_TARGET_VERSION = createVariant((b,p) -> b //
         .name("Java Target Version") //
         .keys( "KIT_JAVA_TARGET_VERSION", "kit.java.target.version") //
-        .parser(c -> JavaLanguageVersion.of(c.toString())) //
+        .of(ofJavaLanguageVersion(p)) //
         .link(KIT_JAVA_SOURCE_VERSION));
     
-    static final Variant<JavaLanguageVersion> KIT_JAVA_TEST_SOURCE_VERSION = createVariant(b -> b //
+    static final Variant<JavaLanguageVersion> KIT_JAVA_TEST_SOURCE_VERSION = createVariant((b,p) -> b //
         .name("Java Test Source Version") //
         .keys( "KIT_JAVA_TEST_SOURCE_VERSION", "kit.java.test.source.version") //
-        .parser(c -> JavaLanguageVersion.of(c.toString())) //
+        .of(ofJavaLanguageVersion(p)) //
         .link(KIT_JAVA_SOURCE_VERSION));
     
-    static final Variant<JavaLanguageVersion> KIT_JAVA_TEST_TARGET_VERSION = createVariant(b -> b //
+    static final Variant<JavaLanguageVersion> KIT_JAVA_TEST_TARGET_VERSION = createVariant((b,p) -> b //
         .name("Java Test Target Version") //
         .keys( "KIT_JAVA_TEST_TARGET_VERSION", "kit.java.test.target.version") //
-        .parser(c -> JavaLanguageVersion.of(c.toString())) //
+        .of(ofJavaLanguageVersion(p)) //
         .link(KIT_JAVA_TEST_SOURCE_VERSION));
     
-    static final Variant<String> KIT_PROJECT_WORKFLOW = createVariant(b -> b //
+    static final Variant<String> KIT_PROJECT_WORKFLOW = createVariant((b,p) -> b //
         .name("Project Workflow") //
         .keys( "KIT_PROJECT_WORKFLOW", "PROJECT_WORKFLOW", "kit.project.workflow") //
-        .parser(Configs::ofTrimAndNotEmpty) //
+        .of(p.ofString()) //
         .fallback(() -> "unknown")
     );
     
-    static final Variant<String> KIT_OSSRH_URL = createVariant(b -> b //
+    static final Variant<String> KIT_OSSRH_URL = createVariant((b,p) -> b //
         .name("Kit OSSRH URL") //
         .keys("KIT_OSSRH_URL", "kit.ossrh.url") //
-        .parser(Configs::ofTrimAndNotEmpty) //
+        .of(p.ofString()) //
         .fallback(() -> "https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED") //
     );
     
-    static final Variant<String> KIT_OSSRH_USERNAME = createVariant(b -> b //
+    static final Variant<String> KIT_OSSRH_USERNAME = createVariant((b,p) -> b //
         .name("Kit OSSRH User Login Name") //
         .keys("KIT_OSSRH_USERNAME", "OSSRH_USERNAME", "kit.ossrh.username")
-        .parser(Configs::ofTrimAndNotEmpty) //
+        .of(p.ofString()) //
     );
     
-    static final Variant<String> KIT_OSSRH_PASSWORD = createVariant(b -> b //
+    static final Variant<String> KIT_OSSRH_PASSWORD = createVariant((b,p) -> b //
         .name("Kit OSSRH Password") //
         .keys( "KIT_OSSRH_PASSWORD", "OSSRH_PASSWORD", "kit.ossrh.password") //
-        .parser(Configs::ofTrimAndNotEmpty) //
+        .of(p.ofString()) //
     );
     
-    static final Variant<String> KIT_GPG_SECRET_KEY = createVariant(b -> b //
+    static final Variant<String> KIT_GPG_SECRET_KEY = createVariant((b,p) -> b //
         .name("Kit OSSRH GPG Secret Key")
         .keys("KIT_OSSRH_GPG_SECRET_KEY", "OSSRH_GPG_SECRET_KEY", "kit.ossrh.gpg.secret.key")
-        .parser(Configs::ofSecretKey)
+        .of(p.ofTrimAndSkipEmpty(Configs::parseSecretKey))
     );
     
-    static final Variant<String> KIT_GPG_SECRET_KEY_PASSWORD = createVariant(b -> b //
+    static final Variant<String> KIT_GPG_SECRET_KEY_PASSWORD = createVariant((b,p) -> b //
         .name("Kit OSSRH GPG Secret Key Password") //
         .keys("KIT_OSSRH_GPG_SECRET_KEY_PASSWORD", "OSSRH_GPG_SECRET_KEY_PASSWORD", "kit.ossrh.gpg.secret.key.password") //
-        .parser(Configs::ofTrimAndNotEmpty)
+        .of(p.ofString()) //
     );
     
-    static final Variant<String[]> KIT_INCLUDE_TAGS = createVariant(b -> b //
+    static final Variant<String[]> KIT_INCLUDE_TAGS = createVariant((b,p) -> b //
         .name("Java Test Include Tagging") //
         .keys("KIT_INCLUDE_TAGS", "kit.include.tags", "includeTags") //
-        .parser(Configs::splitTextByCommaAndTrim) //
+        .of(ofStringArray(p)) //
         .fallback(() -> new String[0])
     );
 
-    static final Variant<String[]> KIT_EXCLUDE_TAGS = createVariant(b -> b //
+    static final Variant<String[]> KIT_EXCLUDE_TAGS = createVariant((b,p) -> b //
         .name("Java Test Exclude Tagging") //
         .keys("KIT_EXCLUDE_TAGS", "kit.exclude.tags", "excludeTags") //
-        .parser(Configs::splitTextByCommaAndTrim) //
+        .of(ofStringArray(p)) //
         .fallback(() -> new String[] { "unstable", "slow", "integration", "functional"})
     );
     
-    static final Variant<String[]> KIT_INTEGRATION_EXCLUDE_TAGS = createVariant(b -> b //
+    static final Variant<String[]> KIT_INTEGRATION_EXCLUDE_TAGS = createVariant((b,p) -> b //
         .name("Java Integration Test Exclude Tagging") //
         .keys("KIT_INTEGRATION_EXCLUDE_TAGS", "kit.integration.exclude.tags", "excludeIntegrationTags") //
-        .parser(Configs::splitTextByCommaAndTrim) //
+        .of(ofStringArray(p)) //
         .link(KIT_EXCLUDE_TAGS) //
         .fallback(() -> new String[] { "unstable", "slow", "functional" })
     );
     
-    static final Variant<String[]> KIT_FUNCTIONAL_EXCLUDE_TAGS = createVariant(b -> b //
+    static final Variant<String[]> KIT_FUNCTIONAL_EXCLUDE_TAGS = createVariant((b,p) -> b //
         .name("Java Functional Exclude Test Tagging") //
         .keys("KIT_FUNCTIONAL_EXCLUDE_TAGS", "kit.functional.exclude.tags") //
-        .parser(Configs::splitTextByCommaAndTrim) //
+        .of(ofStringArray(p)) //
         .link(KIT_EXCLUDE_TAGS) //
         .fallback(() -> new String[] { "unstable", "slow", "integration" })
     );
     
-    private static String ofTrimAndNotEmpty(CharSequence value) {
-        if (ofNullable(value).isPresent()) {
-            final String string = value.toString().trim();
-            if (string.isEmpty()) {
-                return null;
-            }
-            return string;
-        }
-        return null;
+    private static Function<CharSequence,Optional<String[]>> ofStringArray(Parsers parsers) {
+        final Function<CharSequence,Optional<List<String>>> ofList = parsers.ofList(parsers.ofString(), ",");
+        
+        return text -> ofList.apply(text).map(strings -> strings.toArray(new String[0]));
     }
     
-    private static String[] splitTextByCommaAndTrim(CharSequence chars) {
-        if (ofNullable(chars).isPresent()) {
-            return Arrays.stream(chars.toString().split(","))
-                .map(String::trim)
-                .toArray(String[]::new);
-        } else {
-            return new String[0];
-        }
+    private static Function<CharSequence, Optional<JavaLanguageVersion>> ofJavaLanguageVersion(Parsers parsers) {
+        return parsers.ofTrimAndSkipEmpty(parsers.string(JavaLanguageVersion::of));
     }
-
-    private static String ofSecretKey(CharSequence chars) {
-        if (ofNullable(chars).isPresent()) {
-            final String text = chars.toString();
-            if (text.isEmpty()) {
-                return null;
-            }
-            if (text.startsWith("-")) {
-                return text;
-            }
-            try {
-                return base64Decode(text);
-            } catch (IllegalArgumentException thrown) {
-                throw new GradleException("Invalid gpg secret key.");
-            }
+    
+    private static String parseSecretKey(CharSequence text) {
+        final CharSequence validText = textCheck(text);
+        final String string = validText.toString();
+  
+        if (string.startsWith("-")) {
+            return string;
         }
-        return null;
+        try {
+            return base64Decode(string);
+        } catch (IllegalArgumentException thrown) {
+            throw new GradleException("Invalid gpg secret key.");
+        }
     }
 
     private Configs() {
