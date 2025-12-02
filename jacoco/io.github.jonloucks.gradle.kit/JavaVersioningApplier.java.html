@@ -5,27 +5,27 @@ import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.jvm.toolchain.JavaLanguageVersion;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 import static io.github.jonloucks.gradle.kit.Configs.*;
-import static java.util.Optional.empty;
+import static io.github.jonloucks.gradle.kit.Internal.adjustCompileArguments;
 
 @SuppressWarnings(&quot;CodeBlock2Expr&quot;)
 final class JavaVersioningApplier extends ProjectApplier {
     
     JavaVersioningApplier(Project project) {
-<span class="fc" id="L20">        super(project);</span>
-<span class="fc" id="L21">    }</span>
+<span class="fc" id="L18">        super(project);</span>
+<span class="fc" id="L19">    }</span>
     
     @Override
     void apply() {
-<span class="fc" id="L25">        log(&quot;Applying Java versions ...&quot;);</span>
-  
-<span class="fc" id="L27">        getProject().afterEvaluate(x -&gt; {</span>
-<span class="fc" id="L28">            configureJavaVersions();</span>
+<span class="fc" id="L23">        applyOnce(() -&gt; {</span>
+<span class="fc" id="L24">            log(&quot;Applying Java versions ...&quot;);</span>
+            
+<span class="fc" id="L26">            getProject().afterEvaluate(x -&gt; {</span>
+<span class="fc" id="L27">                configureJavaVersions();</span>
+<span class="fc" id="L28">            });</span>
 <span class="fc" id="L29">        });</span>
 <span class="fc" id="L30">    }</span>
     
@@ -56,63 +56,58 @@ final class JavaVersioningApplier extends ProjectApplier {
     
     private void configureJavaCompile(JavaCompile compile) {
 <span class="fc" id="L58">        getReleaseVersion().ifPresent(x -&gt; compile.getOptions().getRelease().set(x.asInt()));</span>
-        
-<span class="fc" id="L60">        final List&lt;String&gt; compilerArgs = new ArrayList&lt;&gt;(compile.getOptions().getCompilerArgs());</span>
-<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if (!compilerArgs.contains(&quot;-Xlint:all&quot;)) {</span>
-<span class="fc" id="L62">            compilerArgs.add(&quot;-Xlint:all&quot;);</span>
-<span class="fc" id="L63">            compile.getOptions().setCompilerArgs(compilerArgs);</span>
-        }
-<span class="fc" id="L65">    }</span>
+<span class="fc" id="L59">        compile.getOptions().setCompilerArgs(adjustCompileArguments(compile.getOptions().getCompilerArgs()));</span>
+<span class="fc" id="L60">    }</span>
     
     private void configureTestJavaCompile(JavaCompile compile) {
-<span class="fc" id="L68">        getTestReleaseVersion().ifPresent(x -&gt; compile.getOptions().getRelease().set(x.asInt()));</span>
-<span class="fc" id="L69">    }</span>
+<span class="fc" id="L63">        getTestReleaseVersion().ifPresent(x -&gt; compile.getOptions().getRelease().set(x.asInt()));</span>
+<span class="fc" id="L64">    }</span>
     
     private void configureJavaPlugin() {
-<span class="fc" id="L72">        final JavaPluginExtension javaPlugin = getProject().getExtensions().getByType(JavaPluginExtension.class);</span>
-<span class="fc" id="L73">        javaPlugin.getModularity().getInferModulePath().set(true);</span>
-<span class="fc" id="L74">        getSourceCompatibility().ifPresent(javaPlugin::setSourceCompatibility);</span>
-<span class="fc" id="L75">        getTargetCompatibility().ifPresent(javaPlugin::setTargetCompatibility);</span>
-<span class="fc" id="L76">        getCompilerVersion().ifPresent(javaPlugin.getToolchain().getLanguageVersion()::set);</span>
-<span class="fc" id="L77">        javaPlugin.withJavadocJar();</span>
-<span class="fc" id="L78">        javaPlugin.withSourcesJar();</span>
-<span class="fc" id="L79">    }</span>
+<span class="fc" id="L67">        final JavaPluginExtension javaPlugin = getProject().getExtensions().getByType(JavaPluginExtension.class);</span>
+<span class="fc" id="L68">        javaPlugin.getModularity().getInferModulePath().set(true);</span>
+<span class="fc" id="L69">        getSourceCompatibility().ifPresent(javaPlugin::setSourceCompatibility);</span>
+<span class="fc" id="L70">        getTargetCompatibility().ifPresent(javaPlugin::setTargetCompatibility);</span>
+<span class="fc" id="L71">        getCompilerVersion().ifPresent(javaPlugin.getToolchain().getLanguageVersion()::set);</span>
+<span class="fc" id="L72">        javaPlugin.withJavadocJar();</span>
+<span class="fc" id="L73">        javaPlugin.withSourcesJar();</span>
+<span class="fc" id="L74">    }</span>
     
     private Optional&lt;JavaLanguageVersion&gt; getCompilerVersion() {
-<span class="fc" id="L82">        return Optional.of(requireConfig(KIT_JAVA_COMPILER_VERSION));</span>
+<span class="fc" id="L77">        return Optional.of(requireConfig(KIT_JAVA_COMPILER_VERSION));</span>
     }
     
     private Optional&lt;JavaLanguageVersion&gt; getSourceCompatibility() {
-<span class="fc bfc" id="L86" title="All 2 branches covered.">        if (isTestProject()) {</span>
-<span class="fc" id="L87">            return Optional.of(requireConfig(KIT_JAVA_TEST_SOURCE_VERSION));</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        if (isTestProject()) {</span>
+<span class="fc" id="L82">            return Optional.of(requireConfig(KIT_JAVA_TEST_SOURCE_VERSION));</span>
         } else {
-<span class="fc" id="L89">            return Optional.of(requireConfig(KIT_JAVA_SOURCE_VERSION));</span>
+<span class="fc" id="L84">            return Optional.of(requireConfig(KIT_JAVA_SOURCE_VERSION));</span>
         }
     }
     
     private Optional&lt;JavaLanguageVersion&gt; getTargetCompatibility() {
-<span class="fc bfc" id="L94" title="All 2 branches covered.">        if (isTestProject()) {</span>
-<span class="fc" id="L95">            return Optional.of(requireConfig(KIT_JAVA_TEST_TARGET_VERSION));</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        if (isTestProject()) {</span>
+<span class="fc" id="L90">            return Optional.of(requireConfig(KIT_JAVA_TEST_TARGET_VERSION));</span>
         } else {
-<span class="fc" id="L97">            return Optional.of(requireConfig(KIT_JAVA_TARGET_VERSION));</span>
+<span class="fc" id="L92">            return Optional.of(requireConfig(KIT_JAVA_TARGET_VERSION));</span>
         }
     }
     
     private Optional&lt;JavaLanguageVersion&gt; getReleaseVersion() {
-<span class="pc bpc" id="L102" title="1 of 2 branches missed.">        if (isTestProject()) {</span>
-<span class="nc" id="L103">            return getTestReleaseVersion();</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        if (isTestProject()) {</span>
+<span class="fc" id="L98">            return getTestReleaseVersion();</span>
         } else {
-<span class="fc" id="L105">            return Optional.of(requireConfig(KIT_JAVA_TARGET_VERSION));</span>
+<span class="fc" id="L100">            return Optional.of(requireConfig(KIT_JAVA_TARGET_VERSION));</span>
         }
     }
     
     private Optional&lt;JavaLanguageVersion&gt; getTestReleaseVersion() {
-<span class="fc" id="L110">        final JavaLanguageVersion testVersion = requireConfig(KIT_JAVA_TEST_TARGET_VERSION);</span>
-<span class="fc" id="L111">        final JavaLanguageVersion implementationVersion = requireConfig(KIT_JAVA_TARGET_VERSION);</span>
-<span class="fc bfc" id="L112" title="All 2 branches covered.">        if (testVersion.compareTo(implementationVersion) &gt; 0) {</span>
-<span class="fc" id="L113">            return Optional.of(testVersion);</span>
+<span class="fc" id="L105">        final JavaLanguageVersion testVersion = requireConfig(KIT_JAVA_TEST_TARGET_VERSION);</span>
+<span class="fc" id="L106">        final JavaLanguageVersion implementationVersion = requireConfig(KIT_JAVA_TARGET_VERSION);</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        if (testVersion.compareTo(implementationVersion) &gt; 0) {</span>
+<span class="fc" id="L108">            return Optional.of(testVersion);</span>
         } else {
-<span class="fc" id="L115">            return empty();</span>
+<span class="fc" id="L110">            return Optional.of(implementationVersion);</span>
         }
     }
 }

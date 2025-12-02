@@ -3,78 +3,99 @@
 import io.github.jonloucks.variants.api.Environment;
 import io.github.jonloucks.variants.api.Variant;
 import org.gradle.api.Project;
+import org.gradle.api.plugins.ExtraPropertiesExtension;
 import org.gradle.api.provider.Provider;
 
 import java.util.Optional;
 
 import static io.github.jonloucks.variants.api.GlobalVariants.createEnvironment;
+import static java.lang.Boolean.TRUE;
 
 abstract class ProjectApplier {
-<span class="fc" id="L13">    ProjectApplier(Project project) {</span>
-<span class="fc" id="L14">        this.project = project;</span>
-<span class="fc" id="L15">        this.environment = createEnvironment( b -&gt; b //</span>
-<span class="fc" id="L16">            .addSystemEnvironmentSource() //</span>
-<span class="fc" id="L17">            .addSource(this::projectEnvironmentVariable) //</span>
-<span class="fc" id="L18">            .addSystemPropertiesSource() //</span>
-<span class="fc" id="L19">            .addSource(this::projectProperty) //</span>
+<span class="fc" id="L15">    ProjectApplier(Project project) {</span>
+<span class="fc" id="L16">        this.project = project;</span>
+<span class="fc" id="L17">        this.applierName = getClass().getName();</span>
+<span class="fc" id="L18">        this.environment = createEnvironment( b -&gt; b //</span>
+<span class="fc" id="L19">            .addSystemEnvironmentSource() //</span>
+<span class="fc" id="L20">            .addSource(this::projectEnvironmentVariable) //</span>
+<span class="fc" id="L21">            .addSystemPropertiesSource() //</span>
+<span class="fc" id="L22">            .addSource(this::projectProperty) //</span>
         );
-<span class="fc" id="L21">    }</span>
+<span class="fc" id="L24">    }</span>
 
     abstract void apply();
     
+    final void applyOnce(Runnable block) {
+<span class="fc" id="L29">        final String name = applierName;</span>
+<span class="fc" id="L30">        final ExtraPropertiesExtension extension = project.getExtensions().getExtraProperties();</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        if (extension.has(name) &amp;&amp;</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">            TRUE.equals(extension.get(name))) {</span>
+<span class="fc" id="L33">            log(&quot;Project &quot; + name + &quot; is already applied&quot;);</span>
+        } else {
+<span class="fc" id="L35">            extension.set(name, TRUE);</span>
+            try {
+<span class="fc" id="L37">                block.run();</span>
+<span class="fc" id="L38">            } catch (Exception thrown) {</span>
+<span class="fc" id="L39">                extension.set(name, thrown);</span>
+<span class="fc" id="L40">                throw thrown;</span>
+<span class="fc" id="L41">            }</span>
+        }
+<span class="fc" id="L43">    }</span>
+    
     final Project getProject() {
-<span class="fc" id="L26">        return project;</span>
+<span class="fc" id="L46">        return project;</span>
     }
     
     final boolean isRootProject() {
-<span class="fc" id="L30">        return getProject().getRootProject().equals(getProject());</span>
+<span class="fc" id="L50">        return getProject().getRootProject().equals(getProject());</span>
     }
     
     final boolean isTestProject() {
-<span class="fc" id="L34">        return isTestProject(getProject());</span>
+<span class="fc" id="L54">        return isTestProject(getProject());</span>
     }
     
     final boolean isTestProject(Project project) {
-<span class="pc bpc" id="L38" title="1 of 4 branches missed.">        return project.getName().endsWith(&quot;-test&quot;) || project.getName().endsWith(&quot;-tests&quot;);</span>
+<span class="fc bfc" id="L58" title="All 4 branches covered.">        return project.getName().endsWith(&quot;-test&quot;) || project.getName().endsWith(&quot;-tests&quot;);</span>
     }
 
     final &lt;T&gt; Optional&lt;T&gt; getConfig(Variant&lt;T&gt; variant) {
-<span class="fc" id="L42">        return environment.findVariance(variant);</span>
+<span class="fc" id="L62">        return environment.findVariance(variant);</span>
     }
     
     final &lt;T&gt; T requireConfig(Variant&lt;T&gt; variant) {
-<span class="fc" id="L46">        return environment.getVariance(variant);</span>
+<span class="fc" id="L66">        return environment.getVariance(variant);</span>
     }
     
     final void log(String text) {
-<span class="fc bfc" id="L50" title="All 2 branches covered.">        if (isLogEnabled()) {</span>
-<span class="fc" id="L51">            System.out.println(text);</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        if (isLogEnabled()) {</span>
+<span class="fc" id="L71">            System.out.println(text);</span>
         }
-<span class="fc" id="L53">    }</span>
+<span class="fc" id="L73">    }</span>
     
     final boolean isLogEnabled() {
-<span class="fc" id="L56">        return environment.findVariance(Configs.KIT_LOG_ENABLED).orElse(false);</span>
+<span class="fc" id="L76">        return environment.findVariance(Configs.KIT_LOG_ENABLED).orElse(false);</span>
     }
     
     final Environment getEnvironment() {
-<span class="nc" id="L60">        return environment;</span>
+<span class="fc" id="L80">        return environment;</span>
     }
     
     private Optional&lt;CharSequence&gt; projectProperty(String key) {
-<span class="fc" id="L64">        return Optional.ofNullable(project.findProperty(key)).map(Object::toString);</span>
+<span class="fc" id="L84">        return Optional.ofNullable(project.findProperty(key)).map(Object::toString);</span>
     }
     
     private Optional&lt;CharSequence&gt; projectEnvironmentVariable(String key) {
-<span class="fc" id="L68">        final Provider&lt;String&gt; variable = project.getProviders().environmentVariable(key);</span>
-<span class="pc bpc" id="L69" title="1 of 2 branches missed.">        if (variable.isPresent()) {</span>
-<span class="nc" id="L70">            return Optional.of(variable.get());</span>
+<span class="fc" id="L88">        final Provider&lt;String&gt; variable = project.getProviders().environmentVariable(key);</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">        if (variable.isPresent()) {</span>
+<span class="nc" id="L90">            return Optional.of(variable.get());</span>
         } else {
-<span class="fc" id="L72">            return Optional.empty();</span>
+<span class="fc" id="L92">            return Optional.empty();</span>
         }
     }
     
     
     private final Project project;
     private final Environment environment;
+    private final String applierName;
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

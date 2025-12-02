@@ -9,8 +9,10 @@ final class JavaPluginApplier extends ProjectApplier {
     
     @Override
     void apply() {
-<span class="fc" id="L12">        log(&quot;Applying java plugin...&quot;);</span>
-<span class="fc" id="L13">        getProject().getPlugins().apply(&quot;java&quot;);</span>
-<span class="fc" id="L14">    }</span>
+<span class="fc" id="L12">        applyOnce(() -&gt; {</span>
+<span class="fc" id="L13">            log(&quot;Applying java plugin...&quot;);</span>
+<span class="fc" id="L14">            getProject().getPlugins().apply(&quot;java&quot;);</span>
+<span class="fc" id="L15">        });</span>
+<span class="fc" id="L16">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

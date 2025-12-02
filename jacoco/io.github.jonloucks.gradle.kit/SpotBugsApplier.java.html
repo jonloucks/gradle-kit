@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SpotBugsApplier.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">main-project</a> &gt; <a href="index.source.html" class="el_package">io.github.jonloucks.gradle.kit</a> &gt; <span class="el_source">SpotBugsApplier.java</span></div><h1>SpotBugsApplier.java</h1><pre class="source lang-java linenums">package io.github.jonloucks.gradle.kit;
 
 import com.github.spotbugs.snom.SpotBugsExtension;
-import com.github.spotbugs.snom.SpotBugsPlugin;
 import com.github.spotbugs.snom.SpotBugsTask;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
@@ -10,50 +9,49 @@ import org.gradle.api.file.DirectoryProperty;
 final class SpotBugsApplier extends ProjectApplier {
     
     void apply() {
-<span class="fc" id="L13">        log(&quot;Applying spotbugs plugin...&quot;);</span>
-<span class="fc" id="L14">        getProject().getPlugins().apply(&quot;com.github.spotbugs&quot;);</span>
-        
-<span class="fc" id="L16">        getProject().afterEvaluate(project -&gt; {</span>
-<span class="fc" id="L17">            log(&quot;After Evaluate SpotBugs Plugin...&quot;);</span>
-<span class="fc" id="L18">            configureSpotbugsPlugin();</span>
-<span class="fc" id="L19">            configureSpotbugsReports();</span>
-<span class="fc" id="L20">        });</span>
-<span class="fc" id="L21">    }</span>
-    
-    private void configureSpotbugsReports() {
-<span class="fc" id="L24">        getProject().getTasks().named(&quot;spotbugsMain&quot;, SpotBugsTask.class)</span>
-<span class="fc" id="L25">            .configure(configureSpotbugsReport());</span>
-<span class="fc" id="L26">    }</span>
-    
-    private Action&lt;SpotBugsTask&gt; configureSpotbugsReport() {
-<span class="fc" id="L29">        final DirectoryProperty buildDir = getProject().getLayout().getBuildDirectory();</span>
-        
-<span class="fc" id="L31">        return reportTask -&gt; {</span>
-<span class="pc bpc" id="L32" title="1 of 2 branches missed.">            if (isTestProject()) {</span>
-<span class="nc" id="L33">                reportTask.setEnabled(false);</span>
-            } else {
-<span class="fc" id="L35">                reportTask.setEnabled(true);</span>
-<span class="fc" id="L36">                reportTask.getReports().forEach(report -&gt; {</span>
-<span class="nc" id="L37">                    report.getRequired().set(true);</span>
-<span class="nc" id="L38">                    report.getOutputLocation().set(buildDir.file(&quot;reports/spotbugs/main/spotbugs.html&quot;));</span>
-<span class="nc" id="L39">                    report.setStylesheet(&quot;fancy-hist.xsl&quot;);</span>
-<span class="nc" id="L40">                });</span>
-            }
-<span class="fc" id="L42">        };</span>
-    }
+<span class="fc" id="L12">        applyOnce(() -&gt; {</span>
+<span class="fc" id="L13">            log(&quot;Applying spotbugs plugin...&quot;);</span>
+<span class="fc" id="L14">            getProject().getPlugins().apply(&quot;com.github.spotbugs&quot;);</span>
+            
+<span class="fc" id="L16">            getProject().afterEvaluate(project -&gt; {</span>
+<span class="fc" id="L17">                log(&quot;After Evaluate SpotBugs Plugin...&quot;);</span>
+<span class="fc" id="L18">                configureSpotbugsPlugin();</span>
+<span class="fc" id="L19">                configureSpotbugsReports();</span>
+<span class="fc" id="L20">            });</span>
+<span class="fc" id="L21">        });</span>
+<span class="fc" id="L22">    }</span>
     
     SpotBugsApplier(Project project) {
-<span class="fc" id="L46">        super(project);</span>
-<span class="fc" id="L47">    }</span>
- 
+<span class="fc" id="L25">        super(project);</span>
+<span class="fc" id="L26">    }</span>
+    
+    private void configureSpotbugsReports() {
+<span class="fc" id="L29">        getProject().getTasks().withType(SpotBugsTask.class).configureEach(configureSpotbugsReport());</span>
+<span class="fc" id="L30">    }</span>
+    
+    private Action&lt;SpotBugsTask&gt; configureSpotbugsReport() {
+<span class="fc" id="L33">        final DirectoryProperty buildDir = getProject().getLayout().getBuildDirectory();</span>
+        
+<span class="fc" id="L35">        return reportTask -&gt; {</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">            if (isTestProject()) {</span>
+<span class="fc" id="L37">                reportTask.setEnabled(false);</span>
+            } else {
+<span class="fc" id="L39">                reportTask.setEnabled(true);</span>
+<span class="fc" id="L40">                reportTask.getReports().configureEach(report -&gt; {</span>
+<span class="nc" id="L41">                    report.getRequired().set(true);</span>
+<span class="nc" id="L42">                    report.getOutputLocation().set(buildDir.file(&quot;reports/spotbugs/main/spotbugs.html&quot;));</span>
+<span class="nc" id="L43">                    report.setStylesheet(&quot;fancy-hist.xsl&quot;);</span>
+<span class="nc" id="L44">                });</span>
+            }
+<span class="fc" id="L46">        };</span>
+    }
+
     private void configureSpotbugsPlugin() {
 <span class="fc" id="L50">        final DirectoryProperty buildDir = getProject().getLayout().getBuildDirectory();</span>
-<span class="fc" id="L51">        getProject().getPlugins().withType(SpotBugsPlugin.class, jacocoPlugin -&gt; {</span>
-<span class="fc" id="L52">            final SpotBugsExtension extension = getProject().getExtensions().getByType(SpotBugsExtension.class);</span>
-<span class="fc" id="L53">            extension.getToolVersion().set(&quot;4.9.6&quot;);</span>
-<span class="fc" id="L54">            extension.getIgnoreFailures().set(isTestProject());</span>
-<span class="fc" id="L55">            extension.getReportsDir().set(buildDir.dir(&quot;reports/spotbugs&quot;));</span>
-<span class="fc" id="L56">        });</span>
-<span class="fc" id="L57">    }</span>
+<span class="fc" id="L51">        final SpotBugsExtension extension = getProject().getExtensions().getByType(SpotBugsExtension.class);</span>
+<span class="fc" id="L52">        extension.getToolVersion().set(&quot;4.9.6&quot;);</span>
+<span class="fc" id="L53">        extension.getIgnoreFailures().set(isTestProject());</span>
+<span class="fc" id="L54">        extension.getReportsDir().set(buildDir.dir(&quot;reports/spotbugs&quot;));</span>
+<span class="fc" id="L55">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

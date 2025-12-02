@@ -8,71 +8,95 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 import static io.github.jonloucks.contracts.api.Checks.nullCheck;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 final class Internal {
-<span class="fc" id="L17">    private Internal() {</span>
-<span class="fc" id="L18">        throw new AssertionError(&quot;Utility class can't be instantiated.&quot;);</span>
+<span class="fc" id="L19">    private Internal() {</span>
+<span class="fc" id="L20">        throw new AssertionError(&quot;Utility class can't be instantiated.&quot;);</span>
     }
-  
+    
+    static List&lt;String&gt; adjustCompileArguments(List&lt;String&gt; arguments) {
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        if (!arguments.contains(&quot;-Xlint:all&quot;)) {</span>
+<span class="fc" id="L25">            final List&lt;String&gt; adjusted = new ArrayList&lt;&gt;(arguments);</span>
+<span class="fc" id="L26">            adjusted.add(&quot;-Xlint:all&quot;);</span>
+<span class="fc" id="L27">            return adjusted;</span>
+        } else {
+<span class="fc" id="L29">            return arguments;</span>
+        }
+    }
+    
+    static boolean isTestingTaskName(String name) {
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        switch (name) {</span>
+            case &quot;test&quot;:
+            case &quot;integrationTest&quot;:
+            case &quot;functionalTest&quot;:
+<span class="fc" id="L38">                return true;</span>
+            default:
+<span class="fc" id="L40">                return false;</span>
+        }
+    }
+    
     static String base64Encode(String text) {
-<span class="fc" id="L22">        return new String(Base64.getEncoder().encode(text.getBytes(UTF_8)), UTF_8);</span>
+<span class="fc" id="L45">        return new String(Base64.getEncoder().encode(text.getBytes(UTF_8)), UTF_8);</span>
     }
     
     static String base64Decode(String text) {
-<span class="fc" id="L26">        return new String(Base64.getDecoder().decode(text), UTF_8);</span>
+<span class="fc" id="L49">        return new String(Base64.getDecoder().decode(text), UTF_8);</span>
     }
     
     static void createChecksums(File file) {
-<span class="fc" id="L30">        final File validFile = nullCheck(file, &quot;File must be present.&quot;);</span>
-<span class="fc" id="L31">        createMD5Checksum(validFile);</span>
-<span class="fc" id="L32">        createSHA1Checksum(validFile);</span>
-<span class="fc" id="L33">    }</span>
+<span class="fc" id="L53">        final File validFile = nullCheck(file, &quot;File must be present.&quot;);</span>
+<span class="fc" id="L54">        createMD5Checksum(validFile);</span>
+<span class="fc" id="L55">        createSHA1Checksum(validFile);</span>
+<span class="fc" id="L56">    }</span>
     
     static void uploadBundle(Environment environment, String bundleName, File bundleFile) {
-<span class="fc" id="L36">        new UploadBundleImpl(environment, bundleName, bundleFile).upload();</span>
-<span class="fc" id="L37">    }</span>
+<span class="fc" id="L59">        new UploadBundleImpl(environment, bundleName, bundleFile).upload();</span>
+<span class="fc" id="L60">    }</span>
     
     private static void createSHA1Checksum(File file) {
-<span class="fc" id="L40">        generateChecksum(file, new File(file.getAbsolutePath() + &quot;.sha1&quot;), &quot;SHA1&quot;);</span>
-<span class="fc" id="L41">    }</span>
+<span class="fc" id="L63">        generateChecksum(file, new File(file.getAbsolutePath() + &quot;.sha1&quot;), &quot;SHA1&quot;);</span>
+<span class="fc" id="L64">    }</span>
     
     private static void createMD5Checksum(File file) {
-<span class="fc" id="L44">        generateChecksum(file, new File(file.getAbsolutePath() + &quot;.md5&quot;), &quot;MD5&quot;);</span>
-<span class="fc" id="L45">    }</span>
+<span class="fc" id="L67">        generateChecksum(file, new File(file.getAbsolutePath() + &quot;.md5&quot;), &quot;MD5&quot;);</span>
+<span class="fc" id="L68">    }</span>
     
     private static void generateChecksum(File inputFile, File outputFile, String algorithm) {
         try {
-<span class="fc" id="L49">            writeDigestBytes(outputFile, createDigestBytes(inputFile, algorithm));</span>
-<span class="fc" id="L50">        } catch (Exception thrown) {</span>
-<span class="fc" id="L51">            throw new GradleException(&quot;Unable to generate checksums.&quot;, thrown);</span>
-<span class="fc" id="L52">        }</span>
-<span class="fc" id="L53">    }</span>
+<span class="fc" id="L72">            writeDigestBytes(outputFile, createDigestBytes(inputFile, algorithm));</span>
+<span class="fc" id="L73">        } catch (Exception thrown) {</span>
+<span class="fc" id="L74">            throw new GradleException(&quot;Unable to generate checksums.&quot;, thrown);</span>
+<span class="fc" id="L75">        }</span>
+<span class="fc" id="L76">    }</span>
     
     private static void writeDigestBytes(File outputFile, byte[] digestBytes) throws Exception {
-<span class="fc" id="L56">        final StringBuilder stringBuilder = new StringBuilder();</span>
-<span class="fc bfc" id="L57" title="All 2 branches covered.">        for (byte b : digestBytes) {</span>
-<span class="fc" id="L58">            stringBuilder.append(String.format(&quot;%02x&quot;, b));</span>
+<span class="fc" id="L79">        final StringBuilder stringBuilder = new StringBuilder();</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        for (byte b : digestBytes) {</span>
+<span class="fc" id="L81">            stringBuilder.append(String.format(&quot;%02x&quot;, b));</span>
         }
-<span class="fc" id="L60">        try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {</span>
-<span class="fc" id="L61">            outputStream.write(stringBuilder.toString().getBytes(UTF_8));</span>
+<span class="fc" id="L83">        try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {</span>
+<span class="fc" id="L84">            outputStream.write(stringBuilder.toString().getBytes(UTF_8));</span>
         }
-<span class="fc" id="L63">    }</span>
+<span class="fc" id="L86">    }</span>
     
     private static byte[] createDigestBytes(File inputFile, String algorithm) throws Exception {
-<span class="fc" id="L66">        final MessageDigest digest = MessageDigest.getInstance(algorithm);</span>
+<span class="fc" id="L89">        final MessageDigest digest = MessageDigest.getInstance(algorithm);</span>
         
-<span class="fc" id="L68">        try (FileInputStream inputStream = new FileInputStream(inputFile)) {</span>
-<span class="fc" id="L69">            final byte[] buffer = new byte[1024];</span>
+<span class="fc" id="L91">        try (FileInputStream inputStream = new FileInputStream(inputFile)) {</span>
+<span class="fc" id="L92">            final byte[] buffer = new byte[1024];</span>
             int bytesCount;
-<span class="fc bfc" id="L71" title="All 2 branches covered.">            while ((bytesCount = inputStream.read(buffer)) != -1) {</span>
-<span class="fc" id="L72">                digest.update(buffer, 0, bytesCount);</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">            while ((bytesCount = inputStream.read(buffer)) != -1) {</span>
+<span class="fc" id="L95">                digest.update(buffer, 0, bytesCount);</span>
             }
-<span class="fc" id="L74">            return digest.digest();</span>
+<span class="fc" id="L97">            return digest.digest();</span>
         }
     }
+
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

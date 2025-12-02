@@ -12,15 +12,17 @@ final class JavadocApplier extends ProjectApplier {
     
     @Override
     void apply() {
-<span class="fc" id="L15">        log(&quot;Applying javadoc...&quot;);</span>
-        
-<span class="fc" id="L17">        getProject().afterEvaluate(project -&gt; {</span>
-<span class="fc" id="L18">            project.getTasks().withType(Javadoc.class).configureEach( javadoc -&gt; {</span>
-<span class="fc" id="L19">                javadoc.setFailOnError(true);</span>
-<span class="fc" id="L20">                javadoc.getModularity().getInferModulePath().set(true);</span>
-<span class="fc" id="L21">                javadoc.options(MinimalJavadocOptions::showFromPublic);</span>
-<span class="fc" id="L22">            });</span>
-<span class="fc" id="L23">        });</span>
-<span class="fc" id="L24">    }</span>
+<span class="fc" id="L15">        applyOnce(() -&gt; {</span>
+<span class="fc" id="L16">            log(&quot;Applying javadoc...&quot;);</span>
+            
+<span class="fc" id="L18">            getProject().afterEvaluate(project -&gt; {</span>
+<span class="fc" id="L19">                project.getTasks().withType(Javadoc.class).configureEach(javadoc -&gt; {</span>
+<span class="fc" id="L20">                    javadoc.setFailOnError(true);</span>
+<span class="fc" id="L21">                    javadoc.getModularity().getInferModulePath().set(true);</span>
+<span class="fc" id="L22">                    javadoc.options(MinimalJavadocOptions::showFromPublic);</span>
+<span class="fc" id="L23">                });</span>
+<span class="fc" id="L24">            });</span>
+<span class="fc" id="L25">        });</span>
+<span class="fc" id="L26">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
