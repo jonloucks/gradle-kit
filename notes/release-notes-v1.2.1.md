@@ -6,7 +6,7 @@
 *  Fixes
 
 ## Forked Repositories Impact
-* Fixes
+*  Fixes
 
 ## 🚀 New Features
 
