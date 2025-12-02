@@ -3,6 +3,8 @@ package io.github.jonloucks.gradle.kit;
 import io.github.jonloucks.variants.api.Environment;
 import org.gradle.api.GradleException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -11,11 +13,39 @@ import java.util.*;
 import static io.github.jonloucks.contracts.test.Tools.assertInstantiateThrows;
 import static io.github.jonloucks.contracts.test.Tools.assertThrown;
 import static io.github.jonloucks.variants.api.GlobalVariants.createEnvironment;
-import static java.util.Collections.singletonMap;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static java.util.Collections.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public final class InternalTests {
+    
+    @ParameterizedTest
+    @ValueSource(strings = {"test", "integrationTest", "functionalTest"})
+    public void internal_isTestingTaskName_Passes(String name) {
+        assertTrue(Internal.isTestingTaskName(name));
+    }
+    
+    @ParameterizedTest
+    @ValueSource(strings = {"unknownTest", "otherTest", "junk"})
+    public void internal_isTestingTaskName_Fails(String name) {
+        assertFalse(Internal.isTestingTaskName(name));
+    }
+    
+    @Test
+    public void internal_adjustCompileArguments_Empty_Works() {
+        final List<String> arguments = emptyList();
+        final List<String> adjusted = Internal.adjustCompileArguments(arguments);
+        assertEquals(singletonList("-Xlint:all"), adjusted);
+    }
+    
+    @Test
+    public void internal_adjustCompileArguments_Twice_Works() {
+        final List<String> arguments = emptyList();
+        final List<String> adjusted = Internal.adjustCompileArguments(arguments);
+        final List<String> adjusted2 = Internal.adjustCompileArguments(adjusted);
+        
+        assertEquals(singletonList("-Xlint:all"), adjusted2);
+    }
+    
     @Test
     public void internal_encoding() {
         final String input = "Hello World!";

@@ -5,13 +5,11 @@ import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.jvm.toolchain.JavaLanguageVersion;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 import static io.github.jonloucks.gradle.kit.Configs.*;
-import static java.util.Optional.empty;
+import static io.github.jonloucks.gradle.kit.Internal.adjustCompileArguments;
 
 @SuppressWarnings("CodeBlock2Expr")
 final class JavaVersioningApplier extends ProjectApplier {
@@ -22,10 +20,12 @@ final class JavaVersioningApplier extends ProjectApplier {
     
     @Override
     void apply() {
-        log("Applying Java versions ...");
-  
-        getProject().afterEvaluate(x -> {
-            configureJavaVersions();
+        applyOnce(() -> {
+            log("Applying Java versions ...");
+            
+            getProject().afterEvaluate(x -> {
+                configureJavaVersions();
+            });
         });
     }
     
@@ -56,12 +56,7 @@ final class JavaVersioningApplier extends ProjectApplier {
     
     private void configureJavaCompile(JavaCompile compile) {
         getReleaseVersion().ifPresent(x -> compile.getOptions().getRelease().set(x.asInt()));
-        
-        final List<String> compilerArgs = new ArrayList<>(compile.getOptions().getCompilerArgs());
-        if (!compilerArgs.contains("-Xlint:all")) {
-            compilerArgs.add("-Xlint:all");
-            compile.getOptions().setCompilerArgs(compilerArgs);
-        }
+        compile.getOptions().setCompilerArgs(adjustCompileArguments(compile.getOptions().getCompilerArgs()));
     }
     
     private void configureTestJavaCompile(JavaCompile compile) {
@@ -112,7 +107,7 @@ final class JavaVersioningApplier extends ProjectApplier {
         if (testVersion.compareTo(implementationVersion) > 0) {
             return Optional.of(testVersion);
         } else {
-            return empty();
+            return Optional.of(implementationVersion);
         }
     }
 }

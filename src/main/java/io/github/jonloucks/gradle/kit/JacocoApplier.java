@@ -16,6 +16,8 @@ import org.gradle.testing.jacoco.tasks.rules.JacocoViolationRulesContainer;
 
 import java.math.BigDecimal;
 
+import static io.github.jonloucks.gradle.kit.Internal.isTestingTaskName;
+
 @SuppressWarnings("CodeBlock2Expr")
 final class JacocoApplier extends ProjectApplier {
 
@@ -25,13 +27,15 @@ final class JacocoApplier extends ProjectApplier {
     
     @Override
     void apply() {
-        log("Applying jacoco plugin...");
-        getProject().getPlugins().apply("jacoco");
-        
-        getProject().afterEvaluate(project -> {
-            configureJacocoPlugin();
-            configureExistingReports();
-            configureVerificationReports();
+        applyOnce(() -> {
+            log("Applying jacoco plugin...");
+            getProject().getPlugins().apply("jacoco");
+            
+            getProject().afterEvaluate(project -> {
+                configureJacocoPlugin();
+                configureExistingReports();
+                configureVerificationReports();
+            });
         });
     }
     
@@ -114,14 +118,7 @@ final class JacocoApplier extends ProjectApplier {
     
     private static TaskCollection<Test> getTestingTasks(Project project) {
         return project.getTasks().withType(Test.class).matching(t -> {
-            switch (t.getName()) {
-                case "test":
-                case "integrationTest":
-                case "functionalTest":
-                    return true;
-                default:
-                    return false;
-            }
+            return isTestingTaskName(t.getName());
         });
     }
     

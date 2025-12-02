@@ -9,7 +9,9 @@ final class JavaLibraryPluginApplier extends ProjectApplier {
     
     @Override
     void apply() {
-        log("Applying java-library plugin...");
-        getProject().getPlugins().apply("java-library");
+        applyOnce(() -> {
+            log("Applying java-library plugin...");
+            getProject().getPlugins().apply("java-library");
+        });
     }
 }

@@ -12,13 +12,15 @@ final class JavadocApplier extends ProjectApplier {
     
     @Override
     void apply() {
-        log("Applying javadoc...");
-        
-        getProject().afterEvaluate(project -> {
-            project.getTasks().withType(Javadoc.class).configureEach( javadoc -> {
-                javadoc.setFailOnError(true);
-                javadoc.getModularity().getInferModulePath().set(true);
-                javadoc.options(MinimalJavadocOptions::showFromPublic);
+        applyOnce(() -> {
+            log("Applying javadoc...");
+            
+            getProject().afterEvaluate(project -> {
+                project.getTasks().withType(Javadoc.class).configureEach(javadoc -> {
+                    javadoc.setFailOnError(true);
+                    javadoc.getModularity().getInferModulePath().set(true);
+                    javadoc.options(MinimalJavadocOptions::showFromPublic);
+                });
             });
         });
     }
