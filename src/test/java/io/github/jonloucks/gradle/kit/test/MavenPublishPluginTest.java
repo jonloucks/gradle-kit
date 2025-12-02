@@ -1,6 +1,7 @@
 package io.github.jonloucks.gradle.kit.test;
 
 import org.gradle.api.Project;
+import org.gradle.api.tasks.bundling.Zip;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +24,8 @@ public final class MavenPublishPluginTest {
         project.evaluationDependsOn(":");
         
         assertDoesNotThrow(() -> {
-            project.getTasks().named("publishToMavenLocal");
+            project.getTasks().named("publishToMavenLocal").get();
+            project.getTasks().withType(Zip.class).forEach(task -> {});
         });
     }
 }

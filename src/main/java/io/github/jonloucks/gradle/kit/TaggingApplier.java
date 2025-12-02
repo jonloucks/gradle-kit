@@ -19,13 +19,15 @@ final class TaggingApplier extends ProjectApplier {
     
     @Override
     void apply() {
-        getProject().afterEvaluate(x -> {
-            log("Applying Test Tagging Rules ...");
-            
-            configureStandardTestTasks();
-            
-            registerTaggedTestTask("integration", KIT_INTEGRATION_EXCLUDE_TAGS);
-            registerTaggedTestTask("functional", KIT_FUNCTIONAL_EXCLUDE_TAGS);
+        applyOnce(() -> { //
+            getProject().afterEvaluate(x -> {
+                log("Applying Test Tagging Rules ...");
+                
+                configureStandardTestTasks();
+                
+                registerTaggedTestTask("integration", KIT_INTEGRATION_EXCLUDE_TAGS);
+                registerTaggedTestTask("functional", KIT_FUNCTIONAL_EXCLUDE_TAGS);
+            });
         });
     }
     

@@ -8,7 +8,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 import static io.github.jonloucks.contracts.api.Checks.nullCheck;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -17,7 +19,28 @@ final class Internal {
     private Internal() {
         throw new AssertionError("Utility class can't be instantiated.");
     }
-  
+    
+    static List<String> adjustCompileArguments(List<String> arguments) {
+        if (!arguments.contains("-Xlint:all")) {
+            final List<String> adjusted = new ArrayList<>(arguments);
+            adjusted.add("-Xlint:all");
+            return adjusted;
+        } else {
+            return arguments;
+        }
+    }
+    
+    static boolean isTestingTaskName(String name) {
+        switch (name) {
+            case "test":
+            case "integrationTest":
+            case "functionalTest":
+                return true;
+            default:
+                return false;
+        }
+    }
+    
     static String base64Encode(String text) {
         return new String(Base64.getEncoder().encode(text.getBytes(UTF_8)), UTF_8);
     }
@@ -74,4 +97,5 @@ final class Internal {
             return digest.digest();
         }
     }
+
 }
