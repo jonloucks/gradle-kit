@@ -26,13 +26,26 @@ final class ProjectDeployer {
     }
     
     private static void deploySettingsDotGradle(Path projectPath) throws Exception {
-        writeString(projectPath.resolve( "settings.gradle"), "");
+        writeString(projectPath.resolve( "settings.gradle"),
+            "pluginManagement {\n" +
+            "    repositories {\n" +
+                "        mavenLocal()\n" +
+                "        gradlePluginPortal()\n" +
+            "    }\n" +
+            "}");
     }
     
     private static void deployBuildDotGradle(Path projectPath, String[] plugins) throws Exception {
         writeString(projectPath.resolve("build.gradle"),
-            "plugins { \n" +
-                formatPlugins(plugins) +
+            "buildscript {\n" +
+                "    repositories {\n" +
+                "        mavenLocal()\n" +
+                "        mavenCentral()\n" +
+                "        gradlePluginPortal()\n" +
+                "    }\n" +
+                "}\n" +
+                "plugins { \n" +
+                 formatPlugins(plugins) +
                 "} \n" +
                 "group = 'io.github.jonloucks.gradle.kit.test'\n" +
                 "version = '0.0.0'\n" +
