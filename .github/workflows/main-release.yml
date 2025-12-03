@@ -47,7 +47,7 @@ jobs:
 
       - name: Build with Gradle
         working-directory: main-project
-        run: ./gradlew build spotbugsMain jacocoTestReport
+        run: ./gradlew build jacocoTestReport
         env:
           PROJECT_WORKFLOW: 'main-release'
 

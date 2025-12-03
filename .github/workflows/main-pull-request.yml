@@ -48,7 +48,7 @@ jobs:
 
     - name: Build with Gradle
       working-directory: main-project
-      run: ./gradlew build spotbugsMain jacocoTestReport publishToMavenLocal
+      run: ./gradlew build jacocoTestReport publishToMavenLocal
       env:
         PROJECT_WORKFLOW: 'main-pull-request'
 
