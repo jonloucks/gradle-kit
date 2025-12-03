@@ -32,9 +32,11 @@ public final class SigningPlugin implements Plugin<Project> {
         
         @Override
         void apply() {
-            applySigningPlugin();
-            getProject().afterEvaluate(x -> {
-                configureSigning();
+            applyOnce(() -> {
+                applySigningPlugin();
+                getProject().afterEvaluate(x -> { //
+                    configureSigning();
+                });
             });
         }
         

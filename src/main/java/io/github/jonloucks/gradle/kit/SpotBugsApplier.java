@@ -37,6 +37,7 @@ final class SpotBugsApplier extends ProjectApplier {
                 reportTask.setEnabled(false);
             } else {
                 reportTask.setEnabled(true);
+                reportTask.reports(spotBugsReports -> spotBugsReports.maybeCreate("html"));
                 reportTask.getReports().configureEach(report -> {
                     report.getRequired().set(true);
                     report.getOutputLocation().set(buildDir.file("reports/spotbugs/main/spotbugs.html"));

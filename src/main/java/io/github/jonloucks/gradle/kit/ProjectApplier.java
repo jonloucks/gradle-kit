@@ -93,7 +93,6 @@ abstract class ProjectApplier {
         }
     }
     
-    
     private final Project project;
     private final Environment environment;
     private final String applierName;
