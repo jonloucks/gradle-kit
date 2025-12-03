@@ -32,34 +32,36 @@ public final class SigningPlugin implements Plugin&lt;Project&gt; {
         
         @Override
         void apply() {
-<span class="fc" id="L35">            applySigningPlugin();</span>
-<span class="fc" id="L36">            getProject().afterEvaluate(x -&gt; {</span>
-<span class="fc" id="L37">                configureSigning();</span>
-<span class="fc" id="L38">            });</span>
-<span class="fc" id="L39">        }</span>
+<span class="fc" id="L35">            applyOnce(() -&gt; {</span>
+<span class="fc" id="L36">                applySigningPlugin();</span>
+<span class="fc" id="L37">                getProject().afterEvaluate(x -&gt; { //</span>
+<span class="fc" id="L38">                    configureSigning();</span>
+<span class="fc" id="L39">                });</span>
+<span class="fc" id="L40">            });</span>
+<span class="fc" id="L41">        }</span>
         
         private void configureSigning() {
-<span class="fc" id="L42">            final String secretKey = getGpgSecretKey();</span>
-<span class="fc" id="L43">            final String secretPassword = getGpgSecretKeyPassword();</span>
-<span class="pc bpc" id="L44" title="3 of 4 branches missed.">            if (ofNullable(secretKey).isPresent() &amp;&amp; ofNullable(secretPassword).isPresent()) {</span>
-<span class="nc" id="L45">                log(&quot;Configuring signing keys...&quot;);</span>
-<span class="nc" id="L46">                getProject().getExtensions().configure(SigningExtension.class, signing -&gt; {</span>
-<span class="nc" id="L47">                    signing.useInMemoryPgpKeys(secretKey, secretPassword);</span>
-<span class="nc" id="L48">                });</span>
+<span class="fc" id="L44">            final String secretKey = getGpgSecretKey();</span>
+<span class="fc" id="L45">            final String secretPassword = getGpgSecretKeyPassword();</span>
+<span class="fc bfc" id="L46" title="All 4 branches covered.">            if (ofNullable(secretKey).isPresent() &amp;&amp; ofNullable(secretPassword).isPresent()) {</span>
+<span class="fc" id="L47">                log(&quot;Configuring signing keys...&quot;);</span>
+<span class="fc" id="L48">                getProject().getExtensions().configure(SigningExtension.class, signing -&gt; {</span>
+<span class="fc" id="L49">                    signing.useInMemoryPgpKeys(secretKey, secretPassword);</span>
+<span class="fc" id="L50">                });</span>
             }
-<span class="fc" id="L50">        }</span>
+<span class="fc" id="L52">        }</span>
         
         private void applySigningPlugin() {
-<span class="fc" id="L53">           log(&quot;Applying signing plugin...&quot;);</span>
-<span class="fc" id="L54">            getProject().getPlugins().apply(&quot;signing&quot;);</span>
-<span class="fc" id="L55">        }</span>
+<span class="fc" id="L55">           log(&quot;Applying signing plugin...&quot;);</span>
+<span class="fc" id="L56">            getProject().getPlugins().apply(&quot;signing&quot;);</span>
+<span class="fc" id="L57">        }</span>
         
         private String getGpgSecretKey() {
-<span class="fc" id="L58">            return getConfig(KIT_GPG_SECRET_KEY).orElse(null);</span>
+<span class="fc" id="L60">            return getConfig(KIT_GPG_SECRET_KEY).orElse(null);</span>
         }
         
         private String getGpgSecretKeyPassword() {
-<span class="fc" id="L62">            return getConfig(KIT_GPG_SECRET_KEY_PASSWORD).orElse(null);</span>
+<span class="fc" id="L64">            return getConfig(KIT_GPG_SECRET_KEY_PASSWORD).orElse(null);</span>
         }
     }
 }

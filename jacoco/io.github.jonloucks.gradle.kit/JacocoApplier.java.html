@@ -51,13 +51,13 @@ final class JacocoApplier extends ProjectApplier {
     
     private Action&lt;JacocoCoverageVerification&gt; configureExistingVerificationReport() {
 <span class="fc" id="L53">        return verification -&gt; {</span>
-<span class="pc bpc" id="L54" title="1 of 2 branches missed.">            if (isRootProject()) {</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">            if (isRootProject()) {</span>
 <span class="fc" id="L55">                verification.violationRules(rules -&gt; {</span>
 <span class="fc" id="L56">                    addViolationRules(rules, &quot;LINE&quot;, &quot;BRANCH&quot;, &quot;CLASS&quot;, &quot;INSTRUCTION&quot;, &quot;METHOD&quot;);</span>
 <span class="fc" id="L57">                });</span>
 <span class="fc" id="L58">                getProject().allprojects(getAllJacocoFiles(verification));</span>
             } else {
-<span class="nc" id="L60">                verification.setEnabled(false);</span>
+<span class="fc" id="L60">                verification.setEnabled(false);</span>
             }
 <span class="fc" id="L62">        };</span>
     }
@@ -92,7 +92,7 @@ final class JacocoApplier extends ProjectApplier {
 <span class="fc" id="L92">                reports.getXml().getRequired().set(true);</span>
 <span class="fc" id="L93">                reports.getCsv().getRequired().set(isRootProject());</span>
 <span class="fc" id="L94">            });</span>
-<span class="pc bpc" id="L95" title="1 of 2 branches missed.">            if (isRootProject()) {</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">            if (isRootProject()) {</span>
 <span class="fc" id="L96">                getProject().allprojects(getAllJacocoFiles(reportTask));</span>
             }
 <span class="fc" id="L98">        };</span>

@@ -37,21 +37,22 @@ final class SpotBugsApplier extends ProjectApplier {
 <span class="fc" id="L37">                reportTask.setEnabled(false);</span>
             } else {
 <span class="fc" id="L39">                reportTask.setEnabled(true);</span>
-<span class="fc" id="L40">                reportTask.getReports().configureEach(report -&gt; {</span>
-<span class="nc" id="L41">                    report.getRequired().set(true);</span>
-<span class="nc" id="L42">                    report.getOutputLocation().set(buildDir.file(&quot;reports/spotbugs/main/spotbugs.html&quot;));</span>
-<span class="nc" id="L43">                    report.setStylesheet(&quot;fancy-hist.xsl&quot;);</span>
-<span class="nc" id="L44">                });</span>
+<span class="fc" id="L40">                reportTask.reports(spotBugsReports -&gt; spotBugsReports.maybeCreate(&quot;html&quot;));</span>
+<span class="fc" id="L41">                reportTask.getReports().configureEach(report -&gt; {</span>
+<span class="fc" id="L42">                    report.getRequired().set(true);</span>
+<span class="fc" id="L43">                    report.getOutputLocation().set(buildDir.file(&quot;reports/spotbugs/main/spotbugs.html&quot;));</span>
+<span class="fc" id="L44">                    report.setStylesheet(&quot;fancy-hist.xsl&quot;);</span>
+<span class="fc" id="L45">                });</span>
             }
-<span class="fc" id="L46">        };</span>
+<span class="fc" id="L47">        };</span>
     }
 
     private void configureSpotbugsPlugin() {
-<span class="fc" id="L50">        final DirectoryProperty buildDir = getProject().getLayout().getBuildDirectory();</span>
-<span class="fc" id="L51">        final SpotBugsExtension extension = getProject().getExtensions().getByType(SpotBugsExtension.class);</span>
-<span class="fc" id="L52">        extension.getToolVersion().set(&quot;4.9.6&quot;);</span>
-<span class="fc" id="L53">        extension.getIgnoreFailures().set(isTestProject());</span>
-<span class="fc" id="L54">        extension.getReportsDir().set(buildDir.dir(&quot;reports/spotbugs&quot;));</span>
-<span class="fc" id="L55">    }</span>
+<span class="fc" id="L51">        final DirectoryProperty buildDir = getProject().getLayout().getBuildDirectory();</span>
+<span class="fc" id="L52">        final SpotBugsExtension extension = getProject().getExtensions().getByType(SpotBugsExtension.class);</span>
+<span class="fc" id="L53">        extension.getToolVersion().set(&quot;4.9.6&quot;);</span>
+<span class="fc" id="L54">        extension.getIgnoreFailures().set(isTestProject());</span>
+<span class="fc" id="L55">        extension.getReportsDir().set(buildDir.dir(&quot;reports/spotbugs&quot;));</span>
+<span class="fc" id="L56">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

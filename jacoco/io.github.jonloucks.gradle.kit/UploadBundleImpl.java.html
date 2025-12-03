@@ -41,16 +41,16 @@ final class UploadBundleImpl {
 <span class="fc" id="L41">            .header(&quot;accept&quot;, &quot;text/plain; charset=UTF-8&quot;)</span>
 <span class="fc" id="L42">            .build();</span>
         
-<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if (&quot;dry-run&quot;.equals(username)) {</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        if (&quot;dry-run&quot;.equals(username)) {</span>
 <span class="fc" id="L45">            return;</span>
         }
         
-<span class="nc" id="L48">        try (Response response = client.newCall(request).execute()) {</span>
-<span class="nc bnc" id="L49" title="All 2 branches missed.">            if (!response.isSuccessful()) {</span>
-<span class="nc" id="L50">                throw new GradleException(&quot;Failure response: &quot; + response + &quot;.&quot;);</span>
+<span class="fc" id="L48">        try (Response response = client.newCall(request).execute()) {</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">            if (!response.isSuccessful()) {</span>
+<span class="fc" id="L50">                throw new GradleException(&quot;Failure response: &quot; + response + &quot;.&quot;);</span>
             }
-<span class="nc" id="L52">        } catch (IOException thrown) {</span>
-<span class="nc" id="L53">            throw new GradleException(&quot;Unable connect to &quot; + url + &quot;.&quot; , thrown);</span>
+<span class="fc" id="L52">        } catch (IOException thrown) {</span>
+<span class="fc" id="L53">            throw new GradleException(&quot;Unable connect to &quot; + url + &quot;.&quot; , thrown);</span>
 <span class="nc" id="L54">        }</span>
 <span class="nc" id="L55">    }</span>
     
