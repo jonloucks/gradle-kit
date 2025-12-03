@@ -1,7 +1,9 @@
 package io.github.jonloucks.gradle.kit;
 
+import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.Task;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.tasks.bundling.Tar;
 import org.gradle.api.tasks.bundling.Zip;
@@ -47,11 +49,18 @@ public final class MavenPublishPlugin implements Plugin<Project> {
             });
         }
         
+        @SuppressWarnings("Convert2Lambda") // gradle does not like lambda here
         private void configureChecksums() {
-            getProject().getTasks().withType(Zip.class).configureEach(zip -> {
-                zip.doLast(task -> {
-                    createChecksums(zip.getArchiveFile().get().getAsFile());
-                });
+            getProject().getTasks().withType(Zip.class).configureEach(new Action<>() {
+                @Override
+                public void execute(Zip zip) {
+                    zip.doLast(new Action<>() {
+                        @Override
+                        public void execute(Task task) {
+                            createChecksums(zip.getArchiveFile().get().getAsFile());
+                        }
+                    });
+                }
             });
         }
         

@@ -2,12 +2,9 @@ package io.github.jonloucks.gradle.kit.test;
 
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,36 +17,71 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Tag("functionalTest")
 public class MavenPublishPluginFunctionalTest {
-    @BeforeEach
-    public void beforeEachTest() {
-        System.setProperty("gradle.kit.log.enabled", "true");
-    }
-    
-    @AfterEach
-    public void afterEachTest() {
-        System.setProperty("gradle.kit.log.enabled", "false");
-    }
-    
+
     @Test
-    public void run_WithDefaults_Works() throws Throwable {
-        Path projectDir =  ProjectDeployer.deploy(JAVA_LIBRARY_KIT, MAVEN_PUBLISH_KIT);
-        
+    public void run_WithDefaults_Works() {
         final Map<String,String> environment = new HashMap<>();
         environment.put("kit.ossrh.username", "dry-run");
         environment.put("kit.ossrh.password", "dry-run");
-        // Run the build
-        BuildResult result = GradleRunner.create()
+  
+        BuildResult result = new KitGradleRunner()
+            .withPlugins(JAVA_LIBRARY_KIT, MAVEN_PUBLISH_KIT)
+            .withEnvironment(environment)
             .forwardOutput()
             .withPluginClasspath()
-            .withEnvironment(environment)
             .withArguments("build", "publish", "createPublisherBundle", "uploadPublisherBundle")
-            .withProjectDir(projectDir.toFile())
             .build();
         
         final String output = result.getOutput();
         
         assertNotNull(output);
-        // Verify the result
+        assertThat(output, containsString("Applying maven-publish plugin..."));
+        assertThat(output, not(containsString("Applying signing plugin...")));
+    }
+    
+    @Test
+    public void run_WithBadCredentials_Works() {
+        final Map<String,String> environment = new HashMap<>();
+        environment.put("kit.ossrh.username", "invalid-test-user");
+        environment.put("kit.ossrh.password", "invalid-test-password");
+        
+        final GradleRunner gradleRunner = new KitGradleRunner()
+            .withPlugins(JAVA_LIBRARY_KIT, MAVEN_PUBLISH_KIT)
+            .withEnvironment(environment)
+            .forwardOutput()
+            .withPluginClasspath()
+            .withArguments("build", "publish", "createPublisherBundle", "uploadPublisherBundle");
+        final BuildResult result = gradleRunner.buildAndFail();
+        
+        final String output = result.getOutput();
+        
+        assertNotNull(output);
+        assertThat(output, containsString("Failure response"));
+        assertThat(output, containsString("Applying maven-publish plugin..."));
+        assertThat(output, not(containsString("Applying signing plugin...")));
+    }
+    
+    @Test
+    public void run_WithUnknownUrl_Works() {
+        
+        final Map<String,String> environment = new HashMap<>();
+        environment.put("kit.ossrh.username", "invalid-test-user");
+        environment.put("kit.ossrh.password", "invalid-test-password");
+        environment.put("kit.ossrh.url", "https://invalid-url");
+     
+        final GradleRunner gradleRunner = new KitGradleRunner()
+            .withPlugins(JAVA_LIBRARY_KIT, MAVEN_PUBLISH_KIT)
+            .withEnvironment(environment)
+            .forwardOutput()
+            .withPluginClasspath()
+            .withArguments("build", "publish", "createPublisherBundle", "uploadPublisherBundle");
+        
+        final BuildResult result = gradleRunner.buildAndFail();
+        
+        final String output = result.getOutput();
+        
+        assertNotNull(output);
+        assertThat(output, containsString("Unable connect to"));
         assertThat(output, containsString("Applying maven-publish plugin..."));
         assertThat(output, not(containsString("Applying signing plugin...")));
     }

@@ -2,37 +2,98 @@ package io.github.jonloucks.gradle.kit.test;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.UUID;
+
+import static java.nio.file.Files.exists;
+import static java.nio.file.Files.isDirectory;
 
 final class ProjectDeployer {
     
-    static Path deploy(String ... plugins) throws Exception {
-        final Path projectPath = pristineProjectPath();
-        
-        deploySettingsDotGradle(projectPath);
-        deployBuildDotGradle(projectPath, plugins);
-        deployJavaSource(projectPath);
-        deployJavaTest(projectPath);
-        
-        return projectPath;
+    static Path deploy(String ... plugins) {
+        try {
+            final Path deployPath = pristineProjectPath();
+            
+            deployBuildDotGradle(deployPath, plugins);
+            deployJavaSource(deployPath);
+            deployJavaTest(deployPath);
+            
+            deployModule(deployPath, "library-api", plugins);
+            deployModule(deployPath, "library-test", plugins);
+            deployModule(deployPath, "library-impl", plugins);
+            deployModule(deployPath, "library-other", plugins);
+            
+            deploySettingsDotGradle(deployPath, "library-api", "library-test", "library-impl", "library-other");
+            
+            return deployPath;
+        } catch (RuntimeException thrown) {
+            throw thrown;
+        } catch (Exception thrown) {
+            throw new RuntimeException(thrown);
+        }
     }
     
-    private static Path pristineProjectPath() throws IOException {
-        final Path projectPath = Paths.get("build/functionalTest");
+    private static void deployModule(Path rootPath, String moduleName, String ... plugins) throws Exception {
+        final Path modulePath = rootPath.resolve(moduleName);
+        Files.createDirectories(modulePath);
+        deployBuildDotGradle(modulePath, plugins);
+        deployJavaSource(modulePath);
+        deployJavaTest(modulePath);
+    }
+    
+    static void deleteDeploy(Path path) {
+        if (exists(path) && isDirectory(path) && path.toString().endsWith("-delete")) {
+            try {
+                deletePath(path);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+    
+    private static void deletePath(Path path) throws IOException {
+        Files.walkFileTree(path, new SimpleFileVisitor<>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+            
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+    
+    private static Path pristineProjectPath() throws Exception {
+        final Path projectPath = Paths.get("build/deployer/" + UUID.randomUUID() +"-delete");
         Files.createDirectories(projectPath);
         return projectPath;
     }
     
-    private static void deploySettingsDotGradle(Path projectPath) throws Exception {
+    private static void deploySettingsDotGradle(Path projectPath, String ... modules) throws Exception {
         writeString(projectPath.resolve( "settings.gradle"),
             "pluginManagement {\n" +
             "    repositories {\n" +
                 "        mavenLocal()\n" +
                 "        gradlePluginPortal()\n" +
             "    }\n" +
-            "}");
+            "}\n" +
+            formatModules(modules)
+        );
+    }
+    
+    private static String formatModules(String[] modules) {
+        final StringBuilder builder = new StringBuilder();
+        
+        for (final String module : modules) {
+            builder.append("include '").append( module ).append("' \n");
+        }
+        
+        return builder.toString();
     }
     
     private static void deployBuildDotGradle(Path projectPath, String[] plugins) throws Exception {
