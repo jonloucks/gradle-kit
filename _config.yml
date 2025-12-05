@@ -1,0 +1,12 @@
+title: Contracts
+theme: jekyll-theme-minimal
+include:
+  - LICENSE.md
+  - CONTRIBUTING.md 
+  - CODE_OF_CONDUCT.md
+  - CODING_STANDARDS.md
+  - PULL_REQUEST_TEMPLATE.md
+  - SECURITY.md
+  - STYLE_GUIDE.md
+
+
