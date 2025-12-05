@@ -23,37 +23,37 @@ final class Configs {
         .description("Enable or Disable Kit Logging"));
     
     static final Variant<JavaLanguageVersion> KIT_JAVA_COMPILER_VERSION = createVariant((b,p) -> b //
-        .name("Java Compiler Version") //
+        .name("Kit Java Compiler Version") //
         .keys("KIT_JAVA_COMPILER_VERSION", "kit.java.compiler.version") //
         .of(ofJavaLanguageVersion(p)) //
         .fallback(() -> JavaLanguageVersion.of("17")));
     
     static final Variant<JavaLanguageVersion> KIT_JAVA_SOURCE_VERSION = createVariant((b,p) -> b //
-        .name("Java Source Version") //
+        .name("Kit Java Source Version") //
         .keys( "KIT_JAVA_SOURCE_VERSION", "kit.java.source.version") //
         .of(ofJavaLanguageVersion(p)) //
         .fallback(() -> JavaLanguageVersion.of("9")));
     
     static final Variant<JavaLanguageVersion> KIT_JAVA_TARGET_VERSION = createVariant((b,p) -> b //
-        .name("Java Target Version") //
+        .name("Kit Java Target Version") //
         .keys( "KIT_JAVA_TARGET_VERSION", "kit.java.target.version") //
         .of(ofJavaLanguageVersion(p)) //
         .link(KIT_JAVA_SOURCE_VERSION));
     
     static final Variant<JavaLanguageVersion> KIT_JAVA_TEST_SOURCE_VERSION = createVariant((b,p) -> b //
-        .name("Java Test Source Version") //
+        .name("Kit Java Test Source Version") //
         .keys( "KIT_JAVA_TEST_SOURCE_VERSION", "kit.java.test.source.version") //
         .of(ofJavaLanguageVersion(p)) //
         .link(KIT_JAVA_SOURCE_VERSION));
     
     static final Variant<JavaLanguageVersion> KIT_JAVA_TEST_TARGET_VERSION = createVariant((b,p) -> b //
-        .name("Java Test Target Version") //
+        .name("Kit Java Test Target Version") //
         .keys( "KIT_JAVA_TEST_TARGET_VERSION", "kit.java.test.target.version") //
         .of(ofJavaLanguageVersion(p)) //
         .link(KIT_JAVA_TEST_SOURCE_VERSION));
     
     static final Variant<String> KIT_PROJECT_WORKFLOW = createVariant((b,p) -> b //
-        .name("Project Workflow") //
+        .name("Kit Project Workflow") //
         .keys( "KIT_PROJECT_WORKFLOW", "PROJECT_WORKFLOW", "kit.project.workflow") //
         .of(p.ofString()) //
         .fallback(() -> "unknown")
@@ -91,21 +91,21 @@ final class Configs {
     );
     
     static final Variant<String[]> KIT_INCLUDE_TAGS = createVariant((b,p) -> b //
-        .name("Java Test Include Tagging") //
+        .name("Kit Java Test Include Tags") //
         .keys("KIT_INCLUDE_TAGS", "kit.include.tags", "includeTags") //
         .of(ofStringArray(p)) //
         .fallback(() -> new String[0])
     );
 
     static final Variant<String[]> KIT_EXCLUDE_TAGS = createVariant((b,p) -> b //
-        .name("Java Test Exclude Tagging") //
+        .name("Kit Java Test Exclude Tags") //
         .keys("KIT_EXCLUDE_TAGS", "kit.exclude.tags", "excludeTags") //
         .of(ofStringArray(p)) //
         .fallback(() -> new String[] { "unstable", "slow", "integration", "functional"})
     );
     
     static final Variant<String[]> KIT_INTEGRATION_EXCLUDE_TAGS = createVariant((b,p) -> b //
-        .name("Java Integration Test Exclude Tagging") //
+        .name("Kit Java Integration Exclude Tags") //
         .keys("KIT_INTEGRATION_EXCLUDE_TAGS", "kit.integration.exclude.tags", "excludeIntegrationTags") //
         .of(ofStringArray(p)) //
         .link(KIT_EXCLUDE_TAGS) //
@@ -113,7 +113,7 @@ final class Configs {
     );
     
     static final Variant<String[]> KIT_FUNCTIONAL_EXCLUDE_TAGS = createVariant((b,p) -> b //
-        .name("Java Functional Exclude Test Tagging") //
+        .name("Kit Java Functional Exclude Tags") //
         .keys("KIT_FUNCTIONAL_EXCLUDE_TAGS", "kit.functional.exclude.tags") //
         .of(ofStringArray(p)) //
         .link(KIT_EXCLUDE_TAGS) //
