@@ -80,6 +80,7 @@ Note: defaults beginning with * denote a link to another property value if not s
 * [Java test coverage report](https://jonloucks.github.io/gradle-kit/jacoco/)
 
 ## Badges
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/11551/badge)](https://www.bestpractices.dev/projects/11551)
 [![Coverage Badge](https://raw.githubusercontent.com/jonloucks/gradle-kit/refs/heads/badges/main-coverage.svg)](https://jonloucks.github.io/gradle-kit/jacoco/)
 [![Javadoc Badge](https://raw.githubusercontent.com/jonloucks/gradle-kit/refs/heads/badges/main-javadoc.svg)](https://jonloucks.github.io/gradle-kit/javadoc/)
 
