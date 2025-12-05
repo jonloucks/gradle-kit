@@ -23,37 +23,37 @@ final class Configs {
 <span class="fc" id="L23">        .description(&quot;Enable or Disable Kit Logging&quot;));</span>
     
 <span class="fc" id="L25">    static final Variant&lt;JavaLanguageVersion&gt; KIT_JAVA_COMPILER_VERSION = createVariant((b,p) -&gt; b //</span>
-<span class="fc" id="L26">        .name(&quot;Java Compiler Version&quot;) //</span>
+<span class="fc" id="L26">        .name(&quot;Kit Java Compiler Version&quot;) //</span>
 <span class="fc" id="L27">        .keys(&quot;KIT_JAVA_COMPILER_VERSION&quot;, &quot;kit.java.compiler.version&quot;) //</span>
 <span class="fc" id="L28">        .of(ofJavaLanguageVersion(p)) //</span>
 <span class="fc" id="L29">        .fallback(() -&gt; JavaLanguageVersion.of(&quot;17&quot;)));</span>
     
 <span class="fc" id="L31">    static final Variant&lt;JavaLanguageVersion&gt; KIT_JAVA_SOURCE_VERSION = createVariant((b,p) -&gt; b //</span>
-<span class="fc" id="L32">        .name(&quot;Java Source Version&quot;) //</span>
+<span class="fc" id="L32">        .name(&quot;Kit Java Source Version&quot;) //</span>
 <span class="fc" id="L33">        .keys( &quot;KIT_JAVA_SOURCE_VERSION&quot;, &quot;kit.java.source.version&quot;) //</span>
 <span class="fc" id="L34">        .of(ofJavaLanguageVersion(p)) //</span>
 <span class="fc" id="L35">        .fallback(() -&gt; JavaLanguageVersion.of(&quot;9&quot;)));</span>
     
 <span class="fc" id="L37">    static final Variant&lt;JavaLanguageVersion&gt; KIT_JAVA_TARGET_VERSION = createVariant((b,p) -&gt; b //</span>
-<span class="fc" id="L38">        .name(&quot;Java Target Version&quot;) //</span>
+<span class="fc" id="L38">        .name(&quot;Kit Java Target Version&quot;) //</span>
 <span class="fc" id="L39">        .keys( &quot;KIT_JAVA_TARGET_VERSION&quot;, &quot;kit.java.target.version&quot;) //</span>
 <span class="fc" id="L40">        .of(ofJavaLanguageVersion(p)) //</span>
 <span class="fc" id="L41">        .link(KIT_JAVA_SOURCE_VERSION));</span>
     
 <span class="fc" id="L43">    static final Variant&lt;JavaLanguageVersion&gt; KIT_JAVA_TEST_SOURCE_VERSION = createVariant((b,p) -&gt; b //</span>
-<span class="fc" id="L44">        .name(&quot;Java Test Source Version&quot;) //</span>
+<span class="fc" id="L44">        .name(&quot;Kit Java Test Source Version&quot;) //</span>
 <span class="fc" id="L45">        .keys( &quot;KIT_JAVA_TEST_SOURCE_VERSION&quot;, &quot;kit.java.test.source.version&quot;) //</span>
 <span class="fc" id="L46">        .of(ofJavaLanguageVersion(p)) //</span>
 <span class="fc" id="L47">        .link(KIT_JAVA_SOURCE_VERSION));</span>
     
 <span class="fc" id="L49">    static final Variant&lt;JavaLanguageVersion&gt; KIT_JAVA_TEST_TARGET_VERSION = createVariant((b,p) -&gt; b //</span>
-<span class="fc" id="L50">        .name(&quot;Java Test Target Version&quot;) //</span>
+<span class="fc" id="L50">        .name(&quot;Kit Java Test Target Version&quot;) //</span>
 <span class="fc" id="L51">        .keys( &quot;KIT_JAVA_TEST_TARGET_VERSION&quot;, &quot;kit.java.test.target.version&quot;) //</span>
 <span class="fc" id="L52">        .of(ofJavaLanguageVersion(p)) //</span>
 <span class="fc" id="L53">        .link(KIT_JAVA_TEST_SOURCE_VERSION));</span>
     
 <span class="fc" id="L55">    static final Variant&lt;String&gt; KIT_PROJECT_WORKFLOW = createVariant((b,p) -&gt; b //</span>
-<span class="fc" id="L56">        .name(&quot;Project Workflow&quot;) //</span>
+<span class="fc" id="L56">        .name(&quot;Kit Project Workflow&quot;) //</span>
 <span class="fc" id="L57">        .keys( &quot;KIT_PROJECT_WORKFLOW&quot;, &quot;PROJECT_WORKFLOW&quot;, &quot;kit.project.workflow&quot;) //</span>
 <span class="fc" id="L58">        .of(p.ofString()) //</span>
 <span class="fc" id="L59">        .fallback(() -&gt; &quot;unknown&quot;)</span>
@@ -91,21 +91,21 @@ final class Configs {
     );
     
 <span class="fc" id="L93">    static final Variant&lt;String[]&gt; KIT_INCLUDE_TAGS = createVariant((b,p) -&gt; b //</span>
-<span class="fc" id="L94">        .name(&quot;Java Test Include Tagging&quot;) //</span>
+<span class="fc" id="L94">        .name(&quot;Kit Java Test Include Tags&quot;) //</span>
 <span class="fc" id="L95">        .keys(&quot;KIT_INCLUDE_TAGS&quot;, &quot;kit.include.tags&quot;, &quot;includeTags&quot;) //</span>
 <span class="fc" id="L96">        .of(ofStringArray(p)) //</span>
 <span class="fc" id="L97">        .fallback(() -&gt; new String[0])</span>
     );
 
 <span class="fc" id="L100">    static final Variant&lt;String[]&gt; KIT_EXCLUDE_TAGS = createVariant((b,p) -&gt; b //</span>
-<span class="fc" id="L101">        .name(&quot;Java Test Exclude Tagging&quot;) //</span>
+<span class="fc" id="L101">        .name(&quot;Kit Java Test Exclude Tags&quot;) //</span>
 <span class="fc" id="L102">        .keys(&quot;KIT_EXCLUDE_TAGS&quot;, &quot;kit.exclude.tags&quot;, &quot;excludeTags&quot;) //</span>
 <span class="fc" id="L103">        .of(ofStringArray(p)) //</span>
 <span class="fc" id="L104">        .fallback(() -&gt; new String[] { &quot;unstable&quot;, &quot;slow&quot;, &quot;integration&quot;, &quot;functional&quot;})</span>
     );
     
 <span class="fc" id="L107">    static final Variant&lt;String[]&gt; KIT_INTEGRATION_EXCLUDE_TAGS = createVariant((b,p) -&gt; b //</span>
-<span class="fc" id="L108">        .name(&quot;Java Integration Test Exclude Tagging&quot;) //</span>
+<span class="fc" id="L108">        .name(&quot;Kit Java Integration Exclude Tags&quot;) //</span>
 <span class="fc" id="L109">        .keys(&quot;KIT_INTEGRATION_EXCLUDE_TAGS&quot;, &quot;kit.integration.exclude.tags&quot;, &quot;excludeIntegrationTags&quot;) //</span>
 <span class="fc" id="L110">        .of(ofStringArray(p)) //</span>
 <span class="fc" id="L111">        .link(KIT_EXCLUDE_TAGS) //</span>
@@ -113,7 +113,7 @@ final class Configs {
     );
     
 <span class="fc" id="L115">    static final Variant&lt;String[]&gt; KIT_FUNCTIONAL_EXCLUDE_TAGS = createVariant((b,p) -&gt; b //</span>
-<span class="fc" id="L116">        .name(&quot;Java Functional Exclude Test Tagging&quot;) //</span>
+<span class="fc" id="L116">        .name(&quot;Kit Java Functional Exclude Tags&quot;) //</span>
 <span class="fc" id="L117">        .keys(&quot;KIT_FUNCTIONAL_EXCLUDE_TAGS&quot;, &quot;kit.functional.exclude.tags&quot;) //</span>
 <span class="fc" id="L118">        .of(ofStringArray(p)) //</span>
 <span class="fc" id="L119">        .link(KIT_EXCLUDE_TAGS) //</span>
