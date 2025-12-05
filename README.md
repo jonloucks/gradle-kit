@@ -1,9 +1,9 @@
-# Gradle Kit 
+a# Gradle Kit 
 Gradle plugins for building and publishing Java projects to Maven Central Repository.
 
 ## Overview
 CI/CD For Java projects GitHub and publishing to Maven Central.
-Eith Environment variable overrides for standard plugins.
+Either Environment variable overrides for standard plugins.
 
 ### java-kit 
 * Automatically applies 'java' plugin
