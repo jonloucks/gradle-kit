@@ -20,43 +20,55 @@ final class Configs {
         .keys("KIT_LOG_ENABLED", "kit.log.enabled", "gradle.kit.log.enabled") //
         .of(p.ofBoolean())
         .fallback(() -> false) //
-        .description("Enable or Disable Kit Logging"));
+        .description("Enable logging to provide more visibility.") //
+    );
     
     static final Variant<JavaLanguageVersion> KIT_JAVA_COMPILER_VERSION = createVariant((b,p) -> b //
         .name("Kit Java Compiler Version") //
         .keys("KIT_JAVA_COMPILER_VERSION", "kit.java.compiler.version") //
         .of(ofJavaLanguageVersion(p)) //
-        .fallback(() -> JavaLanguageVersion.of("17")));
+        .fallback(() -> JavaLanguageVersion.of("17")) //
+        .description("Select the Java compiler version.") //
+    );
     
     static final Variant<JavaLanguageVersion> KIT_JAVA_SOURCE_VERSION = createVariant((b,p) -> b //
         .name("Kit Java Source Version") //
         .keys( "KIT_JAVA_SOURCE_VERSION", "kit.java.source.version") //
         .of(ofJavaLanguageVersion(p)) //
-        .fallback(() -> JavaLanguageVersion.of("9")));
+        .fallback(() -> JavaLanguageVersion.of("9")) //
+        .description("Select the Java source version.") //
+    );
     
     static final Variant<JavaLanguageVersion> KIT_JAVA_TARGET_VERSION = createVariant((b,p) -> b //
         .name("Kit Java Target Version") //
         .keys( "KIT_JAVA_TARGET_VERSION", "kit.java.target.version") //
         .of(ofJavaLanguageVersion(p)) //
-        .link(KIT_JAVA_SOURCE_VERSION));
+        .link(KIT_JAVA_SOURCE_VERSION) //
+        .description("Select the Java target version.") //
+    );
     
     static final Variant<JavaLanguageVersion> KIT_JAVA_TEST_SOURCE_VERSION = createVariant((b,p) -> b //
         .name("Kit Java Test Source Version") //
         .keys( "KIT_JAVA_TEST_SOURCE_VERSION", "kit.java.test.source.version") //
         .of(ofJavaLanguageVersion(p)) //
-        .link(KIT_JAVA_SOURCE_VERSION));
+        .link(KIT_JAVA_SOURCE_VERSION) //
+        .description("Select the Java test source version.") //
+    );
     
     static final Variant<JavaLanguageVersion> KIT_JAVA_TEST_TARGET_VERSION = createVariant((b,p) -> b //
         .name("Kit Java Test Target Version") //
         .keys( "KIT_JAVA_TEST_TARGET_VERSION", "kit.java.test.target.version") //
         .of(ofJavaLanguageVersion(p)) //
-        .link(KIT_JAVA_TEST_SOURCE_VERSION));
+        .link(KIT_JAVA_TEST_SOURCE_VERSION) //
+        .description("Select the Java test target version.") //
+    );
     
     static final Variant<String> KIT_PROJECT_WORKFLOW = createVariant((b,p) -> b //
         .name("Kit Project Workflow") //
         .keys( "KIT_PROJECT_WORKFLOW", "PROJECT_WORKFLOW", "kit.project.workflow") //
         .of(p.ofString()) //
-        .fallback(() -> "unknown")
+        .fallback(() -> "unknown") //
+        .description("Declare CI/CD intent.") //
     );
     
     static final Variant<String> KIT_OSSRH_URL = createVariant((b,p) -> b //
@@ -64,30 +76,43 @@ final class Configs {
         .keys("KIT_OSSRH_URL", "kit.ossrh.url") //
         .of(p.ofString()) //
         .fallback(() -> "https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED") //
+        .description("Select the URL to publish an OSSRH bundle.")
+    );
+    
+    static final Variant<String> KIT_OSSRH_AUTHOR = createVariant((b, p) -> b //
+        .name("Kit OSSRH Author") //
+        .keys("KIT_OSSRH_AUTHOR", "kit.ossrh.author") //
+        .of(p.ofString()) //
+        .link(KIT_PROJECT_WORKFLOW) //
+        .description("Select the author to publish an OSSRH bundle.") //
     );
     
     static final Variant<String> KIT_OSSRH_USERNAME = createVariant((b,p) -> b //
         .name("Kit OSSRH User Login Name") //
-        .keys("KIT_OSSRH_USERNAME", "OSSRH_USERNAME", "kit.ossrh.username")
+        .keys("KIT_OSSRH_USERNAME", "OSSRH_USERNAME", "kit.ossrh.username") //
         .of(p.ofString()) //
+        .description("Select the username to publish an OSSRH bundle.")
     );
     
     static final Variant<String> KIT_OSSRH_PASSWORD = createVariant((b,p) -> b //
         .name("Kit OSSRH Password") //
         .keys( "KIT_OSSRH_PASSWORD", "OSSRH_PASSWORD", "kit.ossrh.password") //
         .of(p.ofString()) //
+        .description("Select the password to publish an OSSRH bundle.") //
     );
     
     static final Variant<String> KIT_GPG_SECRET_KEY = createVariant((b,p) -> b //
-        .name("Kit OSSRH GPG Secret Key")
-        .keys("KIT_OSSRH_GPG_SECRET_KEY", "OSSRH_GPG_SECRET_KEY", "kit.ossrh.gpg.secret.key")
-        .of(p.ofTrimAndSkipEmpty(Configs::parseSecretKey))
+        .name("Kit OSSRH GPG Secret Key") //
+        .keys("KIT_OSSRH_GPG_SECRET_KEY", "OSSRH_GPG_SECRET_KEY", "kit.ossrh.gpg.secret.key") //
+        .of(p.ofTrimAndSkipEmpty(Configs::parseSecretKey)) //
+        .description("Select the GPG secret key for signing.") //
     );
     
     static final Variant<String> KIT_GPG_SECRET_KEY_PASSWORD = createVariant((b,p) -> b //
         .name("Kit OSSRH GPG Secret Key Password") //
         .keys("KIT_OSSRH_GPG_SECRET_KEY_PASSWORD", "OSSRH_GPG_SECRET_KEY_PASSWORD", "kit.ossrh.gpg.secret.key.password") //
         .of(p.ofString()) //
+        .description("Select the GPG secret key password for signing.") //
     );
     
     static final Variant<String[]> KIT_INCLUDE_TAGS = createVariant((b,p) -> b //
