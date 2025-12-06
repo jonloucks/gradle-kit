@@ -105,13 +105,16 @@ import static io.github.jonloucks.gradle.kit.Internal.*;
 <span class="fc" id="L105">            });</span>
 <span class="fc" id="L106">        }</span>
         
+        private String getAuthor() {
+<span class="fc" id="L109">            return requireConfig(KIT_OSSRH_AUTHOR);</span>
+        }
+        
         private File getBundleFile() {
-<span class="fc" id="L109">            return getProject().file(&quot;build/distributions/&quot; + getProject().getGroup() + &quot;-&quot; + getProject().getVersion() + &quot;.tar&quot;);</span>
+<span class="fc" id="L113">            return getProject().file(&quot;build/distributions/&quot; + getProject().getGroup() + &quot;-&quot; + getProject().getVersion() + &quot;.tar&quot;);</span>
         }
         
         private String getBundleName() {
-<span class="fc" id="L113">            final String workflowName = requireConfig(KIT_PROJECT_WORKFLOW);</span>
-<span class="fc" id="L114">            return getProject().getGroup() + &quot;-&quot; + getProject().getVersion() + &quot; by &quot; + workflowName + &quot; @ &quot; + createTimestamp();</span>
+<span class="fc" id="L117">            return getProject().getGroup() + &quot;-&quot; + getProject().getVersion() + &quot; by &quot; + getAuthor() + &quot; @ &quot; + createTimestamp();</span>
         }
 
         private static final String CREATE_BUNDLE_TASK_NAME = &quot;createPublisherBundle&quot;;
