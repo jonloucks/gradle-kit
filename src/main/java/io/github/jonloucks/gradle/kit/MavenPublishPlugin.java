@@ -105,13 +105,16 @@ public final class MavenPublishPlugin implements Plugin<Project> {
             });
         }
         
+        private String getAuthor() {
+            return requireConfig(KIT_OSSRH_AUTHOR);
+        }
+        
         private File getBundleFile() {
             return getProject().file("build/distributions/" + getProject().getGroup() + "-" + getProject().getVersion() + ".tar");
         }
         
         private String getBundleName() {
-            final String workflowName = requireConfig(KIT_PROJECT_WORKFLOW);
-            return getProject().getGroup() + "-" + getProject().getVersion() + " by " + workflowName + " @ " + createTimestamp();
+            return getProject().getGroup() + "-" + getProject().getVersion() + " by " + getAuthor() + " @ " + createTimestamp();
         }
 
         private static final String CREATE_BUNDLE_TASK_NAME = "createPublisherBundle";
