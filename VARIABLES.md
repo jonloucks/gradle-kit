@@ -1,9 +1,6 @@
 # Gradle Kit Variables
 
-<details>
-    <summary>
-    Enable Logging
-    </summary>
+<details markdown="1"><summary>Enable Logging</summary>
 
 #### Responsibility
 Enable logging to provide more visibility.
@@ -24,10 +21,7 @@ false
 
 </details>
 
-<details>
-    <summary>
-    Project Workflow
-    </summary>
+<details markdown="1"><summary>Project Workflow</summary>
 
 #### Responsibility
 Declare CI/CD intent.
@@ -66,10 +60,7 @@ unknown
 
 </details>
 
-<details>
-    <summary>
-    Java Compiler Version
-    </summary>
+<details markdown="1"><summary>Java Compiler Version</summary>
 
 #### Responsibility
 Select the Java compiler version.
@@ -102,10 +93,7 @@ A single number
 
 </details>
 
-<details>
-    <summary>
-    Java Source Version 
-    </summary>
+<details markdown="1"><summary>Java Source Version</summary>
 
 #### Responsibility
 Select the Java source version
@@ -137,10 +125,7 @@ a single number
 
 </details>
 
-<details>
-    <summary>
-    Java Target Version 
-    </summary>
+<details markdown="1"><summary>Java Target Version</summary>
 
 #### Responsibility
 Select the Java target version
@@ -172,10 +157,7 @@ The runtime value of variable KIT_JAVA_SOURCE_VERSION
 
 </details>
 
-<details>
-    <summary>
-    Java Test Source Version 
-    </summary>
+<details markdown="1"><summary>Java Test Source Version</summary>
 
 #### Responsibility
 Select the Java Test source version
@@ -207,10 +189,7 @@ a single number
 
 </details>
 
-<details>
-    <summary>
-    Java Test Target Version 
-    </summary>
+<details markdown="1"><summary>Java Test Target Version</summary>
 
 #### Responsibility
 Select the Java test target version
@@ -242,10 +221,7 @@ The runtime value of variable KIT_JAVA_TEST_SOURCE_VERSION
 
 </details>
 
-<details>
-    <summary>
-    OSSRH URL
-    </summary>
+<details markdown="1"><summary>OSSRH URL</summary>
 
 #### Responsibility
 Define the URL to publish an OSSRH bundle.
@@ -271,10 +247,7 @@ Do not put credentials in your URL, there are variables for that
 
 </details>
 
-<details>
-    <summary>
-    OSSRH Author
-    </summary>
+<details markdown="1"><summary>OSSRH Author</summary>
 
 #### Responsibility
 Define the author to publish an OSSRH bundle.
@@ -313,10 +286,7 @@ The runtime value of variable KIT_PROJECT_WORKFLOW
 
 </details>
 
-<details>
-    <summary>
-    OSSRH User Name
-    </summary>
+<details markdown="1"><summary>OSSRH User Name</summary>
 
 #### Responsibility
 Define the username to publish an OSSRH bundle.
@@ -355,10 +325,7 @@ A non-empty value
 
 </details>
 
-<details>
-    <summary>
-    OSSRH User Password
-    </summary>
+<details markdown="1"><summary>OSSRH User Password</summary>
 
 #### Responsibility
 Define the password to publish an OSSRH bundle.
@@ -397,10 +364,7 @@ A non-empty value
 
 </details>
 
-<details>
-    <summary>
-    Signing GPG Secret Key
-    </summary>
+<details markdown="1"><summary>Signing GPG Secret Key</summary>
 
 #### Responsibility
 Select the GPG secret key for signing.
@@ -439,10 +403,7 @@ A non-empty value
 
 </details>
 
-<details>
-    <summary>
-    Signing GPG Secret Key Password
-    </summary>
+<details markdown="1"><summary>Signing GPG Secret Key Password</summary>
 
 #### Responsibility
 Select the GPG secret key password for signing.
