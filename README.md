@@ -5,8 +5,8 @@ Gradle plugins for building and publishing Java projects to Maven Central Reposi
 CI/CD For Java projects GitHub and publishing to Maven Central.
 Either Environment variable overrides for standard plugins.
 
-<details>
-    <summary>
+<details markdown="1">
+    <summary markdown="1">
     java-kit
     </summary>
 
