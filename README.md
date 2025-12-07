@@ -6,7 +6,7 @@ CI/CD For Java projects GitHub and publishing to Maven Central.
 Either Environment variable overrides for standard plugins.
 
 <details markdown="1">
-    <summary markdown="1">
+    <summary>
     java-kit
     </summary>
 
