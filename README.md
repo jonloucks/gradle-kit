@@ -5,10 +5,7 @@ Gradle plugins for building and publishing Java projects to Maven Central Reposi
 CI/CD For Java projects GitHub and publishing to Maven Central.
 Either Environment variable overrides for standard plugins.
 
-<details>
-    <summary>
-    java-kit
-    </summary>
+<details markdown="1"><summary>java-kit</summary>
 
 * Automatically applies 'java' plugin
 * Changes default Java language levels
@@ -21,10 +18,7 @@ plugins {
 ```
 </details>
 
-<details>
-    <summary>
-    java-library-kit
-    </summary>
+<details markdown="1"><summary>java-library-kit</summary>
 
 * Automatically applies 'java-library' plugin
 * Changes default Java language levels
@@ -37,10 +31,7 @@ plugins {
 ```
 </details>
 
-<details>
-    <summary>
-    maven-publish-kit
-    </summary>
+<details markdown="1"><summary>maven-publish-kit</summary>
 
 * Automatically applies 'publish' plugin
 * Supports Environment, System, and project overriding
@@ -52,10 +43,7 @@ plugins {
 ```
 </details>
 
-<details>
-    <summary>
-    signing-kit
-    </summary>
+<details markdown="1"><summary>signing-kit</summary>
 
 * Automatically applies 'signing' plugin
 * Supports Environment, System, and project overriding
