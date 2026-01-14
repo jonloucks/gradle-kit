@@ -50,7 +50,7 @@ final class SpotBugsApplier extends ProjectApplier {
     private void configureSpotbugsPlugin() {
 <span class="fc" id="L51">        final DirectoryProperty buildDir = getProject().getLayout().getBuildDirectory();</span>
 <span class="fc" id="L52">        final SpotBugsExtension extension = getProject().getExtensions().getByType(SpotBugsExtension.class);</span>
-<span class="fc" id="L53">        extension.getToolVersion().set(&quot;4.9.6&quot;);</span>
+<span class="fc" id="L53">        extension.getToolVersion().set(&quot;4.9.8&quot;);</span>
 <span class="fc" id="L54">        extension.getIgnoreFailures().set(isTestProject());</span>
 <span class="fc" id="L55">        extension.getReportsDir().set(buildDir.dir(&quot;reports/spotbugs&quot;));</span>
 <span class="fc" id="L56">    }</span>
