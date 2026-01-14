@@ -174,7 +174,7 @@ public abstract class JavaPluginTestBase {
         
         assertObject(extension);
         assertObject(spotBugsMainTask);
-        assertEquals("4.9.6", extension.getToolVersion().get());
+        assertEquals("4.9.8", extension.getToolVersion().get());
         assertFalse(extension.getIgnoreFailures().get());
         
         project.getTasks().withType(SpotBugsTask.class, task -> { //
@@ -199,7 +199,7 @@ public abstract class JavaPluginTestBase {
         
         assertObject(extension);
         assertObject(spotBugsMainTask);
-        assertEquals("4.9.6", extension.getToolVersion().get());
+        assertEquals("4.9.8", extension.getToolVersion().get());
         assertTrue(extension.getIgnoreFailures().get());
 
         project.getTasks().withType(SpotBugsTask.class, task -> { //
