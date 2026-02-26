@@ -25,7 +25,9 @@ repositories {
 dependencies {
     implementation libs.okhttp3
     implementation libs.jacoco
-    implementation libs.spotbugs
+    implementation (libs.spotbugs) {
+        exclude group: 'org.apache.logging.log4j'
+    }
     implementation libs.contracts
     implementation libs.variants
 
