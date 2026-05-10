@@ -1,6 +1,6 @@
-# Gradle Kit v1.2.3
+# Gradle Kit v1.2.4
 
-Dependency update
+Dependency update. Gradle 9.5.0 and Spotbugs 6.5.0
 
 ## Customer impact
 * None
@@ -21,6 +21,6 @@ Dependency update
 
 ## ⬇️ Download
 
-*   [MVN Repository](https://mvnrepository.com/artifact/io.github.jonloucks.gradle-kit/gradle-kit/1.2.3)
-*   [Source code (zip)](https://github.com/jonloucks/gradle-kit/archive/refs/tags/v1.2.3.zip)
-*   [Source code (tar.gz)](https://github.com/jonloucks/gradle-kit/archive/refs/tags/v1.2.3.tar.gz)
+*   [MVN Repository](https://mvnrepository.com/artifact/io.github.jonloucks.gradle-kit/gradle-kit/1.2.4)
+*   [Source code (zip)](https://github.com/jonloucks/gradle-kit/archive/refs/tags/v1.2.4.zip)
+*   [Source code (tar.gz)](https://github.com/jonloucks/gradle-kit/archive/refs/tags/v1.2.4.tar.gz)
