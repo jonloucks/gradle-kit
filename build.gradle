@@ -4,6 +4,11 @@ buildscript {
         google()
         mavenLocal()
     }
+    dependencies {
+        constraints {
+            classpath libs.log4j.core
+        }
+    }
 }
 
 plugins {
@@ -22,12 +27,22 @@ repositories {
     mavenLocal()
 }
 
+configurations.all {
+    exclude group: "org.apache.logging.log4j", module: "log4j-core"
+    // Also exclude older 1.x versions if necessary
+    exclude group: "log4j", module: "log4j"
+}
+
 dependencies {
+    constraints {
+        implementation libs.log4j.core
+    }
     implementation libs.okhttp3
     implementation libs.jacoco
     implementation (libs.spotbugs) {
         exclude group: 'org.apache.logging.log4j'
     }
+
     implementation libs.contracts
     implementation libs.variants
 
