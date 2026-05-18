@@ -29,7 +29,6 @@ repositories {
 
 configurations.all {
     exclude group: "org.apache.logging.log4j", module: "log4j-core"
-    // Also exclude older 1.x versions if necessary
     exclude group: "log4j", module: "log4j"
 }
 
